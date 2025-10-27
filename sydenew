@@ -1,6 +1,3 @@
-
-
-
 --[[
 
 
@@ -4903,7 +4900,7 @@ function syde:Init(library)
 					if option:IsA("Frame") and option:FindFirstChild("Title") then
 						local optionText = option.Title.Text:lower()
 						local isTemplate = option == option or option.Name == "Option"
-						local shouldShow = not isTemplate and (searchText == "" or optionText:find(searchText, 1, true))
+						local shouldShow = not isTemplate and (searchText == "" or optionText:find(searchText, 1, true) or SelectedOptions[option.Title.Text])
 
 						if shouldShow then
 							option.Visible = true

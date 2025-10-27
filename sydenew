@@ -4899,7 +4899,7 @@ function syde:Init(library)
 				for _, option in ipairs(dropdown.dropHolder.drop.Container:GetChildren()) do
 					if option:IsA("Frame") and option:FindFirstChild("Title") then
 						local optionText = option.Title.Text:lower()
-						local isTemplate = option == option or option.Name == "Option"
+						local isTemplate = option.Name == "Option"
 						local shouldShow = not isTemplate and (searchText == "" or optionText:find(searchText, 1, true) or SelectedOptions[option.Title.Text])
 
 						if shouldShow then

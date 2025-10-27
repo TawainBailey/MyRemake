@@ -1,3 +1,6 @@
+
+
+
 --[[
 
 
@@ -4965,10 +4968,8 @@ function syde:Init(library)
 								tweenservice:Create(option.ImageLabel, TweenInfo.new(0.3), {ImageTransparency = 0}):Play()
 							end
 							
-							if TabData.Locked == false then
-								if DropdownData.CallBack then
-									DropdownData.CallBack(SelectedOrder)
-								end
+							if DropdownData.CallBack then
+								DropdownData.CallBack(SelectedOrder)
 							end
 						else
 							dropdown.dropHolder.drop.Selected.Text = OptionText

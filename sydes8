@@ -4034,6 +4034,14 @@ function syde:Init(library)
 			else
 				Section.icon.Visible = false
 			end
+
+			-- Add gradient to section background
+			local gradient = Instance.new("UIGradient")
+			gradient.Color = ColorSequence.new{
+				ColorSequenceKeypoint.new(0, Color3.fromRGB(10, 50, 100)), -- Dark blue
+				ColorSequenceKeypoint.new(1, Color3.fromRGB(50, 100, 200))  -- Light blue
+			}
+			gradient.Parent = Section
 		end
 
 

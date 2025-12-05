@@ -1257,6 +1257,8 @@ function SetUserInfo()
 	else
 		imageLabel.Image = PLACEHOLDER_IMAGE
 	end
+
+	WINDOW.UserInfo.ConnectionStatus.Status.TextLabel.Text = "Connected"
 end
 
 function CloseUI()

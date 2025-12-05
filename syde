@@ -1,20 +1,3 @@
---[[
-
-
-                        dP          
-                        88          
-.d8888b. dP    dP .d888b88 .d8888b. 
-Y8ooooo. 88    88 88'  `88 88ooood8 
-      88 88.  .88 88.  .88 88.  ... 
-`88888P' `8888P88 `88888P8 `88888P' beta.
-              .88                   
-          d8888P                    
-
-
-made with 💓 by sellessence
-]]
-
-
 
 local inputservice =	game:GetService("InsertService")
 local tweenservice = 	game:GetService("TweenService")
@@ -767,11 +750,9 @@ do
 						if social.CopyToClip and LargeSocial:FindFirstChild("interact") then
 							LargeSocial.interact.MouseButton1Click:Connect(function()
 								if social.Style == 'Discord' then
+									setclipboard('https://discord.gg/' .. social.Discord)
+								else
 									setclipboard(social.Discord)
-								elseif social.Style == 'WebSite' then
-									setclipboard(social.Name)
-								elseif social.Style == 'GitHub' then
-									setclipboard(social.GitHub)
 								end
 							end)
 						end
@@ -849,11 +830,10 @@ do
 
 						if social.CopyToClip and SmallSocial:FindFirstChild("interact") then
 							SmallSocial.interact.MouseButton1Click:Connect(function()
-								--	setclipboard(social.Discord or social.Name or "No data")
-								if social.Style == 'WebSite' then
-									setclipboard(social.Name)
-								elseif social.Style == 'GitHub' then
-									setclipboard(social.GitHub)
+								if social.Style == 'Discord' then
+									setclipboard('https://discord.gg/' .. social.Discord)
+								else
+									setclipboard(social.Discord)
 								end
 							end)
 						end
@@ -6258,5 +6238,3 @@ function syde:Init(library)
 
 end
 return syde
-
-

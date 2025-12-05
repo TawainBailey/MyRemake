@@ -1,3 +1,21 @@
+--[[
+
+
+                        dP          
+                        88          
+.d8888b. dP    dP .d888b88 .d8888b. 
+Y8ooooo. 88    88 88'  `88 88ooood8 
+      88 88.  .88 88.  .88 88.  ... 
+`88888P' `8888P88 `88888P8 `88888P' beta.
+              .88                   
+          d8888P                    
+
+
+made with 💓 by sellessence
+]]
+
+
+
 local inputservice =	game:GetService("InsertService")
 local tweenservice = 	game:GetService("TweenService")
 local https = 			game:GetService("HttpService")
@@ -4016,9 +4034,14 @@ function syde:Init(library)
 
 		local InitElement = {}
 
+		InitElement.TabData = TabData
+		local currentSection = nil
+
 		function InitElement:Section(Title, Icon, DefaultOpen)
 			DefaultOpen = DefaultOpen or false
 			local Section = {}
+			
+			Section.TabData = InitElement.TabData
 			
 			-- Main section frame
 			Section.Root = New("Frame", {
@@ -4243,7 +4266,7 @@ function syde:Init(library)
 					end)
 			
 					button.interact.MouseButton1Click:Connect(function()
-						if TabData.Locked == false then
+						if Section.TabData.Locked == false then
 							if ButtonData.CallBack then
 								local success, errorMsg = pcall(ButtonData.CallBack)
 								if not success then
@@ -4266,7 +4289,7 @@ function syde:Init(library)
 					local Complete = false
 			
 					button.interact.MouseButton1Down:Connect(function()
-						if TabData.Locked == false then
+						if Section.TabData.Locked == false then
 							Holding = true
 							TimeLeft = HoldTime
 							local HoldStart = tick()
@@ -4372,7 +4395,7 @@ function syde:Init(library)
 				UpdateToggleUI(ToggleData.Value)
 
 				toggle.interact.MouseButton1Click:Connect(function()
-					if TabData.Locked == false then
+					if Section.TabData.Locked == false then
 						ToggleData.Value = not ToggleData.Value
 						UpdateToggleUI(ToggleData.Value)
 
@@ -4638,7 +4661,7 @@ function syde:Init(library)
 					if TimeLeft <= 0 then
 						Complete = true
 
-						if TabData.Locked == false then
+						if Section.TabData.Locked == false then
 							if ButtonData.CallBack then
 								local success, errorMsg = pcall(ButtonData.CallBack)
 								if not success then
@@ -4933,7 +4956,7 @@ function syde:Init(library)
 
 				userinput.InputBegan:Connect(function(input, processed)
 					if not processed and ToggleData.Keybind and ToggleData.KeybindReady and input.KeyCode == ToggleData.Keybind then
-						if TabData.Locked == false then
+						if Section.TabData.Locked == false then
 							ToggleData.Value = not ToggleData.Value
 							UpdateToggleUI(ToggleData.Value)
 
@@ -5107,7 +5130,7 @@ function syde:Init(library)
 						Slider.v.Text = string.format("<font size='14'>%d</font><font color='#434343'>/%d</font>", newValue, Options.Range[2])
 
 						tweenservice:Create(Slider.Title, TweenInfo.new(0.55, Enum.EasingStyle.Exponential), {TextTransparency = 0}):Play()
-						if TabData.Locked == false then
+						if Section.TabData.Locked == false then
 							local success, errorMsg = pcall(function()
 								Options.CallBack(newValue)
 							end)
@@ -5468,7 +5491,7 @@ function syde:Init(library)
 							tweenservice:Create(option, TweenInfo.new(0.3), {BackgroundColor3 = Color3.fromRGB(39, 39, 39)}):Play()
 							tweenservice:Create(option.ImageLabel, TweenInfo.new(0.3), {ImageTransparency = 0}):Play()
 							
-							if TabData.Locked == false then
+							if Section.TabData.Locked == false then
 								if DropdownData.CallBack then
 									DropdownData.CallBack(OptionText)
 								end

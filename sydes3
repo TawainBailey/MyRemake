@@ -1,3 +1,20 @@
+--[[
+
+
+                        dP          
+                        88          
+.d8888b. dP    dP .d888b88 .d8888b. 
+Y8ooooo. 88    88 88'  `88 88ooood8 
+      88 88.  .88 88.  .88 88.  ... 
+`88888P' `8888P88 `88888P8 `88888P' beta.
+              .88                   
+          d8888P                    
+
+
+made with 💓 by sellessence
+]]
+
+
 
 local inputservice =	game:GetService("InsertService")
 local tweenservice = 	game:GetService("TweenService")
@@ -31,9 +48,7 @@ local syde = {
 		['Accent'] = Color3.fromRGB(255, 255, 255);
 		['HitBox'] = Color3.fromRGB(255, 255, 255);
 		['DropShadow']   = Color3.fromRGB(0, 0, 0);
-		['SectionGradientEnabled'] = false;
-		['SectionGradientColor1'] = Color3.fromRGB(255, 255, 255);
-		['SectionGradientColor2'] = Color3.fromRGB(200, 200, 200);
+
 	};
 	Connections = {};
 	Comms = Instance.new('BindableEvent');
@@ -2609,11 +2624,6 @@ function syde:Init(library)
 				else
 					Section.icon.Visible = false
 				end
-
-				if syde.theme.SectionGradientEnabled then
-					local grad = Instance.new('UIGradient', Section)
-					grad.Color = ColorSequence.new(syde.theme.SectionGradientColor1, syde.theme.SectionGradientColor2)
-				end
 			end
 
 			function element:Paragraph(Paragraph, Parent)
@@ -3312,42 +3322,6 @@ function syde:Init(library)
 				})
 			end,
 			SFlag = 'DS'
-		}, WINDOW.Settings.Pages.Theme.Container)
-
-		element:Toggle({
-			Title = 'Section Gradient',
-			Description = 'Enable gradient background for sections.',
-			Value = syde.theme.SectionGradientEnabled,
-			CallBack = function(v)
-				syde:UpdateTheme({
-					['SectionGradientEnabled'] = v
-				})
-			end,
-			SFlag = 'SGE'
-		}, WINDOW.Settings.Pages.Theme.Container)
-
-		element:ColorPicker({
-			Title = 'Section Gradient Color 1',
-			Linkable = true,
-			Color = syde.theme.SectionGradientColor1;
-			CallBack = function(c)
-				syde:UpdateTheme({
-					['SectionGradientColor1'] = c
-				})
-			end,
-			SFlag = 'SGC1'
-		}, WINDOW.Settings.Pages.Theme.Container)
-
-		element:ColorPicker({
-			Title = 'Section Gradient Color 2',
-			Linkable = true,
-			Color = syde.theme.SectionGradientColor2;
-			CallBack = function(c)
-				syde:UpdateTheme({
-					['SectionGradientColor2'] = c
-				})
-			end,
-			SFlag = 'SGC2'
 		}, WINDOW.Settings.Pages.Theme.Container)
 
 		element:Section('Other', WINDOW.Settings.Pages.Theme.Container, '0')
@@ -4056,11 +4030,6 @@ function syde:Init(library)
 				Section.Title.Position = UDim2.new(0, 25,0, 0)
 			else
 				Section.icon.Visible = false
-			end
-
-			if syde.theme.SectionGradientEnabled then
-				local grad = Instance.new('UIGradient', Section)
-				grad.Color = ColorSequence.new(syde.theme.SectionGradientColor1, syde.theme.SectionGradientColor2)
 			end
 		end
 
@@ -4927,7 +4896,7 @@ function syde:Init(library)
 				for _, option in ipairs(dropdown.dropHolder.drop.Container:GetChildren()) do
 					if option:IsA("Frame") and option:FindFirstChild("Title") then
 						local optionText = option.Title.Text:lower()
-						local isTemplate = option == option or option.Name == "Option"
+						local isTemplate = option.Name == "Option"
 						local shouldShow = not isTemplate and (searchText == "" or optionText:find(searchText, 1, true))
 
 						if shouldShow then

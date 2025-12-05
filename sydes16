@@ -4017,21 +4017,29 @@ function syde:Init(library)
 
 		local InitElement = {}
 
-		function InitElement:Section(Title, Icon)
+		function InitElement:Section(SectionConfig)
 			local SectionData = {
-				Title = Title
+				Title = SectionConfig.Title or SectionConfig;
+				Icon = SectionConfig.Icon;
+				Collapsible = SectionConfig.Collapsible or false;
 			}
+
+			-- Handle legacy string parameter
+			if type(SectionConfig) == "string" then
+				SectionData.Title = SectionConfig
+				SectionData.Collapsible = false
+			end
 
 			local Section = PAGES.Page.Section:Clone()
 			Section.Visible = true
-			Section.Title.Text = Title
+			Section.Title.Text = SectionData.Title
 			Section.Parent = Page
 			Section.Title.Position = UDim2.new(0, 0,0, 0)
 			Section.BackgroundColor3 = Color3.fromRGB(255, 255, 255) -- Reset to default
 			Section.BackgroundTransparency = 1 -- Make background transparent
 
-			if Icon then
-				Section.icon.Image = 'rbxassetid://'..Icon
+			if SectionData.Icon then
+				Section.icon.Image = 'rbxassetid://'..SectionData.Icon
 				Section.Title.Position = UDim2.new(0, 25,0, 0)
 			else
 				Section.icon.Visible = false
@@ -4044,6 +4052,61 @@ function syde:Init(library)
 				ColorSequenceKeypoint.new(1, Color3.fromRGB(150, 200, 255))  -- Lighter blue
 			}
 			gradient.Parent = Section.Title
+
+			-- Collapsible functionality
+			local isCollapsed = false
+			local sectionElements = {} -- Track elements in this section
+			
+			if SectionData.Collapsible then
+				-- Add arrow icon
+				local arrowIcon = Instance.new("ImageLabel")
+				arrowIcon.Name = "Arrow"
+				arrowIcon.Size = UDim2.new(0, 16, 0, 16)
+				arrowIcon.Position = UDim2.new(1, -25, 0.5, -8)
+				arrowIcon.BackgroundTransparency = 1
+				arrowIcon.Image = "rbxassetid://6034818372" -- Down arrow
+				arrowIcon.ImageColor3 = Color3.fromRGB(150, 200, 255)
+				arrowIcon.Parent = Section
+
+				-- Make title clickable
+				local titleButton = Instance.new("TextButton")
+				titleButton.BackgroundTransparency = 1
+				titleButton.Size = UDim2.new(1, 0, 1, 0)
+				titleButton.Text = ""
+				titleButton.Parent = Section.Title
+				titleButton.ZIndex = 10
+
+				titleButton.MouseButton1Click:Connect(function()
+					isCollapsed = not isCollapsed
+					
+					-- Animate arrow rotation
+					local targetRotation = isCollapsed and 180 or 0
+					tweenservice:Create(arrowIcon, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {
+						Rotation = targetRotation
+					}):Play()
+					
+					-- Hide/show elements
+					for _, element in ipairs(sectionElements) do
+						if element.Instance then
+							element.Instance.Visible = not isCollapsed
+						end
+					end
+				end)
+			end
+
+			-- Return section object for tracking elements
+			local SectionObject = {
+				Instance = Section,
+				Elements = sectionElements,
+				AddElement = function(element)
+					table.insert(sectionElements, element)
+				end,
+				IsCollapsed = function()
+					return isCollapsed
+				end
+			}
+
+			return SectionObject
 		end
 
 

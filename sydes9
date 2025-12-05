@@ -4027,6 +4027,7 @@ function syde:Init(library)
 			Section.Title.Text = Title
 			Section.Parent = Page
 			Section.Title.Position = UDim2.new(0, 0,0, 0)
+			Section.BackgroundColor3 = Color3.fromRGB(255, 255, 255) -- Ensure gradient works on white background
 
 			if Icon then
 				Section.icon.Image = 'rbxassetid://'..Icon

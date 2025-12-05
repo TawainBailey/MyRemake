@@ -5845,6 +5845,7 @@ function syde:Init(library)
 			local ParaData = {
 				Title = Paragraph.Title;
 				Content = Paragraph.Content;
+				Gradient = Paragraph.Gradient;
 			}
 
 			local Para = PAGES.Page.Paragraph:Clone()
@@ -5852,6 +5853,13 @@ function syde:Init(library)
 			Para.Parent = Page
 			Para.Title.Text = ParaData.Title
 			Para.Content.Text = ParaData.Content
+
+			-- Apply gradient to title if specified
+			if ParaData.Gradient then
+				local gradient = Instance.new("UIGradient")
+				gradient.Color = ParaData.Gradient
+				gradient.Parent = Para.Title
+			end
 
 			Para.Content.Size = UDim2.new(1, -20, 0, Para.Content.TextBounds.Y)
 			Para.Size = UDim2.new(1, -15, 0, Para.Content.Size.Y.Offset + 45)

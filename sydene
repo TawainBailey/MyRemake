@@ -4544,7 +4544,7 @@ function syde:Init(library)
 						end)
 					end)
 				end
-			end			return Section
+			end			currentSection = Section
 		end
 
 
@@ -4559,7 +4559,7 @@ function syde:Init(library)
 
 			local button = PAGES.Page.Button:Clone()
 			button.Visible = true
-			button.Parent = Page
+			button.Parent = currentSection and currentSection.Container or Page
 			button.Title.Text = ButtonData.Title
 			button.Name = ButtonData.Title
 			button.Title.Size = UDim2.new(0, button.Title.TextBounds.X + 15,0, 35)
@@ -4741,7 +4741,7 @@ function syde:Init(library)
 
 			local toggle = PAGES.Page.Toggle:Clone()
 			toggle.Visible = true
-			toggle.Parent = Page
+			toggle.Parent = currentSection and currentSection.Container or Page
 			toggle.Title.Text = ToggleData.Title
 			toggle.Name = ToggleData.Title
 

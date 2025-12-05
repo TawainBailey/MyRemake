@@ -4040,8 +4040,8 @@ function syde:Init(library)
 			-- Add gradient to section title text
 			local gradient = Instance.new("UIGradient")
 			gradient.Color = ColorSequence.new{
-				ColorSequenceKeypoint.new(0, Color3.fromRGB(10, 50, 100)), -- Dark blue
-				ColorSequenceKeypoint.new(1, Color3.fromRGB(50, 100, 200))  -- Light blue
+				ColorSequenceKeypoint.new(0, Color3.fromRGB(100, 150, 255)), -- Light blue
+				ColorSequenceKeypoint.new(1, Color3.fromRGB(150, 200, 255))  -- Lighter blue
 			}
 			gradient.Parent = Section.Title
 		end

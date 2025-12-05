@@ -4017,6 +4017,8 @@ function syde:Init(library)
 
 		local InitElement = {}
 
+		local CurrentSection = nil -- Track current section for collapsible functionality
+
 		function InitElement:Section(SectionConfig)
 			local SectionData = {
 				Title = SectionConfig.Title or SectionConfig;
@@ -4094,19 +4096,10 @@ function syde:Init(library)
 				end)
 			end
 
-			-- Return section object for tracking elements
-			local SectionObject = {
-				Instance = Section,
-				Elements = sectionElements,
-				AddElement = function(element)
-					table.insert(sectionElements, element)
-				end,
-				IsCollapsed = function()
-					return isCollapsed
-				end
-			}
-
-			return SectionObject
+			-- Return section object only for collapsible sections
+			if SectionData.Collapsible then
+				return SectionObject
+			end
 		end
 
 

@@ -5136,7 +5136,14 @@ function syde:Init(library)
 
 			textBox:GetPropertyChangedSignal("Text"):Connect(function()
 				if TextInputData.NumbersOnly then
-					textBox.Text = textBox.Text:gsub("%D", "")
+					-- Allow digits and at most one decimal point
+					local cleaned = textBox.Text:gsub("[^%d%.]", "")
+					-- Ensure only one decimal point
+					local parts = cleaned:split(".")
+					if #parts > 2 then
+						cleaned = parts[1] .. "." .. table.concat(parts, "", 2, #parts - 1)
+					end
+					textBox.Text = cleaned
 				end
 
 				textBox.Size = UDim2.new(1, -60, 0, defaultHeight + 40)

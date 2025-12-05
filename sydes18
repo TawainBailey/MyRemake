@@ -4055,10 +4055,14 @@ function syde:Init(library)
 			}
 			gradient.Parent = Section.Title
 
+			-- Create section object
+			local SectionObject = {
+				Section = Section;
+				Elements = {}; -- Track elements in this section
+				IsCollapsed = false;
+			}
+
 			-- Collapsible functionality
-			local isCollapsed = false
-			local sectionElements = {} -- Track elements in this section
-			
 			if SectionData.Collapsible then
 				-- Add arrow icon
 				local arrowIcon = Instance.new("ImageLabel")
@@ -4079,22 +4083,28 @@ function syde:Init(library)
 				titleButton.ZIndex = 10
 
 				titleButton.MouseButton1Click:Connect(function()
-					isCollapsed = not isCollapsed
+					SectionObject.IsCollapsed = not SectionObject.IsCollapsed
 					
 					-- Animate arrow rotation
-					local targetRotation = isCollapsed and 180 or 0
+					local targetRotation = SectionObject.IsCollapsed and 180 or 0
 					tweenservice:Create(arrowIcon, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {
 						Rotation = targetRotation
 					}):Play()
 					
 					-- Hide/show elements
-					for _, element in ipairs(sectionElements) do
+					for _, element in ipairs(SectionObject.Elements) do
 						if element.Instance then
-							element.Instance.Visible = not isCollapsed
+							element.Instance.Visible = not SectionObject.IsCollapsed
 						end
 					end
+					
+					-- Update layout
+					syde:updateLayout()
 				end)
 			end
+
+			-- Set current section for element registration
+			CurrentSection = SectionObject
 
 			-- Return section object only for collapsible sections
 			if SectionData.Collapsible then
@@ -4279,7 +4289,10 @@ function syde:Init(library)
 				end
 			end
 
-
+			-- Register with current section
+			if CurrentSection then
+				table.insert(CurrentSection.Elements, {Instance = button})
+			end
 
 		end
 
@@ -4595,6 +4608,11 @@ function syde:Init(library)
 				end
 			end)
 
+			-- Register with current section
+			if CurrentSection then
+				table.insert(CurrentSection.Elements, {Instance = toggle})
+			end
+
 			return ToggleData
 
 		end
@@ -4821,6 +4839,11 @@ function syde:Init(library)
 				else
 					descLabel.Visible = false
 				end
+			end
+
+			-- Register with current section
+			if CurrentSection then
+				table.insert(CurrentSection.Elements, {Instance = slider})
 			end
 
 		end
@@ -5074,6 +5097,11 @@ function syde:Init(library)
 			end
 
 			SetDropdownOptions()
+
+			-- Register with current section
+			if CurrentSection then
+				table.insert(CurrentSection.Elements, {Instance = dropdown})
+			end
 		end
 
 
@@ -5187,6 +5215,11 @@ function syde:Init(library)
 					textBox.ClearTextOnFocus = false
 				end
 			end)
+
+			-- Register with current section
+			if CurrentSection then
+				table.insert(CurrentSection.Elements, {Instance = textinput})
+			end
 		end
 
 		function InitElement:ColorPicker(ColorPicker)
@@ -5950,6 +5983,11 @@ function syde:Init(library)
 			end
 
 			ParagraphSettings.Instance = Para
+
+			-- Register with current section
+			if CurrentSection then
+				table.insert(CurrentSection.Elements, {Instance = Para})
+			end
 
 			return ParagraphSettings
 		end

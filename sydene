@@ -33,6 +33,23 @@ local dragOffset =        255
 local dragOffsetMobile =  150
 local camera =          workspace.CurrentCamera
 
+local function New(class, props, children)
+	local inst = Instance.new(class)
+	for k, v in pairs(props or {}) do
+		if k == "Parent" then continue end
+		inst[k] = v
+	end
+	if children then
+		for _, child in ipairs(children) do
+			child.Parent = inst
+		end
+	end
+	if props and props.Parent then
+		inst.Parent = props.Parent
+	end
+	return inst
+end
+
 local sharedModule = {}
 local resizing = false
 
@@ -4017,23 +4034,363 @@ function syde:Init(library)
 
 		local InitElement = {}
 
-		function InitElement:Section(Title, Icon)
-			local SectionData = {
-				Title = Title
-			}
-
-			local Section = PAGES.Page.Section:Clone()
-			Section.Visible = true
-			Section.Title.Text = Title
-			Section.Parent = Page
-			Section.Title.Position = UDim2.new(0, 0,0, 0)
-
+		function InitElement:Section(Title, Icon, DefaultOpen)
+			DefaultOpen = DefaultOpen or false
+			local Section = {}
+			
+			-- Main section frame
+			Section.Root = New("Frame", {
+				Size = UDim2.new(1, -10, 0, 0),
+				AutomaticSize = Enum.AutomaticSize.Y,
+				BackgroundTransparency = 1,
+				Parent = Page,
+				LayoutOrder = 7,
+			})
+			
+			-- Section header (clickable, transparent)
+			Section.Header = New("TextButton", {
+				Size = UDim2.new(1, 0, 0, 30),
+				Position = UDim2.new(0, 0, 0, 5),
+				BackgroundTransparency = 1,
+				AutoButtonColor = false,
+				Text = "",
+				Parent = Section.Root,
+			})
+			
+			-- Section title text with gradient support
+			Section.TitleLabel = New("TextLabel", {
+				Size = UDim2.new(1, -30, 1, 0),
+				Position = UDim2.fromOffset(5, 0),
+				BackgroundTransparency = 1,
+				Text = Title,
+				TextColor3 = Color3.fromRGB(240, 240, 240),
+				TextSize = 14,
+				TextXAlignment = Enum.TextXAlignment.Left,
+				FontFace = Font.new(
+					"rbxasset://fonts/families/GothamSSm.json",
+					Enum.FontWeight.Medium,
+					Enum.FontStyle.Normal
+				),
+				Parent = Section.Header,
+			})
+			
 			if Icon then
-				Section.icon.Image = 'rbxassetid://'..Icon
-				Section.Title.Position = UDim2.new(0, 25,0, 0)
-			else
-				Section.icon.Visible = false
+				-- Add icon
+				local icon = New("ImageLabel", {
+					Size = UDim2.fromOffset(20, 20),
+					Position = UDim2.new(0, 0, 0.5, 0),
+					AnchorPoint = Vector2.new(0, 0.5),
+					BackgroundTransparency = 1,
+					Image = 'rbxassetid://'..Icon,
+					Parent = Section.Header,
+				})
+				Section.TitleLabel.Position = UDim2.fromOffset(30, 0)
+				Section.TitleLabel.Size = UDim2.new(1, -60, 1, 0)
 			end
+			
+			-- Arrow icon
+			Section.Arrow = New("ImageLabel", {
+				Size = UDim2.fromOffset(14, 14),
+				Position = UDim2.new(1, -20, 0.5, 0),
+				AnchorPoint = Vector2.new(0.5, 0.5),
+				BackgroundTransparency = 1,
+				Image = "rbxassetid://6034818372",
+				ImageColor3 = Color3.fromRGB(150, 150, 150),
+				Rotation = DefaultOpen and 0 or 90,
+				Parent = Section.Header,
+			})
+			
+			-- Content container
+			Section.Container = New("Frame", {
+				Size = UDim2.new(1, 0, 0, 0),
+				Position = UDim2.fromOffset(0, 36),
+				AutomaticSize = Enum.AutomaticSize.Y,
+				BackgroundTransparency = 1,
+				Parent = Section.Root,
+				Visible = DefaultOpen,
+				ClipsDescendants = true,
+			}, {
+				New("UIListLayout", {
+					SortOrder = Enum.SortOrder.LayoutOrder,
+					Padding = UDim.new(0, 4),
+				}),
+				New("UIPadding", {
+					PaddingTop = UDim.new(0, 8),
+					PaddingLeft = UDim.new(0, 15),
+					PaddingRight = UDim.new(0, 15),
+					PaddingBottom = UDim.new(0, 8),
+				}),
+			})
+			
+			-- Layout
+			Section.Layout = Section.Container:FindFirstChild("UIListLayout")
+			
+			-- State
+			Section.Open = DefaultOpen
+			
+			-- Toggle function
+			function Section:Toggle()
+				Section.Open = not Section.Open
+				
+				-- Animate arrow rotation (90 = closed pointing right, 0 = open pointing down)
+				local rotationTween = tweenservice:Create(
+					Section.Arrow,
+					TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+					{ Rotation = Section.Open and 0 or 90 }
+				)
+				rotationTween:Play()
+				
+				if Section.Open then
+					-- Opening animation
+					Section.Container.Visible = true
+					Section.Container.Size = UDim2.new(1, 0, 0, 0)
+					
+					local contentHeight = Section.Layout.AbsoluteContentSize.Y + 13  -- padding
+					
+					-- Animate container expansion
+					local expandTween = tweenservice:Create(
+						Section.Container,
+						TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+						{ Size = UDim2.new(1, 0, 0, contentHeight) }
+					)
+					expandTween:Play()
+					
+					-- Update root size
+					Section.Root.Size = UDim2.new(1, -10, 0, contentHeight + 36)
+				else
+					-- Closing animation
+					local collapseTween = tweenservice:Create(
+						Section.Container,
+						TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+						{ Size = UDim2.new(1, 0, 0, 0) }
+					)
+					collapseTween:Play()
+					
+					-- Hide container after animation
+					collapseTween.Completed:Connect(function()
+						Section.Container.Visible = false
+					end)
+					
+					-- Update root size
+					Section.Root.Size = UDim2.new(1, -10, 0, 36)
+				end
+			end
+			
+			-- Set title function
+			function Section:SetTitle(NewTitle)
+				Section.TitleLabel.Text = NewTitle
+			end
+			
+			-- Set gradient function (applies to text)
+			function Section:SetGradient(gradientOptions)
+				if gradientOptions and gradientOptions.Enabled then
+					-- Remove existing gradient if any
+					local existingGradient = Section.TitleLabel:FindFirstChild("UIGradient")
+					if existingGradient then
+						existingGradient:Destroy()
+					end
+					
+					-- Ensure base text color is white
+					Section.TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+					
+					-- Create text gradient
+					New("UIGradient", {
+						Color = ColorSequence.new{
+							ColorSequenceKeypoint.new(0, gradientOptions.Color1 or Color3.fromRGB(0, 150, 0)),
+							ColorSequenceKeypoint.new(1, gradientOptions.Color2 or Color3.fromRGB(0, 255, 150))
+						},
+						Rotation = gradientOptions.Rotation or 0,
+						Parent = Section.TitleLabel,
+					})
+				else
+					-- Remove gradient if disabled and reset to default color
+					local existingGradient = Section.TitleLabel:FindFirstChild("UIGradient")
+					if existingGradient then
+						existingGradient:Destroy()
+					end
+					Section.TitleLabel.TextColor3 = Color3.fromRGB(240, 240, 240)
+				end
+			end
+			
+			-- Click handler
+			syde:AddConnection(Section.Header.MouseButton1Click, function()
+				Section:Toggle()
+			end)
+			
+			-- Auto-resize based on content (only when section is open)
+			syde:AddConnection(Section.Layout:GetPropertyChangedSignal("AbsoluteContentSize"), function()
+				if Section.Open then
+					local contentHeight = Section.Layout.AbsoluteContentSize.Y + 16  -- padding
+					Section.Container.Size = UDim2.new(1, 0, 0, contentHeight)
+					Section.Root.Size = UDim2.new(1, -10, 0, contentHeight + 36)
+				else
+					Section.Root.Size = UDim2.new(1, -10, 0, 36)
+				end
+			end)
+			
+			-- Add element functions
+			function Section:Button(Button)
+				local ButtonData = {
+					Title = Button.Title or "Temp Button";
+					CallBack = Button.CallBack;
+					Desc = Button.Description or "";
+					Type = Button.Type or 'Default';
+					HoldTime = Button.HoldTime or 3;
+				}
+			
+				local button = PAGES.Page.Button:Clone()
+				button.Visible = true
+				button.Parent = Section.Container
+				button.Title.Text = ButtonData.Title
+				button.Name = ButtonData.Title
+				button.Title.Size = UDim2.new(0, button.Title.TextBounds.X + 15,0, 35)
+			
+				local fOTween = TweenInfo.new(0.7, Enum.EasingStyle.Exponential)
+				local fITween = TweenInfo.new(0.7, Enum.EasingStyle.Exponential)
+			
+				if ButtonData.Type == 'Default' then
+					button.interact.MouseButton1Down:Connect(function()
+						tweenservice:Create(button.UIStroke, fOTween, { Transparency = 1 }):Play()
+						tweenservice:Create(button.ImageLabel, fOTween, { ImageTransparency = 1 }):Play()
+						tweenservice:Create(button.ImageLabel, TweenInfo.new(0.8, Enum.EasingStyle.Exponential), { ImageTransparency = 1 }):Play()
+					end)
+			
+					button.interact.MouseButton1Up:Connect(function()
+						tweenservice:Create(button.UIStroke, fITween, { Transparency = 0 }):Play()
+						tweenservice:Create(button.ImageLabel, TweenInfo.new(0.8, Enum.EasingStyle.Exponential), { ImageTransparency = 0.95 }):Play()
+					end)
+			
+					button.interact.MouseButton1Click:Connect(function()
+						if TabData.Locked == false then
+							if ButtonData.CallBack then
+								local success, errorMsg = pcall(ButtonData.CallBack)
+								if not success then
+									warn(`[ Button Error: { button.Name } ] Callback Error: { errorMsg }`)
+								end
+							else
+								warn(`[ CallBack Missing: { button.Name } ] No Function Assigned`)
+							end
+						end
+					end)
+			
+					button.interact.MouseLeave:Connect(function()
+						tweenservice:Create(button.UIStroke, fITween, { Transparency = 0 }):Play()
+						tweenservice:Create(button.ImageLabel, TweenInfo.new(0.8, Enum.EasingStyle.Exponential), { ImageTransparency = 0.95 }):Play()
+					end)
+				elseif ButtonData.Type == 'Hold' then
+					local HoldTime = ButtonData.HoldTime
+					local Holding = false
+					local TimeLeft = HoldTime
+					local Complete = false
+			
+					button.interact.MouseButton1Down:Connect(function()
+						if TabData.Locked == false then
+							Holding = true
+							TimeLeft = HoldTime
+							local HoldStart = tick()
+							local HoldConnection
+							local function UpdateHold()
+								if not Holding then return end
+								TimeLeft = HoldTime - (tick() - HoldStart)
+								if TimeLeft <= 0 then
+									Complete = true
+									Holding = false
+									if HoldConnection then HoldConnection:Disconnect() end
+									if ButtonData.CallBack then
+										local success, errorMsg = pcall(ButtonData.CallBack)
+										if not success then
+											warn(`[ Hold Button Error: { button.Name } ] Callback Error: { errorMsg }`)
+										end
+									end
+									button.Title.Text = ButtonData.Title
+									tweenservice:Create(button.UIStroke, fITween, { Transparency = 0 }):Play()
+									tweenservice:Create(button.ImageLabel, TweenInfo.new(0.8, Enum.EasingStyle.Exponential), { ImageTransparency = 0.95 }):Play()
+								else
+									button.Title.Text = string.format("%.1f", TimeLeft)
+								end
+							end
+							HoldConnection = runservice.Heartbeat:Connect(UpdateHold)
+							tweenservice:Create(button.UIStroke, fOTween, { Transparency = 1 }):Play()
+							tweenservice:Create(button.ImageLabel, fOTween, { ImageTransparency = 1 }):Play()
+						end
+					end)
+			
+					button.interact.MouseButton1Up:Connect(function()
+						if Holding then
+							Holding = false
+							if HoldConnection then HoldConnection:Disconnect() end
+							button.Title.Text = ButtonData.Title
+							tweenservice:Create(button.UIStroke, fITween, { Transparency = 0 }):Play()
+							tweenservice:Create(button.ImageLabel, TweenInfo.new(0.8, Enum.EasingStyle.Exponential), { ImageTransparency = 0.95 }):Play()
+						end
+					end)
+			
+					button.interact.MouseLeave:Connect(function()
+						if Holding then
+							Holding = false
+							if HoldConnection then HoldConnection:Disconnect() end
+							button.Title.Text = ButtonData.Title
+							tweenservice:Create(button.UIStroke, fITween, { Transparency = 0 }):Play()
+							tweenservice:Create(button.ImageLabel, TweenInfo.new(0.8, Enum.EasingStyle.Exponential), { ImageTransparency = 0.95 }):Play()
+						end
+					end)
+				end
+			end
+			
+			function Section:Toggle(Toggle)
+				local ToggleData = {
+					Title = Toggle.Title or "Temp Toggle";
+					CallBack = Toggle.CallBack;
+					Desc = Toggle.Description or "";
+					Default = Toggle.Default or false;
+					Flag = Toggle.Flag;
+				}
+			
+				local toggle = PAGES.Page.Toggle:Clone()
+				toggle.Visible = true
+				toggle.Parent = Section.Container
+				toggle.Title.Text = ToggleData.Title
+				toggle.Name = ToggleData.Title
+			
+				local toggleState = ToggleData.Default
+			
+				local function UpdateToggle()
+					if toggleState then
+						tweenservice:Create(toggle.UIStroke, TweenInfo.new(0.4, Enum.EasingStyle.Quart), { Transparency = 0 }):Play()
+						tweenservice:Create(toggle.ImageLabel, TweenInfo.new(0.4, Enum.EasingStyle.Quart), { ImageTransparency = 0.8 }):Play()
+						tweenservice:Create(toggle.indicator, TweenInfo.new(0.4, Enum.EasingStyle.Quart), { BackgroundTransparency = 0 }):Play()
+						tweenservice:Create(toggle.indicator.ImageLabel, TweenInfo.new(0.4, Enum.EasingStyle.Quart), { ImageTransparency = 0 }):Play()
+					else
+						tweenservice:Create(toggle.UIStroke, TweenInfo.new(0.4, Enum.EasingStyle.Quart), { Transparency = 1 }):Play()
+						tweenservice:Create(toggle.ImageLabel, TweenInfo.new(0.4, Enum.EasingStyle.Quart), { ImageTransparency = 1 }):Play()
+						tweenservice:Create(toggle.indicator, TweenInfo.new(0.4, Enum.EasingStyle.Quart), { BackgroundTransparency = 1 }):Play()
+						tweenservice:Create(toggle.indicator.ImageLabel, TweenInfo.new(0.4, Enum.EasingStyle.Quart), { ImageTransparency = 1 }):Play()
+					end
+				end
+			
+				UpdateToggle()
+			
+				toggle.interact.MouseButton1Click:Connect(function()
+					if TabData.Locked == false then
+						toggleState = not toggleState
+						UpdateToggle()
+						if ToggleData.CallBack then
+							local success, errorMsg = pcall(ToggleData.CallBack, toggleState)
+							if not success then
+								warn(`[ Toggle Error: { toggle.Name } ] Callback Error: { errorMsg }`)
+							end
+						end
+						if ToggleData.Flag then
+							syde.Flags[ToggleData.Flag] = toggleState
+							if syde.ConfigEnabled then
+								syde:SaveConfig()
+							end
+						end
+					end
+				end)
+			end
+			
+			return Section
 		end
 
 
@@ -4899,8 +5256,8 @@ function syde:Init(library)
 				for _, option in ipairs(dropdown.dropHolder.drop.Container:GetChildren()) do
 					if option:IsA("Frame") and option:FindFirstChild("Title") then
 						local optionText = option.Title.Text:lower()
-						local isTemplate = option.Name == "Option"
-						local shouldShow = not isTemplate and (searchText == "" or optionText:find(searchText, 1, true) or SelectedOptions[option.Title.Text])
+						local isTemplate = option == option or option.Name == "Option"
+						local shouldShow = not isTemplate and (searchText == "" or optionText:find(searchText, 1, true))
 
 						if shouldShow then
 							option.Visible = true
@@ -4964,10 +5321,6 @@ function syde:Init(library)
 								tweenservice:Create(option, TweenInfo.new(0.3), {BackgroundColor3 = Color3.fromRGB(39, 39, 39)}):Play()
 								tweenservice:Create(option.ImageLabel, TweenInfo.new(0.3), {ImageTransparency = 0}):Play()
 							end
-							
-							if DropdownData.CallBack then
-								DropdownData.CallBack(SelectedOrder)
-							end
 						else
 							dropdown.dropHolder.drop.Selected.Text = OptionText
 
@@ -4994,6 +5347,12 @@ function syde:Init(library)
 						end
 
 						UpdateSelectedText()
+						
+						if TabData == false then
+							if DropdownData.Multi and DropdownData.CallBack then
+								DropdownData.CallBack(SelectedOrder)
+							end
+						end
 						
 					end)
 				end

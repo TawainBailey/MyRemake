@@ -4126,6 +4126,7 @@ function syde:Init(library)
 		function InitElement:BorderGroup(BorderConfig)
 			local BorderData = {
 				Title = BorderConfig.Title or BorderConfig;
+				Gradient = BorderConfig.Gradient;
 			}
 
 			-- Handle legacy string parameter
@@ -4153,10 +4154,14 @@ function syde:Init(library)
 
 			-- Add gradient to text
 			local gradient = Instance.new("UIGradient")
-			gradient.Color = ColorSequence.new{
-				ColorSequenceKeypoint.new(0, Color3.fromRGB(100, 150, 255)), -- Light blue
-				ColorSequenceKeypoint.new(1, Color3.fromRGB(150, 200, 255))  -- Lighter blue
-			}
+			if BorderData.Gradient then
+				gradient.Color = BorderData.Gradient
+			else
+				gradient.Color = ColorSequence.new{
+					ColorSequenceKeypoint.new(0, Color3.fromRGB(100, 150, 255)), -- Light blue
+					ColorSequenceKeypoint.new(1, Color3.fromRGB(150, 200, 255))  -- Lighter blue
+				}
+			end
 			gradient.Parent = BorderLabel
 
 			-- Create border group object with element methods

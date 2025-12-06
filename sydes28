@@ -4100,7 +4100,7 @@ function syde:Init(library)
 					end
 					
 					-- Update layout
-					syde:updateLayout()
+					syde:updateLayout(Page)
 				end)
 			end
 
@@ -4127,10 +4127,10 @@ function syde:Init(library)
 			local BorderLabel = Instance.new("TextLabel")
 			BorderLabel.Name = "BorderGroup"
 			BorderLabel.BackgroundTransparency = 1
-			BorderLabel.Size = UDim2.new(1, -15, 0, 25)
+			BorderLabel.Size = UDim2.new(1, -15, 0, 20)
 			BorderLabel.Position = UDim2.new(0, 0, 0, 0)
-			BorderLabel.Font = Enum.Font.SourceSansBold
-			BorderLabel.TextSize = 16
+			BorderLabel.Font = Enum.Font.SourceSans
+			BorderLabel.TextSize = 14
 			BorderLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 			BorderLabel.TextXAlignment = Enum.TextXAlignment.Left
 			BorderLabel.Text = BorderData.Title
@@ -4158,8 +4158,8 @@ function syde:Init(library)
 						local prevBorderGroup = CurrentBorderGroup
 						CurrentBorderGroup = self
 						
-						-- Call the element creation method
-						local result = methodFunc(...)
+						-- Call the element creation method with correct self
+						local result = methodFunc(InitElement, ...)
 						
 						-- Restore previous border group
 						CurrentBorderGroup = prevBorderGroup

@@ -4146,6 +4146,11 @@ function syde:Init(library)
 			BorderLabel.Text = BorderData.Title
 			BorderLabel.Parent = Page
 
+			-- Register border label with current section for collapsible functionality
+			if CurrentSection then
+				table.insert(CurrentSection.Elements, {Instance = BorderLabel})
+			end
+
 			-- Add gradient to text
 			local gradient = Instance.new("UIGradient")
 			gradient.Color = ColorSequence.new{

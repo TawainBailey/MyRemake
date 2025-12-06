@@ -4060,6 +4060,7 @@ function syde:Init(library)
 			local SectionObject = {
 				Section = Section;
 				Elements = {}; -- Track elements in this section
+				BorderGroups = {}; -- Track border groups in this section
 				IsCollapsed = false;
 			}
 
@@ -4096,6 +4097,15 @@ function syde:Init(library)
 					for _, element in ipairs(SectionObject.Elements) do
 						if element.Instance then
 							element.Instance.Visible = not SectionObject.IsCollapsed
+						end
+					end
+					
+					-- Hide/show elements in border groups
+					for _, borderGroup in ipairs(SectionObject.BorderGroups) do
+						for _, element in ipairs(borderGroup.Elements) do
+							if element.Instance then
+								element.Instance.Visible = not SectionObject.IsCollapsed
+							end
 						end
 					end
 					
@@ -4171,6 +4181,11 @@ function syde:Init(library)
 
 			-- Set current border group for element registration
 			CurrentBorderGroup = BorderGroupObject
+
+			-- Register border group with current section
+			if CurrentSection then
+				table.insert(CurrentSection.BorderGroups, BorderGroupObject)
+			end
 
 			return BorderGroupObject
 		end

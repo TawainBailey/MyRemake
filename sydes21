@@ -4018,6 +4018,7 @@ function syde:Init(library)
 		local InitElement = {}
 
 		local CurrentSection = nil -- Track current section for collapsible functionality
+		local CurrentBorder = nil -- Track current border for element grouping
 
 		function InitElement:Section(SectionConfig)
 			local SectionData = {
@@ -4113,6 +4114,86 @@ function syde:Init(library)
 		end
 
 
+		function InitElement:Border(BorderConfig)
+			local BorderData = {
+				Title = BorderConfig.Title or BorderConfig;
+				Gradient = BorderConfig.Gradient;
+			}
+
+			-- Handle legacy string parameter
+			if type(BorderConfig) == "string" then
+				BorderData.Title = BorderConfig
+				BorderData.Gradient = nil
+			end
+
+			-- Create border container
+			local Border = Instance.new("Frame")
+			Border.Name = "Border"
+			Border.BackgroundTransparency = 0.95
+			Border.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+			Border.BorderSizePixel = 0
+			Border.Size = UDim2.new(1, -15, 0, 35) -- Start with title height
+			Border.Parent = Page
+
+			-- Create border title
+			local BorderTitle = Instance.new("TextLabel")
+			BorderTitle.Name = "BorderTitle"
+			BorderTitle.BackgroundTransparency = 1
+			BorderTitle.Size = UDim2.new(1, 0, 0, 25)
+			BorderTitle.Position = UDim2.new(0, 0, 0, 0)
+			BorderTitle.Font = Enum.Font.SourceSansSemibold
+			BorderTitle.TextSize = 14
+			BorderTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+			BorderTitle.Text = BorderData.Title
+			BorderTitle.TextXAlignment = Enum.TextXAlignment.Left
+			BorderTitle.Parent = Border
+
+			-- Add gradient to border title if specified
+			if BorderData.Gradient then
+				local gradient = Instance.new("UIGradient")
+				gradient.Color = BorderData.Gradient
+				gradient.Parent = BorderTitle
+			else
+				-- Default gradient for borders
+				local gradient = Instance.new("UIGradient")
+				gradient.Color = ColorSequence.new{
+					ColorSequenceKeypoint.new(0, Color3.fromRGB(150, 200, 255)),
+					ColorSequenceKeypoint.new(1, Color3.fromRGB(100, 150, 255))
+				}
+				gradient.Parent = BorderTitle
+			end
+
+			-- Create content container for elements
+			local BorderContent = Instance.new("Frame")
+			BorderContent.Name = "BorderContent"
+			BorderContent.BackgroundTransparency = 1
+			BorderContent.Size = UDim2.new(1, 0, 1, -30) -- Account for title
+			BorderContent.Position = UDim2.new(0, 0, 0, 30)
+			BorderContent.Parent = Border
+
+			-- Create border object to track elements
+			local BorderObject = {
+				Border = Border;
+				Content = BorderContent;
+				Elements = {}; -- Track elements in this border
+				UpdateSize = function()
+					local totalHeight = 30 -- Title height
+					for _, element in ipairs(BorderObject.Elements) do
+						if element.Instance and element.Instance.Visible then
+							totalHeight = totalHeight + element.Instance.Size.Y.Offset + 5
+						end
+					end
+					Border.Size = UDim2.new(1, -15, 0, totalHeight)
+				end
+			}
+
+			-- Set current border for element registration
+			CurrentBorder = BorderObject
+
+			return BorderObject
+		end
+
+
 		function InitElement:Button(Button)
 			local ButtonData = {
 				Title = Button.Title or "Temp Button";
@@ -4124,7 +4205,7 @@ function syde:Init(library)
 
 			local button = PAGES.Page.Button:Clone()
 			button.Visible = true
-			button.Parent = Page
+			button.Parent = CurrentBorder and CurrentBorder.Content or Page
 			button.Title.Text = ButtonData.Title
 			button.Name = ButtonData.Title
 			button.Title.Size = UDim2.new(0, button.Title.TextBounds.X + 15,0, 35)
@@ -4289,9 +4370,12 @@ function syde:Init(library)
 				end
 			end
 
-			-- Register with current section
+			-- Register with current section and border
 			if CurrentSection then
 				table.insert(CurrentSection.Elements, {Instance = button})
+			end
+			if CurrentBorder then
+				table.insert(CurrentBorder.Elements, {Instance = button})
 			end
 
 		end
@@ -4309,7 +4393,7 @@ function syde:Init(library)
 
 			local toggle = PAGES.Page.Toggle:Clone()
 			toggle.Visible = true
-			toggle.Parent = Page
+			toggle.Parent = CurrentBorder and CurrentBorder.Content or Page
 			toggle.Title.Text = ToggleData.Title
 			toggle.Name = ToggleData.Title
 
@@ -4608,9 +4692,12 @@ function syde:Init(library)
 				end
 			end)
 
-			-- Register with current section
+			-- Register with current section and border
 			if CurrentSection then
 				table.insert(CurrentSection.Elements, {Instance = toggle})
+			end
+			if CurrentBorder then
+				table.insert(CurrentBorder.Elements, {Instance = toggle})
 			end
 
 			return ToggleData
@@ -4626,7 +4713,7 @@ function syde:Init(library)
 
 			local slider = PAGES.Page.Slider:Clone()
 			slider.Visible = true
-			slider.Parent = Page
+			slider.Parent = CurrentBorder and CurrentBorder.Content or Page
 			slider.Title.Text = SliderData.Title
 			slider.Name = SliderData.Title
 			slider.slideholder.slider.Visible = false
@@ -4841,9 +4928,12 @@ function syde:Init(library)
 				end
 			end
 
-			-- Register with current section
+			-- Register with current section and border
 			if CurrentSection then
 				table.insert(CurrentSection.Elements, {Instance = slider})
+			end
+			if CurrentBorder then
+				table.insert(CurrentBorder.Elements, {Instance = slider})
 			end
 
 		end
@@ -4860,7 +4950,7 @@ function syde:Init(library)
 
 			local dropdown = PAGES.Page.Dropdown:Clone()
 			dropdown.Visible = true
-			dropdown.Parent = Page
+			dropdown.Parent = CurrentBorder and CurrentBorder.Content or Page
 			dropdown.Title.Text = DropdownData.Title
 			dropdown.Name = DropdownData.Title
 			dropdown.dropHolder.drop.Container.Option.Visible = false
@@ -5098,9 +5188,12 @@ function syde:Init(library)
 
 			SetDropdownOptions()
 
-			-- Register with current section
+			-- Register with current section and border
 			if CurrentSection then
 				table.insert(CurrentSection.Elements, {Instance = dropdown})
+			end
+			if CurrentBorder then
+				table.insert(CurrentBorder.Elements, {Instance = dropdown})
 			end
 		end
 
@@ -5117,7 +5210,7 @@ function syde:Init(library)
 
 			local textinput = PAGES.Page.Input:Clone()
 			textinput.Visible = true
-			textinput.Parent = Page
+			textinput.Parent = CurrentBorder and CurrentBorder.Content or Page
 			textinput.Name = TextInputData.Title
 			textinput.Title.Text = TextInputData.Title
 			textinput.TextFrame.TextBox.PlaceholderText = TextInputData.PlaceHolder
@@ -5223,9 +5316,12 @@ function syde:Init(library)
 				end
 			end)
 
-			-- Register with current section
+			-- Register with current section and border
 			if CurrentSection then
 				table.insert(CurrentSection.Elements, {Instance = textinput})
+			end
+			if CurrentBorder then
+				table.insert(CurrentBorder.Elements, {Instance = textinput})
 			end
 		end
 
@@ -5946,7 +6042,7 @@ function syde:Init(library)
 
 			local Para = PAGES.Page.Paragraph:Clone()
 			Para.Visible = true
-			Para.Parent = Page
+			Para.Parent = CurrentBorder and CurrentBorder.Content or Page
 			Para.Title.Text = ParaData.Title
 			Para.Content.Text = ParaData.Content
 
@@ -5991,9 +6087,12 @@ function syde:Init(library)
 
 			ParagraphSettings.Instance = Para
 
-			-- Register with current section
+			-- Register with current section and border
 			if CurrentSection then
 				table.insert(CurrentSection.Elements, {Instance = Para})
+			end
+			if CurrentBorder then
+				table.insert(CurrentBorder.Elements, {Instance = Para})
 			end
 
 			return ParagraphSettings

@@ -4158,8 +4158,8 @@ function syde:Init(library)
 				gradient.Color = BorderData.Gradient
 			else
 				gradient.Color = ColorSequence.new{
-					ColorSequenceKeypoint.new(0, Color3.fromRGB(100, 150, 255)), -- Light blue
-					ColorSequenceKeypoint.new(1, Color3.fromRGB(150, 200, 255))  -- Lighter blue
+					ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 100, 100)), -- Red
+					ColorSequenceKeypoint.new(1, Color3.fromRGB(100, 150, 255))  -- Blue
 				}
 			end
 			gradient.Parent = BorderLabel

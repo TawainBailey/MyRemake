@@ -5080,8 +5080,8 @@ function syde:Init(library)
 
 						UpdateSelectedText()
 						
-						if TabData == false then
-							if DropdownData.Multi and DropdownData.CallBack then
+						if DropdownData.Multi and DropdownData.CallBack then
+							if TabData.Locked == false then
 								DropdownData.CallBack(SelectedOrder)
 							end
 						end

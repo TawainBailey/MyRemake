@@ -4115,6 +4115,10 @@ function syde:Init(library)
 			end
 
 			-- Set current section for element registration
+			-- Clear any active border group when starting a new section. This
+			-- prevents previously-created BorderGroups from capturing subsequent
+			-- elements (which made later sections appear nested inside earlier ones).
+			CurrentBorderGroup = nil
 			CurrentSection = SectionObject
 
 			-- Return section object only for collapsible sections
@@ -4134,33 +4138,22 @@ function syde:Init(library)
 				BorderData.Title = BorderConfig
 			end
 
-			-- Create border container frame for visual grouping
-			local BorderContainer = Instance.new("Frame")
-			BorderContainer.Name = "BorderGroupContainer"
-			BorderContainer.BackgroundColor3 = BorderData.Color or Color3.fromRGB(100, 200, 255)
-			BorderContainer.BackgroundTransparency = 0.8 -- Semi-transparent background
-			BorderContainer.BorderSizePixel = 1
-			BorderContainer.BorderColor3 = BorderData.Color or Color3.fromRGB(100, 200, 255)
-			BorderContainer.Size = UDim2.new(1, -10, 0, 25)
-			BorderContainer.Position = UDim2.new(0, 0, 0, 0)
-			BorderContainer.Parent = Page
-
-			-- Create title text label
+			-- Create simple text label for grouping
 			local BorderLabel = Instance.new("TextLabel")
-			BorderLabel.Name = "BorderGroupTitle"
+			BorderLabel.Name = "BorderGroup"
 			BorderLabel.BackgroundTransparency = 1
-			BorderLabel.Size = UDim2.new(1, 0, 1, 0)
-			BorderLabel.Position = UDim2.new(0, 5, 0, 0)
+			BorderLabel.Size = UDim2.new(1, -15, 0, 20)
+			BorderLabel.Position = UDim2.new(0, 0, 0, 0)
 			BorderLabel.Font = Enum.Font.SourceSans
 			BorderLabel.TextSize = 14
-			BorderLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+			BorderLabel.TextColor3 = BorderData.Color or Color3.fromRGB(100, 200, 255) -- Default to bright blue
 			BorderLabel.TextXAlignment = Enum.TextXAlignment.Left
 			BorderLabel.Text = BorderData.Title
-			BorderLabel.Parent = BorderContainer
+			BorderLabel.Parent = Page
 
-			-- Register border container with current section for collapsible functionality
+			-- Register border label with current section for collapsible functionality
 			if CurrentSection then
-				table.insert(CurrentSection.Elements, {Instance = BorderContainer})
+				table.insert(CurrentSection.Elements, {Instance = BorderLabel})
 			end
 
 			-- Create border group object with element methods
@@ -4188,8 +4181,12 @@ function syde:Init(library)
 				end
 			end
 
-			-- Set current border group for element registration
-			CurrentBorderGroup = BorderGroupObject
+			-- Do NOT set global CurrentBorderGroup here. BorderGroupObject methods
+			-- already temporarily set CurrentBorderGroup while creating elements.
+			-- Leaving CurrentBorderGroup set here caused subsequent elements
+			-- created with the top-level API (e.g. ItemTab:Button) to be
+			-- incorrectly registered into the previous border group, making
+			-- later sections appear nested inside earlier ones.
 
 			-- Register border group with current section
 			if CurrentSection then

@@ -5376,6 +5376,7 @@ function syde:Init(library)
 			end
 			if CurrentBorder then
 				table.insert(CurrentBorder.Elements, {Instance = textinput})
+				CurrentBorder.UpdateSize()
 			end
 		end
 
@@ -6154,6 +6155,7 @@ function syde:Init(library)
 			end
 			if CurrentBorder then
 				table.insert(CurrentBorder.Elements, {Instance = Para})
+				CurrentBorder.UpdateSize()
 			end
 
 			return ParagraphSettings

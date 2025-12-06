@@ -5186,12 +5186,50 @@ function syde:Init(library)
 
 			SetDropdownOptions()
 
+			-- Expose a handle so callers can update options or destroy the dropdown later
+			local DropdownHandle = {}
+
+			function DropdownHandle:SetOptions(newOptions)
+				-- Remove all existing option frames (preserve template named 'Option')
+				for _, child in ipairs(dropdown.dropHolder.drop.Container:GetChildren()) do
+					if child:IsA("Frame") and child.Name ~= "Option" then
+						child:Destroy()
+					end
+				end
+
+				DropdownData.Options = newOptions or {}
+				-- Reset selection state
+				SelectedOptions = {}
+				SelectedOrder = {}
+				-- Rebuild option widgets
+				SetDropdownOptions()
+			end
+
+			function DropdownHandle:Get()
+				-- Return selected value(s)
+				if DropdownData.Multi then
+					return SelectedOrder
+				else
+					return SelectedOrder[1]
+				end
+			end
+
+			function DropdownHandle:Destroy()
+				if dropdown and dropdown.Parent then
+					dropdown:Destroy()
+				end
+			end
+
+			DropdownHandle.Instance = dropdown
+
 			-- Register with current section or border group
 			if CurrentBorderGroup then
 				table.insert(CurrentBorderGroup.Elements, {Instance = dropdown})
 			elseif CurrentSection then
 				table.insert(CurrentSection.Elements, {Instance = dropdown})
 			end
+
+			return DropdownHandle
 		end
 
 

@@ -368,14 +368,26 @@ function syde:updateLayout(container, spacing)
 	if resizing == false then
 		for _, child in ipairs(container:GetChildren()) do
 			if (child:IsA("Frame") or child:IsA("ImageLabel") or child:IsA("TextLabel") or child:IsA("TextButton")) and child.Visible then
-				--child.Size = UDim2.new(1, -10, 0, child.Size.Y.Offset) -- Full width, fixed height
-				-- child.Position = UDim2.new(0, 0, 0, yOffset)
-				tweenservice:Create(child, TweenInfo.new(0.45, Enum.EasingStyle.Exponential), {Position = UDim2.new(0, 0, 0, yOffset)}):Play()
-				yOffset = yOffset + child.AbsoluteSize.Y + spacing
+				-- Handle borders recursively
+				if child.Name == "Border" then
+					-- Position the border
+					tweenservice:Create(child, TweenInfo.new(0.45, Enum.EasingStyle.Exponential), {Position = UDim2.new(0, 0, 0, yOffset)}):Play()
+					local borderHeight = child.AbsoluteSize.Y
+					yOffset = yOffset + borderHeight + spacing
+					
+					-- Recursively layout border contents
+					local borderContent = child:FindFirstChild("BorderContent")
+					if borderContent then
+						syde:updateLayout(borderContent, spacing)
+					end
+				else
+					-- Regular element
+					tweenservice:Create(child, TweenInfo.new(0.45, Enum.EasingStyle.Exponential), {Position = UDim2.new(0, 0, 0, yOffset)}):Play()
+					yOffset = yOffset + child.AbsoluteSize.Y + spacing
+				end
 			end
 		end
 	end
-
 
 	container.CanvasSize = UDim2.new(0, 0, 0, yOffset)
 end
@@ -4169,8 +4181,8 @@ function syde:Init(library)
 			local BorderContent = Instance.new("Frame")
 			BorderContent.Name = "BorderContent"
 			BorderContent.BackgroundTransparency = 1
-			BorderContent.Size = UDim2.new(1, 0, 1, -30) -- Account for title
-			BorderContent.Position = UDim2.new(0, 0, 0, 30)
+			BorderContent.Size = UDim2.new(1, 0, 1, -35) -- Account for title and some padding
+			BorderContent.Position = UDim2.new(0, 0, 0, 35)
 			BorderContent.Parent = Border
 
 			-- Create border object to track elements
@@ -4213,6 +4225,9 @@ function syde:Init(library)
 			local button = PAGES.Page.Button:Clone()
 			button.Visible = true
 			button.Parent = CurrentBorder and CurrentBorder.Content or Page
+			if CurrentBorder then
+				button.Position = UDim2.new(0, 0, 0, 0) -- Reset position for border content
+			end
 			button.Title.Text = ButtonData.Title
 			button.Name = ButtonData.Title
 			button.Title.Size = UDim2.new(0, button.Title.TextBounds.X + 15,0, 35)
@@ -4383,6 +4398,7 @@ function syde:Init(library)
 			end
 			if CurrentBorder then
 				table.insert(CurrentBorder.Elements, {Instance = button})
+				CurrentBorder.UpdateSize()
 			end
 
 		end
@@ -4400,7 +4416,14 @@ function syde:Init(library)
 
 			local toggle = PAGES.Page.Toggle:Clone()
 			toggle.Visible = true
+			local toggle = PAGES.Page.Toggle:Clone()
+			toggle.Visible = true
 			toggle.Parent = CurrentBorder and CurrentBorder.Content or Page
+			if CurrentBorder then
+				toggle.Position = UDim2.new(0, 0, 0, 0) -- Reset position for border content
+			end
+			toggle.Title.Text = ToggleData.Title
+			toggle.Name = ToggleData.Title
 			toggle.Title.Text = ToggleData.Title
 			toggle.Name = ToggleData.Title
 
@@ -4705,6 +4728,7 @@ function syde:Init(library)
 			end
 			if CurrentBorder then
 				table.insert(CurrentBorder.Elements, {Instance = toggle})
+				CurrentBorder.UpdateSize()
 			end
 
 			return ToggleData
@@ -4720,7 +4744,14 @@ function syde:Init(library)
 
 			local slider = PAGES.Page.Slider:Clone()
 			slider.Visible = true
+			local slider = PAGES.Page.Slider:Clone()
+			slider.Visible = true
 			slider.Parent = CurrentBorder and CurrentBorder.Content or Page
+			if CurrentBorder then
+				slider.Position = UDim2.new(0, 0, 0, 0) -- Reset position for border content
+			end
+			slider.Title.Text = SliderData.Title
+			slider.Name = SliderData.Title
 			slider.Title.Text = SliderData.Title
 			slider.Name = SliderData.Title
 			slider.slideholder.slider.Visible = false
@@ -4941,6 +4972,7 @@ function syde:Init(library)
 			end
 			if CurrentBorder then
 				table.insert(CurrentBorder.Elements, {Instance = slider})
+				CurrentBorder.UpdateSize()
 			end
 
 		end
@@ -4957,7 +4989,14 @@ function syde:Init(library)
 
 			local dropdown = PAGES.Page.Dropdown:Clone()
 			dropdown.Visible = true
+			local dropdown = PAGES.Page.Dropdown:Clone()
+			dropdown.Visible = true
 			dropdown.Parent = CurrentBorder and CurrentBorder.Content or Page
+			if CurrentBorder then
+				dropdown.Position = UDim2.new(0, 0, 0, 0) -- Reset position for border content
+			end
+			dropdown.Title.Text = DropdownData.Title
+			dropdown.Name = DropdownData.Title
 			dropdown.Title.Text = DropdownData.Title
 			dropdown.Name = DropdownData.Title
 			dropdown.dropHolder.drop.Container.Option.Visible = false
@@ -5201,6 +5240,7 @@ function syde:Init(library)
 			end
 			if CurrentBorder then
 				table.insert(CurrentBorder.Elements, {Instance = dropdown})
+				CurrentBorder.UpdateSize()
 			end
 		end
 
@@ -5217,7 +5257,14 @@ function syde:Init(library)
 
 			local textinput = PAGES.Page.Input:Clone()
 			textinput.Visible = true
+			local textinput = PAGES.Page.Input:Clone()
+			textinput.Visible = true
 			textinput.Parent = CurrentBorder and CurrentBorder.Content or Page
+			if CurrentBorder then
+				textinput.Position = UDim2.new(0, 0, 0, 0) -- Reset position for border content
+			end
+			textinput.Title.Text = TextInputData.Title
+			textinput.Name = TextInputData.Title
 			textinput.Name = TextInputData.Title
 			textinput.Title.Text = TextInputData.Title
 			textinput.TextFrame.TextBox.PlaceholderText = TextInputData.PlaceHolder
@@ -6049,7 +6096,14 @@ function syde:Init(library)
 
 			local Para = PAGES.Page.Paragraph:Clone()
 			Para.Visible = true
+			local Para = PAGES.Page.Paragraph:Clone()
+			Para.Visible = true
 			Para.Parent = CurrentBorder and CurrentBorder.Content or Page
+			if CurrentBorder then
+				Para.Position = UDim2.new(0, 0, 0, 0) -- Reset position for border content
+			end
+			Para.Title.Text = ParagraphData.Title
+			Para.Content.Text = ParagraphData.Content
 			Para.Title.Text = ParaData.Title
 			Para.Content.Text = ParaData.Content
 

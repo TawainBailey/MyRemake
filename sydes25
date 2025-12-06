@@ -368,26 +368,14 @@ function syde:updateLayout(container, spacing)
 	if resizing == false then
 		for _, child in ipairs(container:GetChildren()) do
 			if (child:IsA("Frame") or child:IsA("ImageLabel") or child:IsA("TextLabel") or child:IsA("TextButton")) and child.Visible then
-				-- Handle borders recursively
-				if child.Name == "Border" then
-					-- Position the border
-					tweenservice:Create(child, TweenInfo.new(0.45, Enum.EasingStyle.Exponential), {Position = UDim2.new(0, 0, 0, yOffset)}):Play()
-					local borderHeight = child.AbsoluteSize.Y
-					yOffset = yOffset + borderHeight + spacing
-					
-					-- Recursively layout border contents
-					local borderContent = child:FindFirstChild("BorderContent")
-					if borderContent then
-						syde:updateLayout(borderContent, spacing)
-					end
-				else
-					-- Regular element
-					tweenservice:Create(child, TweenInfo.new(0.45, Enum.EasingStyle.Exponential), {Position = UDim2.new(0, 0, 0, yOffset)}):Play()
-					yOffset = yOffset + child.AbsoluteSize.Y + spacing
-				end
+				--child.Size = UDim2.new(1, -10, 0, child.Size.Y.Offset) -- Full width, fixed height
+				-- child.Position = UDim2.new(0, 0, 0, yOffset)
+				tweenservice:Create(child, TweenInfo.new(0.45, Enum.EasingStyle.Exponential), {Position = UDim2.new(0, 0, 0, yOffset)}):Play()
+				yOffset = yOffset + child.AbsoluteSize.Y + spacing
 			end
 		end
 	end
+
 
 	container.CanvasSize = UDim2.new(0, 0, 0, yOffset)
 end
@@ -4030,7 +4018,7 @@ function syde:Init(library)
 		local InitElement = {}
 
 		local CurrentSection = nil -- Track current section for collapsible functionality
-		local CurrentBorder = nil -- Track current border for element grouping
+		local CurrentBorderGroup = nil -- Track current border group
 
 		function InitElement:Section(SectionConfig)
 			local SectionData = {
@@ -4125,91 +4113,39 @@ function syde:Init(library)
 			end
 		end
 
-
-		function InitElement:Border(BorderConfig)
+		function InitElement:BorderGroup(BorderConfig)
 			local BorderData = {
 				Title = BorderConfig.Title or BorderConfig;
-				Gradient = BorderConfig.Gradient;
 			}
 
 			-- Handle legacy string parameter
 			if type(BorderConfig) == "string" then
 				BorderData.Title = BorderConfig
-				BorderData.Gradient = nil
 			end
 
-			-- Create border container
-			local Border = Instance.new("Frame")
-			Border.Name = "Border"
-			Border.BackgroundTransparency = 0.95
-			Border.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-			Border.BorderSizePixel = 1
-			Border.BorderColor3 = Color3.fromRGB(45, 45, 45)
-			Border.Size = UDim2.new(1, -20, 0, 35) -- Start with title height, slightly indented
-			Border.Position = UDim2.new(0, 10, 0, 0) -- Indent from left edge
-			Border.Parent = Page
+			local BorderGroup = PAGES.Page.BorderGroup:Clone()
+			BorderGroup.Visible = true
+			BorderGroup.Parent = Page
+			BorderGroup.Title.Text = BorderData.Title
 
-			-- Create border title
-			local BorderTitle = Instance.new("TextLabel")
-			BorderTitle.Name = "BorderTitle"
-			BorderTitle.BackgroundTransparency = 1
-			BorderTitle.Size = UDim2.new(1, 0, 0, 25)
-			BorderTitle.Position = UDim2.new(0, 0, 0, 0)
-			BorderTitle.Font = Enum.Font.SourceSansSemibold
-			BorderTitle.TextSize = 14
-			BorderTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
-			BorderTitle.Text = BorderData.Title
-			BorderTitle.TextXAlignment = Enum.TextXAlignment.Left
-			BorderTitle.Parent = Border
+			-- Add gradient to border group title text
+			local gradient = Instance.new("UIGradient")
+			gradient.Color = ColorSequence.new{
+				ColorSequenceKeypoint.new(0, Color3.fromRGB(100, 150, 255)), -- Light blue
+				ColorSequenceKeypoint.new(1, Color3.fromRGB(150, 200, 255))  -- Lighter blue
+			}
+			gradient.Parent = BorderGroup.Title
 
-			-- Add gradient to border title if specified
-			if BorderData.Gradient then
-				local gradient = Instance.new("UIGradient")
-				gradient.Color = BorderData.Gradient
-				gradient.Parent = BorderTitle
-			else
-				-- Default gradient for borders
-				local gradient = Instance.new("UIGradient")
-				gradient.Color = ColorSequence.new{
-					ColorSequenceKeypoint.new(0, Color3.fromRGB(150, 200, 255)),
-					ColorSequenceKeypoint.new(1, Color3.fromRGB(100, 150, 255))
-				}
-				gradient.Parent = BorderTitle
-			end
-
-			-- Create content container for elements
-			local BorderContent = Instance.new("Frame")
-			BorderContent.Name = "BorderContent"
-			BorderContent.BackgroundTransparency = 1
-			BorderContent.Size = UDim2.new(1, 0, 1, -35) -- Account for title and some padding
-			BorderContent.Position = UDim2.new(0, 0, 0, 35)
-			BorderContent.Parent = Border
-
-			-- Create border object to track elements
-			local BorderObject = {
-				Border = Border;
-				Content = BorderContent;
-				Elements = {}; -- Track elements in this border
-				UpdateSize = function()
-					local totalHeight = 30 -- Title height
-					for _, element in ipairs(BorderObject.Elements) do
-						if element.Instance and element.Instance.Visible then
-							totalHeight = totalHeight + element.Instance.Size.Y.Offset + 5
-						end
-					end
-					Border.Size = UDim2.new(1, -15, 0, totalHeight)
-				end
+			-- Create border group object
+			local BorderGroupObject = {
+				BorderGroup = BorderGroup;
+				Elements = {}; -- Track elements in this border group
 			}
 
-			-- Set current border for element registration
-			CurrentBorder = BorderObject
+			-- Set current border group for element registration
+			CurrentBorderGroup = BorderGroupObject
 
-			-- Register border with current section so it collapses with the section
-			if CurrentSection then
-				table.insert(CurrentSection.Elements, {Instance = Border})
-			end
-
-			return BorderObject
+			return BorderGroupObject
 		end
 
 
@@ -4224,10 +4160,7 @@ function syde:Init(library)
 
 			local button = PAGES.Page.Button:Clone()
 			button.Visible = true
-			button.Parent = CurrentBorder and CurrentBorder.Content or Page
-			if CurrentBorder then
-				button.Position = UDim2.new(0, 0, 0, 0) -- Reset position for border content
-			end
+			button.Parent = Page
 			button.Title.Text = ButtonData.Title
 			button.Name = ButtonData.Title
 			button.Title.Size = UDim2.new(0, button.Title.TextBounds.X + 15,0, 35)
@@ -4392,13 +4325,11 @@ function syde:Init(library)
 				end
 			end
 
-			-- Register with current section and border
-			if CurrentSection then
+			-- Register with current section or border group
+			if CurrentBorderGroup then
+				table.insert(CurrentBorderGroup.Elements, {Instance = button})
+			elseif CurrentSection then
 				table.insert(CurrentSection.Elements, {Instance = button})
-			end
-			if CurrentBorder then
-				table.insert(CurrentBorder.Elements, {Instance = button})
-				CurrentBorder.UpdateSize()
 			end
 
 		end
@@ -4416,14 +4347,7 @@ function syde:Init(library)
 
 			local toggle = PAGES.Page.Toggle:Clone()
 			toggle.Visible = true
-			local toggle = PAGES.Page.Toggle:Clone()
-			toggle.Visible = true
-			toggle.Parent = CurrentBorder and CurrentBorder.Content or Page
-			if CurrentBorder then
-				toggle.Position = UDim2.new(0, 0, 0, 0) -- Reset position for border content
-			end
-			toggle.Title.Text = ToggleData.Title
-			toggle.Name = ToggleData.Title
+			toggle.Parent = Page
 			toggle.Title.Text = ToggleData.Title
 			toggle.Name = ToggleData.Title
 
@@ -4722,13 +4646,11 @@ function syde:Init(library)
 				end
 			end)
 
-			-- Register with current section and border
-			if CurrentSection then
+			-- Register with current section or border group
+			if CurrentBorderGroup then
+				table.insert(CurrentBorderGroup.Elements, {Instance = toggle})
+			elseif CurrentSection then
 				table.insert(CurrentSection.Elements, {Instance = toggle})
-			end
-			if CurrentBorder then
-				table.insert(CurrentBorder.Elements, {Instance = toggle})
-				CurrentBorder.UpdateSize()
 			end
 
 			return ToggleData
@@ -4744,14 +4666,7 @@ function syde:Init(library)
 
 			local slider = PAGES.Page.Slider:Clone()
 			slider.Visible = true
-			local slider = PAGES.Page.Slider:Clone()
-			slider.Visible = true
-			slider.Parent = CurrentBorder and CurrentBorder.Content or Page
-			if CurrentBorder then
-				slider.Position = UDim2.new(0, 0, 0, 0) -- Reset position for border content
-			end
-			slider.Title.Text = SliderData.Title
-			slider.Name = SliderData.Title
+			slider.Parent = Page
 			slider.Title.Text = SliderData.Title
 			slider.Name = SliderData.Title
 			slider.slideholder.slider.Visible = false
@@ -4966,13 +4881,9 @@ function syde:Init(library)
 				end
 			end
 
-			-- Register with current section and border
+			-- Register with current section
 			if CurrentSection then
 				table.insert(CurrentSection.Elements, {Instance = slider})
-			end
-			if CurrentBorder then
-				table.insert(CurrentBorder.Elements, {Instance = slider})
-				CurrentBorder.UpdateSize()
 			end
 
 		end
@@ -4989,14 +4900,7 @@ function syde:Init(library)
 
 			local dropdown = PAGES.Page.Dropdown:Clone()
 			dropdown.Visible = true
-			local dropdown = PAGES.Page.Dropdown:Clone()
-			dropdown.Visible = true
-			dropdown.Parent = CurrentBorder and CurrentBorder.Content or Page
-			if CurrentBorder then
-				dropdown.Position = UDim2.new(0, 0, 0, 0) -- Reset position for border content
-			end
-			dropdown.Title.Text = DropdownData.Title
-			dropdown.Name = DropdownData.Title
+			dropdown.Parent = Page
 			dropdown.Title.Text = DropdownData.Title
 			dropdown.Name = DropdownData.Title
 			dropdown.dropHolder.drop.Container.Option.Visible = false
@@ -5234,13 +5138,11 @@ function syde:Init(library)
 
 			SetDropdownOptions()
 
-			-- Register with current section and border
-			if CurrentSection then
+			-- Register with current section or border group
+			if CurrentBorderGroup then
+				table.insert(CurrentBorderGroup.Elements, {Instance = dropdown})
+			elseif CurrentSection then
 				table.insert(CurrentSection.Elements, {Instance = dropdown})
-			end
-			if CurrentBorder then
-				table.insert(CurrentBorder.Elements, {Instance = dropdown})
-				CurrentBorder.UpdateSize()
 			end
 		end
 
@@ -5257,14 +5159,7 @@ function syde:Init(library)
 
 			local textinput = PAGES.Page.Input:Clone()
 			textinput.Visible = true
-			local textinput = PAGES.Page.Input:Clone()
-			textinput.Visible = true
-			textinput.Parent = CurrentBorder and CurrentBorder.Content or Page
-			if CurrentBorder then
-				textinput.Position = UDim2.new(0, 0, 0, 0) -- Reset position for border content
-			end
-			textinput.Title.Text = TextInputData.Title
-			textinput.Name = TextInputData.Title
+			textinput.Parent = Page
 			textinput.Name = TextInputData.Title
 			textinput.Title.Text = TextInputData.Title
 			textinput.TextFrame.TextBox.PlaceholderText = TextInputData.PlaceHolder
@@ -5370,13 +5265,11 @@ function syde:Init(library)
 				end
 			end)
 
-			-- Register with current section and border
-			if CurrentSection then
+			-- Register with current section or border group
+			if CurrentBorderGroup then
+				table.insert(CurrentBorderGroup.Elements, {Instance = textinput})
+			elseif CurrentSection then
 				table.insert(CurrentSection.Elements, {Instance = textinput})
-			end
-			if CurrentBorder then
-				table.insert(CurrentBorder.Elements, {Instance = textinput})
-				CurrentBorder.UpdateSize()
 			end
 		end
 
@@ -6097,14 +5990,7 @@ function syde:Init(library)
 
 			local Para = PAGES.Page.Paragraph:Clone()
 			Para.Visible = true
-			local Para = PAGES.Page.Paragraph:Clone()
-			Para.Visible = true
-			Para.Parent = CurrentBorder and CurrentBorder.Content or Page
-			if CurrentBorder then
-				Para.Position = UDim2.new(0, 0, 0, 0) -- Reset position for border content
-			end
-			Para.Title.Text = ParagraphData.Title
-			Para.Content.Text = ParagraphData.Content
+			Para.Parent = Page
 			Para.Title.Text = ParaData.Title
 			Para.Content.Text = ParaData.Content
 
@@ -6149,13 +6035,11 @@ function syde:Init(library)
 
 			ParagraphSettings.Instance = Para
 
-			-- Register with current section and border
-			if CurrentSection then
+			-- Register with current section or border group
+			if CurrentBorderGroup then
+				table.insert(CurrentBorderGroup.Elements, {Instance = Para})
+			elseif CurrentSection then
 				table.insert(CurrentSection.Elements, {Instance = Para})
-			end
-			if CurrentBorder then
-				table.insert(CurrentBorder.Elements, {Instance = Para})
-				CurrentBorder.UpdateSize()
 			end
 
 			return ParagraphSettings

@@ -4126,7 +4126,7 @@ function syde:Init(library)
 		function InitElement:BorderGroup(BorderConfig)
 			local BorderData = {
 				Title = BorderConfig.Title or BorderConfig;
-				Gradient = BorderConfig.Gradient;
+				Color = BorderConfig.Color;
 			}
 
 			-- Handle legacy string parameter
@@ -4134,60 +4134,27 @@ function syde:Init(library)
 				BorderData.Title = BorderConfig
 			end
 
-			-- Create container frame for gradient background
-			local BorderContainer = Instance.new("Frame")
-			BorderContainer.Name = "BorderGroupContainer"
-			BorderContainer.BackgroundTransparency = 1
-			BorderContainer.Size = UDim2.new(1, -15, 0, 20)
-			BorderContainer.Position = UDim2.new(0, 0, 0, 0)
-			BorderContainer.Parent = Page
-
-			-- Create gradient background
-			local gradientBg = Instance.new("Frame")
-			gradientBg.Name = "GradientBg"
-			gradientBg.BackgroundTransparency = 1
-			gradientBg.Size = UDim2.new(1, 0, 1, 0)
-			gradientBg.Parent = BorderContainer
-
-			local gradient = Instance.new("UIGradient")
-			gradient.Rotation = 90 -- Horizontal gradient
-			if BorderData.Gradient then
-				gradient.Color = BorderData.Gradient
-			else
-				gradient.Color = ColorSequence.new{
-					ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 255)), -- Pure Magenta
-					ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 255, 255))  -- Pure Cyan
-				}
-			end
-			gradient.Parent = gradientBg
-
-			-- Create text label on top
+			-- Create simple text label for grouping
 			local BorderLabel = Instance.new("TextLabel")
 			BorderLabel.Name = "BorderGroup"
 			BorderLabel.BackgroundTransparency = 1
-			BorderLabel.Size = UDim2.new(1, 0, 1, 0)
+			BorderLabel.Size = UDim2.new(1, -15, 0, 20)
 			BorderLabel.Position = UDim2.new(0, 0, 0, 0)
 			BorderLabel.Font = Enum.Font.SourceSans
 			BorderLabel.TextSize = 14
-			BorderLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+			BorderLabel.TextColor3 = BorderData.Color or Color3.fromRGB(255, 0, 255) -- Default to magenta
 			BorderLabel.TextXAlignment = Enum.TextXAlignment.Left
 			BorderLabel.Text = BorderData.Title
-			BorderLabel.Parent = BorderContainer
+			BorderLabel.Parent = Page
 
-			-- Register border container with current section for collapsible functionality
+			-- Register border label with current section for collapsible functionality
 			if CurrentSection then
-				table.insert(CurrentSection.Elements, {Instance = BorderContainer})
-			end
-
-			-- Register border container with current section for collapsible functionality
-			if CurrentSection then
-				table.insert(CurrentSection.Elements, {Instance = BorderContainer})
+				table.insert(CurrentSection.Elements, {Instance = BorderLabel})
 			end
 
 			-- Create border group object with element methods
 			local BorderGroupObject = {
-				BorderGroup = BorderContainer;
-				BorderLabel = BorderLabel;
+				BorderGroup = BorderLabel;
 				Elements = {}; -- Track elements in this border group
 			}
 

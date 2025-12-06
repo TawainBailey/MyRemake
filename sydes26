@@ -4123,24 +4123,76 @@ function syde:Init(library)
 				BorderData.Title = BorderConfig
 			end
 
-			local BorderGroup = PAGES.Page.BorderGroup:Clone()
-			BorderGroup.Visible = true
-			BorderGroup.Parent = Page
-			BorderGroup.Title.Text = BorderData.Title
+			-- Create border group frame
+			local BorderFrame = Instance.new("Frame")
+			BorderFrame.Name = "BorderGroup"
+			BorderFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+			BorderFrame.BackgroundTransparency = 0.5
+			BorderFrame.BorderSizePixel = 0
+			BorderFrame.Size = UDim2.new(1, -15, 0, 50) -- Will be resized based on content
+			BorderFrame.Parent = Page
 
-			-- Add gradient to border group title text
+			-- Add border/stroke
+			local UIStroke = Instance.new("UIStroke")
+			UIStroke.Color = Color3.fromRGB(50, 50, 50)
+			UIStroke.Thickness = 1
+			UIStroke.Parent = BorderFrame
+
+			-- Create title label
+			local TitleLabel = Instance.new("TextLabel")
+			TitleLabel.Name = "Title"
+			TitleLabel.BackgroundTransparency = 1
+			TitleLabel.Position = UDim2.new(0, 10, 0, -10)
+			TitleLabel.Size = UDim2.new(0, 200, 0, 20)
+			TitleLabel.Font = Enum.Font.SourceSansBold
+			TitleLabel.TextSize = 14
+			TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+			TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+			TitleLabel.Text = BorderData.Title
+			TitleLabel.ZIndex = 2
+			TitleLabel.Parent = BorderFrame
+
+			-- Add gradient to title
 			local gradient = Instance.new("UIGradient")
 			gradient.Color = ColorSequence.new{
 				ColorSequenceKeypoint.new(0, Color3.fromRGB(100, 150, 255)), -- Light blue
 				ColorSequenceKeypoint.new(1, Color3.fromRGB(150, 200, 255))  -- Lighter blue
 			}
-			gradient.Parent = BorderGroup.Title
+			gradient.Parent = TitleLabel
 
-			-- Create border group object
+			-- Create container for elements
+			local Container = Instance.new("Frame")
+			Container.Name = "Container"
+			Container.BackgroundTransparency = 1
+			Container.Size = UDim2.new(1, -10, 1, -10)
+			Container.Position = UDim2.new(0, 5, 0, 5)
+			Container.Parent = BorderFrame
+
+			-- Create border group object with element methods
 			local BorderGroupObject = {
-				BorderGroup = BorderGroup;
+				BorderGroup = BorderFrame;
+				Container = Container;
 				Elements = {}; -- Track elements in this border group
 			}
+
+			-- Add element creation methods to the border group object
+			for methodName, methodFunc in pairs(InitElement) do
+				if methodName ~= "Section" and methodName ~= "BorderGroup" then
+					BorderGroupObject[methodName] = function(self, ...)
+						-- Temporarily set current border group
+						local prevBorderGroup = CurrentBorderGroup
+						CurrentBorderGroup = self
+						
+						-- Call the element creation method
+						local result = methodFunc(...)
+						
+						-- Restore previous border group
+						CurrentBorderGroup = prevBorderGroup
+						
+						return result
+					end
+				end
+			end
 
 			-- Set current border group for element registration
 			CurrentBorderGroup = BorderGroupObject
@@ -4160,7 +4212,7 @@ function syde:Init(library)
 
 			local button = PAGES.Page.Button:Clone()
 			button.Visible = true
-			button.Parent = Page
+			button.Parent = CurrentBorderGroup and CurrentBorderGroup.Container or Page
 			button.Title.Text = ButtonData.Title
 			button.Name = ButtonData.Title
 			button.Title.Size = UDim2.new(0, button.Title.TextBounds.X + 15,0, 35)
@@ -4347,7 +4399,7 @@ function syde:Init(library)
 
 			local toggle = PAGES.Page.Toggle:Clone()
 			toggle.Visible = true
-			toggle.Parent = Page
+			toggle.Parent = CurrentBorderGroup and CurrentBorderGroup.Container or Page
 			toggle.Title.Text = ToggleData.Title
 			toggle.Name = ToggleData.Title
 
@@ -4900,7 +4952,7 @@ function syde:Init(library)
 
 			local dropdown = PAGES.Page.Dropdown:Clone()
 			dropdown.Visible = true
-			dropdown.Parent = Page
+			dropdown.Parent = CurrentBorderGroup and CurrentBorderGroup.Container or Page
 			dropdown.Title.Text = DropdownData.Title
 			dropdown.Name = DropdownData.Title
 			dropdown.dropHolder.drop.Container.Option.Visible = false
@@ -5159,7 +5211,7 @@ function syde:Init(library)
 
 			local textinput = PAGES.Page.Input:Clone()
 			textinput.Visible = true
-			textinput.Parent = Page
+			textinput.Parent = CurrentBorderGroup and CurrentBorderGroup.Container or Page
 			textinput.Name = TextInputData.Title
 			textinput.Title.Text = TextInputData.Title
 			textinput.TextFrame.TextBox.PlaceholderText = TextInputData.PlaceHolder
@@ -5990,7 +6042,7 @@ function syde:Init(library)
 
 			local Para = PAGES.Page.Paragraph:Clone()
 			Para.Visible = true
-			Para.Parent = Page
+			Para.Parent = CurrentBorderGroup and CurrentBorderGroup.Container or Page
 			Para.Title.Text = ParaData.Title
 			Para.Content.Text = ParaData.Content
 

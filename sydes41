@@ -2017,6 +2017,32 @@ function syde:Init(library)
 					end
 				end)
 
+				local TextInputHandle = {}
+
+				function TextInputHandle:Set(text)
+					textBox.Text = tostring(text or "")
+				end
+
+				function TextInputHandle:Get()
+					return textBox.Text
+				end
+
+				function TextInputHandle:Destroy()
+					if textinput and textinput.Parent then
+						textinput:Destroy()
+					end
+				end
+
+				TextInputHandle.Instance = textinput
+
+				-- Register with current section or border group
+				if CurrentBorderGroup then
+					table.insert(CurrentBorderGroup.Elements, {Instance = textinput})
+				elseif CurrentSection then
+					table.insert(CurrentSection.Elements, {Instance = textinput})
+				end
+
+				return TextInputHandle
 			end
 
 			---

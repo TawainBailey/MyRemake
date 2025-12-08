@@ -194,6 +194,20 @@ function syde:AddConnection(Type, Callback)
 	end)
 
 	return Connection, Disconnect
+
+	-- Module compatibility: expose `syde` to common global environments so external modules
+	-- (Pastebin/loaded modules) can access it even if they don't receive it as a parameter.
+	pcall(function()
+		-- Prefer getgenv() when available (executors), otherwise try _G
+		if type(getgenv) == "function" then
+			local env = getgenv()
+			if env and type(env) == "table" and not env.syde then
+				env.syde = syde
+			end
+		elseif _G and type(_G) == "table" and not _G.syde then
+			_G.syde = syde
+		end
+	end)
 end
 
 function syde:MakeResizable(Dragger, Object, MinSize, Callback, LockAspectRatio)

@@ -380,7 +380,7 @@ function syde:updateLayout(container, spacing)
 	container.CanvasSize = UDim2.new(0, 0, 0, yOffset)
 end
 
-local dragSpeed = isMobile and 1.0 or 0.6
+local dragSpeed = 0.6
 local LockToScreen = false
 
 function syde:AddDrag(Object, Main, ConstrainToParent)
@@ -391,7 +391,9 @@ function syde:AddDrag(Object, Main, ConstrainToParent)
 	local tweenService = game:GetService("TweenService")
 
 	local dragging, dragInput, startMousePos, startFramePos = false, nil, nil, nil
-	local originalCameraType = nil
+	local holdTime = isMobile and 0.3 or 0 -- Hold time for mobile to prevent accidental drags
+	local holdStartTime = 0
+	local holdThread = nil
 
 	local function getConstrainedPosition(newPos)
 		if not LockToScreen then
@@ -426,33 +428,44 @@ function syde:AddDrag(Object, Main, ConstrainToParent)
 		end
 	end
 
+	local function startDrag()
+		dragging = true
+		startMousePos = userInput:GetMouseLocation() -- Use mouse location for consistency
 
+		local screenSize = workspace.CurrentCamera.ViewportSize
+		local absX = screenSize.X * Main.Position.X.Scale + Main.Position.X.Offset
+		local absY = screenSize.Y * Main.Position.Y.Scale + Main.Position.Y.Offset
 
+		Main.Position = UDim2.new(0, absX, 0, absY)
+		startFramePos = Main.Position
+	end
+
+	local function cancelHold()
+		if holdThread then
+			task.cancel(holdThread)
+			holdThread = nil
+		end
+	end
 
 	syde:AddConnection(Object.InputBegan, function(input)
 		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-			dragging = true
-			startMousePos = getInputPos(input)
-
-			local screenSize = workspace.CurrentCamera.ViewportSize
-			local absX = screenSize.X * Main.Position.X.Scale + Main.Position.X.Offset
-			local absY = screenSize.Y * Main.Position.Y.Scale + Main.Position.Y.Offset
-
-			Main.Position = UDim2.new(0, absX, 0, absY)
-			startFramePos = Main.Position
-
-			-- On mobile, disable camera movement during drag
-			if isMobile and input.UserInputType == Enum.UserInputType.Touch then
-				originalCameraType = camera.CameraType
-				camera.CameraType = Enum.CameraType.Scriptable
+			cancelHold()
+			holdStartTime = tick()
+			if holdTime > 0 then
+				holdThread = task.delay(holdTime, function()
+					if tick() - holdStartTime >= holdTime then
+						startDrag()
+					end
+				end)
+			else
+				startDrag()
 			end
 		end
 	end)
 
-
 	syde:AddConnection(userInput.InputChanged, function(input)
 		if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-			local currentMousePos = getInputPos(input)
+			local currentMousePos = userInput:GetMouseLocation()
 			if currentMousePos and startMousePos then
 				local delta = currentMousePos - startMousePos
 
@@ -468,13 +481,15 @@ function syde:AddDrag(Object, Main, ConstrainToParent)
 
 	syde:AddConnection(Object.InputEnded, function(input)
 		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+			cancelHold()
 			dragging = false
+		end
+	end)
 
-			-- Restore camera type on mobile
-			if isMobile and input.UserInputType == Enum.UserInputType.Touch and originalCameraType then
-				camera.CameraType = originalCameraType
-				originalCameraType = nil
-			end
+	syde:AddConnection(userInput.InputEnded, function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+			cancelHold()
+			dragging = false
 		end
 	end)
 end
@@ -6514,67 +6529,9 @@ function syde:Init(library)
 			end
 		end
 
-		end
-
 		return InitElement
 
 	end
-
-	-- Mobile Toggle Button (single instance)
-	local mobileScreenGui = Instance.new("ScreenGui")
-	mobileScreenGui.Name = "SydeMobileToggleGui"
-	mobileScreenGui.ResetOnSpawn = false
-	mobileScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-	mobileScreenGui.DisplayOrder = 999999 -- HIGHEST PRIORITY
-	mobileScreenGui.Parent = coregui
-
-	local mobileToggle = Instance.new("Frame")
-	mobileToggle.Name = "SydeMobileToggle"
-	mobileToggle.Size = UDim2.new(0, 60, 0, 60)
-	mobileToggle.Position = UDim2.new(1, -80, 0, 20) -- Top-right corner
-	mobileToggle.BackgroundColor3 = Color3.fromRGB(26, 26, 26)
-	mobileToggle.BackgroundTransparency = 0
-	mobileToggle.BorderSizePixel = 0
-	mobileToggle.ZIndex = 9999
-	mobileToggle.Parent = mobileScreenGui
-
-	local corner = Instance.new("UICorner")
-	corner.CornerRadius = UDim.new(0, 12)
-	corner.Parent = mobileToggle
-
-	local stroke = Instance.new("UIStroke")
-	stroke.Color = syde.theme.Accent
-	stroke.Transparency = 0.5
-	stroke.Thickness = 2
-	stroke.Parent = mobileToggle
-
-	local icon = Instance.new("ImageLabel")
-	icon.Size = UDim2.new(0, 30, 0, 30)
-	icon.Position = UDim2.new(0.5, 0, 0.5, 0)
-	icon.AnchorPoint = Vector2.new(0.5, 0.5)
-	icon.BackgroundTransparency = 1
-	icon.Image = "rbxassetid://6031094678"
-	icon.ImageColor3 = Color3.fromRGB(255, 255, 255)
-	icon.Parent = mobileToggle
-
-	local button = Instance.new("TextButton")
-	button.Size = UDim2.new(1, 0, 1, 0)
-	button.BackgroundTransparency = 1
-	button.Text = ""
-	button.Parent = mobileToggle
-
-	button.MouseButton1Click:Connect(function()
-		ToggleUI()
-		tweenservice:Create(icon, TweenInfo.new(0.3, Enum.EasingStyle.Exponential), {
-			ImageColor3 = UIClosed and Color3.fromRGB(255, 100, 100) or Color3.fromRGB(100, 255, 100)
-		}):Play()
-	end)
-
-	-- Make it draggable
-	syde:AddDrag(button, mobileToggle, true)
-
-	print("✅ ScreenGui created with DisplayOrder:", mobileScreenGui.DisplayOrder)
-	print("📍 Mobile toggle button created at:", mobileToggle.AbsolutePosition)
 
 	return ldata
 

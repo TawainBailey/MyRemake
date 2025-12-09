@@ -6127,6 +6127,9 @@ function syde:Init(library)
 				totalHeight = 0
 
 				if type(ParaData.Content) == "table" then
+					-- Hide original content label
+					Para.Content.Visible = false
+					
 					-- Multiple segments
 					local yOffset = 0
 					for i, segment in ipairs(ParaData.Content) do
@@ -6137,6 +6140,7 @@ function syde:Init(library)
 						contentLabel.Text = text
 						contentLabel.Position = UDim2.new(0, 0, 0, yOffset)
 						contentLabel.Size = UDim2.new(1, 0, 0, 0) -- Will be set by text bounds
+						contentLabel.Visible = true
 						contentLabel.Parent = Para
 
 						if gradient then
@@ -6158,7 +6162,8 @@ function syde:Init(library)
 						table.insert(contentLabels, contentLabel)
 					end
 				else
-					-- Single content
+					-- Show original content label
+					Para.Content.Visible = true
 					Para.Content.Text = ParaData.Content
 					local textSize = textservice:GetTextSize(
 						Para.Content.Text,

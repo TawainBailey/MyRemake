@@ -4049,6 +4049,8 @@ function syde:Init(library)
 			end
 
 			-- Add gradient to section title text
+			Section.Title.TextTransparency = 0
+			Section.Title.TextColor3 = Color3.new(1, 1, 1) -- White text for bright gradient
 			local gradient = Instance.new("UIGradient")
 			gradient.Color = ColorSequence.new{
 				ColorSequenceKeypoint.new(0, Color3.fromRGB(135, 206, 250)),    -- sky blue
@@ -6092,6 +6094,8 @@ function syde:Init(library)
 			Para.Content.Text = ParaData.Content
 
 			-- Apply gradient to title
+			Para.Title.TextTransparency = 0
+			Para.Title.TextColor3 = Color3.new(1, 1, 1) -- White text for bright gradient
 			local gradient = Instance.new("UIGradient")
 			gradient.Color = ParaData.Gradient
 			gradient.Rotation = 0

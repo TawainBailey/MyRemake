@@ -391,9 +391,6 @@ function syde:AddDrag(Object, Main, ConstrainToParent)
 	local tweenService = game:GetService("TweenService")
 
 	local dragging, dragInput, startMousePos, startFramePos = false, nil, nil, nil
-	local holdTime = isMobile and 0.3 or 0 -- Hold time for mobile to prevent accidental drags
-	local holdStartTime = 0
-	local holdThread = nil
 
 	local function getConstrainedPosition(newPos)
 		if not LockToScreen then
@@ -428,44 +425,27 @@ function syde:AddDrag(Object, Main, ConstrainToParent)
 		end
 	end
 
-	local function startDrag()
-		dragging = true
-		startMousePos = userInput:GetMouseLocation() -- Use mouse location for consistency
 
-		local screenSize = workspace.CurrentCamera.ViewportSize
-		local absX = screenSize.X * Main.Position.X.Scale + Main.Position.X.Offset
-		local absY = screenSize.Y * Main.Position.Y.Scale + Main.Position.Y.Offset
 
-		Main.Position = UDim2.new(0, absX, 0, absY)
-		startFramePos = Main.Position
-	end
-
-	local function cancelHold()
-		if holdThread then
-			task.cancel(holdThread)
-			holdThread = nil
-		end
-	end
 
 	syde:AddConnection(Object.InputBegan, function(input)
 		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-			cancelHold()
-			holdStartTime = tick()
-			if holdTime > 0 then
-				holdThread = task.delay(holdTime, function()
-					if tick() - holdStartTime >= holdTime then
-						startDrag()
-					end
-				end)
-			else
-				startDrag()
-			end
+			dragging = true
+			startMousePos = getInputPos(input)
+
+			local screenSize = workspace.CurrentCamera.ViewportSize
+			local absX = screenSize.X * Main.Position.X.Scale + Main.Position.X.Offset
+			local absY = screenSize.Y * Main.Position.Y.Scale + Main.Position.Y.Offset
+
+			Main.Position = UDim2.new(0, absX, 0, absY)
+			startFramePos = Main.Position
 		end
 	end)
 
+
 	syde:AddConnection(userInput.InputChanged, function(input)
 		if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-			local currentMousePos = userInput:GetMouseLocation()
+			local currentMousePos = getInputPos(input)
 			if currentMousePos and startMousePos then
 				local delta = currentMousePos - startMousePos
 
@@ -481,14 +461,6 @@ function syde:AddDrag(Object, Main, ConstrainToParent)
 
 	syde:AddConnection(Object.InputEnded, function(input)
 		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-			cancelHold()
-			dragging = false
-		end
-	end)
-
-	syde:AddConnection(userInput.InputEnded, function(input)
-		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-			cancelHold()
 			dragging = false
 		end
 	end)
@@ -4077,14 +4049,13 @@ function syde:Init(library)
 			end
 
 			-- Add gradient to section title text
-			Section.Title.TextTransparency = 0
-			Section.Title.TextColor3 = Color3.new(1, 1, 1)
 			local gradient = Instance.new("UIGradient")
 			gradient.Color = ColorSequence.new{
 				ColorSequenceKeypoint.new(0, Color3.fromRGB(135, 206, 250)),    -- sky blue
 				ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 255, 255)),  -- bright white
 				ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 120, 255))       -- deeper blue
 			}
+			gradient.Rotation = 0
 			gradient.Parent = Section.Title
 
 			-- Create section object
@@ -6103,139 +6074,59 @@ function syde:Init(library)
 				Title = Paragraph.Title;
 				Content = Paragraph.Content;
 				Gradient = Paragraph.Gradient;
-				ContentGradient = Paragraph.ContentGradient;
 			}
+
+			-- Set default bright gradient if not specified
+			if not ParaData.Gradient then
+				ParaData.Gradient = ColorSequence.new{
+					ColorSequenceKeypoint.new(0, Color3.fromRGB(135, 206, 250)),    -- sky blue
+					ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 255, 255)),  -- bright white
+					ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 120, 255))       -- deeper blue
+				}
+			end
 
 			local Para = PAGES.Page.Paragraph:Clone()
 			Para.Visible = true
 			Para.Parent = Page
-
-			-- Ensure Content exists (create if missing)
-			if not Para.Content then
-				local contentLabel = Instance.new("TextLabel")
-				contentLabel.Name = "Content"
-				contentLabel.Size = UDim2.new(1, -20, 0, 0)
-				contentLabel.Position = UDim2.new(0, 10, 0, 35)
-				contentLabel.BackgroundTransparency = 1
-				contentLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
-				contentLabel.TextSize = 14
-				contentLabel.Font = Enum.Font.Gotham
-				contentLabel.TextXAlignment = Enum.TextXAlignment.Left
-				contentLabel.TextYAlignment = Enum.TextYAlignment.Top
-				contentLabel.TextWrapped = true
-				contentLabel.Parent = Para
-				Para.Content = contentLabel
-			end
-
 			Para.Title.Text = ParaData.Title
+			Para.Content.Text = ParaData.Content
 
-			-- Apply gradient to title if specified
-			if ParaData.Gradient then
-				Para.Title.TextTransparency = 0
-				Para.Title.TextColor3 = Color3.new(1, 1, 1)
-				local gradient = Instance.new("UIGradient")
-				gradient.Color = ParaData.Gradient
-				gradient.Parent = Para.Title
-			end
+			-- Apply gradient to title
+			local gradient = Instance.new("UIGradient")
+			gradient.Color = ParaData.Gradient
+			gradient.Rotation = 0
+			gradient.Parent = Para.Title
 
-			-- Handle content
-			local contentLabels = {}
-			local totalHeight = 0
-
-			local function createContent()
-				-- Clear existing content labels
-				for _, label in ipairs(contentLabels) do
-					label:Destroy()
-				end
-				contentLabels = {}
-				totalHeight = 0
-
-				if type(ParaData.Content) == "table" then
-					-- Hide original content label
-					Para.Content.Visible = false
-					
-					-- Multiple segments
-					local baseY = Para.Content.Position.Y.Offset
-					local yOffset = 0
-					for i, segment in ipairs(ParaData.Content) do
-						local text = segment.Text or segment
-						local gradient = segment.Gradient
-
-						local contentLabel = Para.Content:Clone()
-						contentLabel.Text = text
-						contentLabel.Position = UDim2.new(Para.Content.Position.X.Scale, Para.Content.Position.X.Offset, 0, baseY + yOffset)
-						contentLabel.Size = UDim2.new(1, 0, 0, 0) -- Will be set by text bounds
-						contentLabel.Visible = true
-						contentLabel.TextColor3 = Color3.new(1, 1, 1) -- White text for visibility
-						contentLabel.Parent = Para
-
-						if gradient then
-							contentLabel.TextTransparency = 0
-							contentLabel.TextColor3 = Color3.new(1, 1, 1)
-							local uiGradient = Instance.new("UIGradient")
-							uiGradient.Color = gradient
-							uiGradient.Parent = contentLabel
-						end
-
-						local textSize = textservice:GetTextSize(
-							text,
-							contentLabel.TextSize,
-							contentLabel.Font,
-							Vector2.new(contentLabel.AbsoluteSize.X, math.huge)
-						)
-						contentLabel.Size = UDim2.new(1, 0, 0, textSize.Y)
-						yOffset = yOffset + textSize.Y
-						totalHeight = yOffset
-
-						table.insert(contentLabels, contentLabel)
-					end
-				else
-					-- Show original content label
-					Para.Content.Visible = true
-					Para.Content.Text = ParaData.Content
-					Para.Content.TextColor3 = Color3.new(1, 1, 1) -- White text for visibility
-
-					-- Apply gradient to content if specified
-					if ParaData.ContentGradient then
-						Para.Content.TextTransparency = 0
-						Para.Content.TextColor3 = Color3.new(1, 1, 1)
-						local gradient = Instance.new("UIGradient")
-						gradient.Color = ParaData.ContentGradient
-						gradient.Parent = Para.Content
-					end
-
-					local textSize = textservice:GetTextSize(
-						Para.Content.Text,
-						Para.Content.TextSize,
-						Para.Content.Font,
-						Vector2.new(Para.Content.AbsoluteSize.X, math.huge)
-					)
-					totalHeight = textSize.Y
-					Para.Content.Size = UDim2.new(1, -20, 0, totalHeight)
-					table.insert(contentLabels, Para.Content)
-				end
-			end
-
-			createContent()
-
-			Para.Size = UDim2.new(1, -15, 0, totalHeight + 45)
+			Para.Content.Size = UDim2.new(1, -20, 0, Para.Content.TextBounds.Y)
+			Para.Size = UDim2.new(1, -15, 0, Para.Content.Size.Y.Offset + 45)
 
 			local function updateSize()
-				createContent() -- Recreate content to update sizes
-				Para.Size = UDim2.new(1, -15, 0, totalHeight + 45)
+				local textSize = textservice:GetTextSize(
+					Para.Content.Text,
+					Para.Content.TextSize,
+					Para.Content.Font,
+					Vector2.new(Para.Content.AbsoluteSize.X, math.huge) -- Allows vertical expansion
+				)
+
+				local newDescSize = UDim2.new(1, -20, 0, textSize.Y)
+				local newButtonSize = UDim2.new(Para.Size.X.Scale, Para.Size.X.Offset, 0, textSize.Y + 40) -- Adding extra padding
+
+				local descTween = tweenservice:Create(Para.Content, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), { Size = newDescSize })
+				descTween:Play()
+
+				local buttonTween = tweenservice:Create(Para, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), { Size = newButtonSize })
+				buttonTween:Play()
 			end
 
-			-- For single content, listen to text changes
-			if type(ParaData.Content) ~= "table" then
-				Para.Content:GetPropertyChangedSignal("TextBounds"):Connect(updateSize)
-			end
+			updateSize()
+
+			Para.Content:GetPropertyChangedSignal("TextBounds"):Connect(updateSize)
 			
 			local ParagraphSettings = {}
 
-			function ParagraphSettings:Set(title, content)
+			function ParagraphSettings:Set(title, text)
 				Para.Title.Text = title
-				ParaData.Content = content
-				updateSize()
+				Para.Content.Text = text
 			end
 
 			ParagraphSettings.Instance = Para

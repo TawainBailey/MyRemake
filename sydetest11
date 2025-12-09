@@ -6109,6 +6109,24 @@ function syde:Init(library)
 			local Para = PAGES.Page.Paragraph:Clone()
 			Para.Visible = true
 			Para.Parent = Page
+
+			-- Ensure Content exists (create if missing)
+			if not Para.Content then
+				local contentLabel = Instance.new("TextLabel")
+				contentLabel.Name = "Content"
+				contentLabel.Size = UDim2.new(1, -20, 0, 0)
+				contentLabel.Position = UDim2.new(0, 10, 0, 35)
+				contentLabel.BackgroundTransparency = 1
+				contentLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+				contentLabel.TextSize = 14
+				contentLabel.Font = Enum.Font.Gotham
+				contentLabel.TextXAlignment = Enum.TextXAlignment.Left
+				contentLabel.TextYAlignment = Enum.TextYAlignment.Top
+				contentLabel.TextWrapped = true
+				contentLabel.Parent = Para
+				Para.Content = contentLabel
+			end
+
 			Para.Title.Text = ParaData.Title
 
 			-- Apply gradient to title if specified

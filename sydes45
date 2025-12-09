@@ -6518,7 +6518,7 @@ function syde:Init(library)
 		local mobileToggle = Instance.new("Frame")
 		mobileToggle.Name = "SydeMobileToggle"
 		mobileToggle.Size = UDim2.new(0, 50, 0, 50)
-		mobileToggle.Position = UDim2.new(1, -60, 0, 10)
+		mobileToggle.Position = UDim2.new(0.9, -25, 0, 20)
 		mobileToggle.BackgroundColor3 = Color3.fromRGB(26, 26, 26)
 		mobileToggle.BackgroundTransparency = 0.1
 		mobileToggle.BorderSizePixel = 0
@@ -6559,7 +6559,7 @@ function syde:Init(library)
 		end)
 
 		-- Make it draggable
-		syde:AddDrag(button, mobileToggle, false)
+		syde:AddDrag(button, mobileToggle, true)
 
 		return InitElement
 

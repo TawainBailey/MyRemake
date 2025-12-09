@@ -1,3 +1,21 @@
+--[[
+
+
+                        dP          
+                        88          
+.d8888b. dP    dP .d888b88 .d8888b. 
+Y8ooooo. 88    88 88'  `88 88ooood8 
+      88 88.  .88 88.  .88 88.  ... 
+`88888P' `8888P88 `88888P8 `88888P' beta.
+              .88                   
+          d8888P                    
+
+
+made with 💓 by sellessence
+]]
+
+
+
 local inputservice =	game:GetService("InsertService")
 local tweenservice = 	game:GetService("TweenService")
 local https = 			game:GetService("HttpService")
@@ -362,7 +380,7 @@ function syde:updateLayout(container, spacing)
 	container.CanvasSize = UDim2.new(0, 0, 0, yOffset)
 end
 
-local dragSpeed = isMobile and 1.0 or 0.6
+local dragSpeed = 0.6
 local LockToScreen = false
 
 function syde:AddDrag(Object, Main, ConstrainToParent)
@@ -373,7 +391,6 @@ function syde:AddDrag(Object, Main, ConstrainToParent)
 	local tweenService = game:GetService("TweenService")
 
 	local dragging, dragInput, startMousePos, startFramePos = false, nil, nil, nil
-	local originalCameraType = nil
 
 	local function getConstrainedPosition(newPos)
 		if not LockToScreen then
@@ -422,12 +439,6 @@ function syde:AddDrag(Object, Main, ConstrainToParent)
 
 			Main.Position = UDim2.new(0, absX, 0, absY)
 			startFramePos = Main.Position
-
-			-- On mobile, disable camera movement during drag
-			if isMobile and input.UserInputType == Enum.UserInputType.Touch then
-				originalCameraType = camera.CameraType
-				camera.CameraType = Enum.CameraType.Scriptable
-			end
 		end
 	end)
 
@@ -451,12 +462,6 @@ function syde:AddDrag(Object, Main, ConstrainToParent)
 	syde:AddConnection(Object.InputEnded, function(input)
 		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
 			dragging = false
-
-			-- Restore camera type on mobile
-			if isMobile and input.UserInputType == Enum.UserInputType.Touch and originalCameraType then
-				camera.CameraType = originalCameraType
-				originalCameraType = nil
-			end
 		end
 	end)
 end
@@ -6494,8 +6499,6 @@ function syde:Init(library)
 					warn("Syde Configurations Error 〡 " .. tostring(result))
 				end
 			end
-		end
-
 		end
 
 		return InitElement

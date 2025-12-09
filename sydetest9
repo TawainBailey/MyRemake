@@ -4077,10 +4077,13 @@ function syde:Init(library)
 			end
 
 			-- Add gradient to section title text
+			Section.Title.TextTransparency = 0
+			Section.Title.TextColor3 = Color3.new(1, 1, 1)
 			local gradient = Instance.new("UIGradient")
 			gradient.Color = ColorSequence.new{
-				ColorSequenceKeypoint.new(0, Color3.fromRGB(50, 100, 200)), -- Nice blue
-				ColorSequenceKeypoint.new(1, Color3.fromRGB(100, 200, 255))  -- Bright blue
+				ColorSequenceKeypoint.new(0, Color3.fromRGB(135, 206, 250)),    -- sky blue
+				ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 255, 255)),  -- bright white
+				ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 120, 255))       -- deeper blue
 			}
 			gradient.Parent = Section.Title
 
@@ -6100,6 +6103,7 @@ function syde:Init(library)
 				Title = Paragraph.Title;
 				Content = Paragraph.Content;
 				Gradient = Paragraph.Gradient;
+				ContentGradient = Paragraph.ContentGradient;
 			}
 
 			local Para = PAGES.Page.Paragraph:Clone()
@@ -6170,6 +6174,16 @@ function syde:Init(library)
 					-- Show original content label
 					Para.Content.Visible = true
 					Para.Content.Text = ParaData.Content
+
+					-- Apply gradient to content if specified
+					if ParaData.ContentGradient then
+						Para.Content.TextTransparency = 0
+						Para.Content.TextColor3 = Color3.new(1, 1, 1)
+						local gradient = Instance.new("UIGradient")
+						gradient.Color = ParaData.ContentGradient
+						gradient.Parent = Para.Content
+					end
+
 					local textSize = textservice:GetTextSize(
 						Para.Content.Text,
 						Para.Content.TextSize,

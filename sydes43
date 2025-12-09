@@ -4051,9 +4051,11 @@ function syde:Init(library)
 			-- Add gradient to section title text
 			local gradient = Instance.new("UIGradient")
 			gradient.Color = ColorSequence.new{
-				ColorSequenceKeypoint.new(0, Color3.fromRGB(50, 100, 200)), -- Nice blue
-				ColorSequenceKeypoint.new(1, Color3.fromRGB(100, 200, 255))  -- Bright blue
+				ColorSequenceKeypoint.new(0, Color3.fromRGB(135, 206, 250)),    -- sky blue
+				ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 255, 255)),  -- bright white
+				ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 120, 255))       -- deeper blue
 			}
+			gradient.Rotation = 0
 			gradient.Parent = Section.Title
 
 			-- Create section object
@@ -6074,18 +6076,26 @@ function syde:Init(library)
 				Gradient = Paragraph.Gradient;
 			}
 
+			-- Set default bright gradient if not specified
+			if not ParaData.Gradient then
+				ParaData.Gradient = ColorSequence.new{
+					ColorSequenceKeypoint.new(0, Color3.fromRGB(135, 206, 250)),    -- sky blue
+					ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 255, 255)),  -- bright white
+					ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 120, 255))       -- deeper blue
+				}
+			end
+
 			local Para = PAGES.Page.Paragraph:Clone()
 			Para.Visible = true
 			Para.Parent = Page
 			Para.Title.Text = ParaData.Title
 			Para.Content.Text = ParaData.Content
 
-			-- Apply gradient to title if specified
-			if ParaData.Gradient then
-				local gradient = Instance.new("UIGradient")
-				gradient.Color = ParaData.Gradient
-				gradient.Parent = Para.Title
-			end
+			-- Apply gradient to title
+			local gradient = Instance.new("UIGradient")
+			gradient.Color = ParaData.Gradient
+			gradient.Rotation = 0
+			gradient.Parent = Para.Title
 
 			Para.Content.Size = UDim2.new(1, -20, 0, Para.Content.TextBounds.Y)
 			Para.Size = UDim2.new(1, -15, 0, Para.Content.Size.Y.Offset + 45)

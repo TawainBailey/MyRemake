@@ -6106,7 +6106,6 @@ function syde:Init(library)
 			Para.Visible = true
 			Para.Parent = Page
 			Para.Title.Text = ParaData.Title
-			Para.Content.Text = ParaData.Content
 
 			-- Apply gradient to title if specified
 			if ParaData.Gradient then
@@ -6115,36 +6114,84 @@ function syde:Init(library)
 				gradient.Parent = Para.Title
 			end
 
-			Para.Content.Size = UDim2.new(1, -20, 0, Para.Content.TextBounds.Y)
-			Para.Size = UDim2.new(1, -15, 0, Para.Content.Size.Y.Offset + 45)
+			-- Handle content
+			local contentLabels = {}
+			local totalHeight = 0
 
-			local function updateSize()
-				local textSize = textservice:GetTextSize(
-					Para.Content.Text,
-					Para.Content.TextSize,
-					Para.Content.Font,
-					Vector2.new(Para.Content.AbsoluteSize.X, math.huge) -- Allows vertical expansion
-				)
+			local function createContent()
+				-- Clear existing content labels
+				for _, label in ipairs(contentLabels) do
+					label:Destroy()
+				end
+				contentLabels = {}
+				totalHeight = 0
 
-				local newDescSize = UDim2.new(1, -20, 0, textSize.Y)
-				local newButtonSize = UDim2.new(Para.Size.X.Scale, Para.Size.X.Offset, 0, textSize.Y + 40) -- Adding extra padding
+				if type(ParaData.Content) == "table" then
+					-- Multiple segments
+					local yOffset = 0
+					for i, segment in ipairs(ParaData.Content) do
+						local text = segment.Text or segment
+						local gradient = segment.Gradient
 
-				local descTween = tweenservice:Create(Para.Content, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), { Size = newDescSize })
-				descTween:Play()
+						local contentLabel = Para.Content:Clone()
+						contentLabel.Text = text
+						contentLabel.Position = UDim2.new(0, 0, 0, yOffset)
+						contentLabel.Size = UDim2.new(1, 0, 0, 0) -- Will be set by text bounds
+						contentLabel.Parent = Para
 
-				local buttonTween = tweenservice:Create(Para, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), { Size = newButtonSize })
-				buttonTween:Play()
+						if gradient then
+							local uiGradient = Instance.new("UIGradient")
+							uiGradient.Color = gradient
+							uiGradient.Parent = contentLabel
+						end
+
+						local textSize = textservice:GetTextSize(
+							text,
+							contentLabel.TextSize,
+							contentLabel.Font,
+							Vector2.new(contentLabel.AbsoluteSize.X, math.huge)
+						)
+						contentLabel.Size = UDim2.new(1, 0, 0, textSize.Y)
+						yOffset = yOffset + textSize.Y
+						totalHeight = yOffset
+
+						table.insert(contentLabels, contentLabel)
+					end
+				else
+					-- Single content
+					Para.Content.Text = ParaData.Content
+					local textSize = textservice:GetTextSize(
+						Para.Content.Text,
+						Para.Content.TextSize,
+						Para.Content.Font,
+						Vector2.new(Para.Content.AbsoluteSize.X, math.huge)
+					)
+					totalHeight = textSize.Y
+					Para.Content.Size = UDim2.new(1, -20, 0, totalHeight)
+					table.insert(contentLabels, Para.Content)
+				end
 			end
 
-			updateSize()
+			createContent()
 
-			Para.Content:GetPropertyChangedSignal("TextBounds"):Connect(updateSize)
+			Para.Size = UDim2.new(1, -15, 0, totalHeight + 45)
+
+			local function updateSize()
+				createContent() -- Recreate content to update sizes
+				Para.Size = UDim2.new(1, -15, 0, totalHeight + 45)
+			end
+
+			-- For single content, listen to text changes
+			if type(ParaData.Content) ~= "table" then
+				Para.Content:GetPropertyChangedSignal("TextBounds"):Connect(updateSize)
+			end
 			
 			local ParagraphSettings = {}
 
-			function ParagraphSettings:Set(title, text)
+			function ParagraphSettings:Set(title, content)
 				Para.Title.Text = title
-				Para.Content.Text = text
+				ParaData.Content = content
+				updateSize()
 			end
 
 			ParagraphSettings.Instance = Para

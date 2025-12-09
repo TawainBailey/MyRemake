@@ -6514,62 +6514,59 @@ function syde:Init(library)
 			end
 		end
 
-		-- Mobile Toggle Button (also shown on PC for testing)
-		local mobileToggle = Instance.new("Frame")
-		mobileToggle.Name = "SydeMobileToggle"
-		mobileToggle.Size = UDim2.new(0, 50, 0, 50)
-		mobileToggle.Position = UDim2.new(0.5, -25, 0, 20)
-		mobileToggle.BackgroundColor3 = Color3.fromRGB(26, 26, 26)
-		mobileToggle.BackgroundTransparency = 0.1
-		mobileToggle.BorderSizePixel = 0
-		mobileToggle.ZIndex = 9999
-		mobileToggle.Parent = coregui
-
-		local corner = Instance.new("UICorner")
-		corner.CornerRadius = UDim.new(0, 8)
-		corner.Parent = mobileToggle
-
-		local stroke = Instance.new("UIStroke")
-		stroke.Color = Color3.fromRGB(255, 255, 255)
-		stroke.Transparency = 0.8
-		stroke.Thickness = 1
-		stroke.ZIndex = 10000
-		stroke.Parent = mobileToggle
-
-		local icon = Instance.new("ImageLabel")
-		icon.Size = UDim2.new(0, 24, 0, 24)
-		icon.Position = UDim2.new(0.5, 0, 0.5, 0)
-		icon.AnchorPoint = Vector2.new(0.5, 0.5)
-		icon.BackgroundTransparency = 1
-		icon.Image = "rbxassetid://6031094678" -- Menu icon
-		icon.ImageColor3 = Color3.fromRGB(255, 255, 255)
-		icon.ZIndex = 10001
-		icon.Parent = mobileToggle
-
-		local button = Instance.new("TextButton")
-		button.Size = UDim2.new(1, 0, 1, 0)
-		button.BackgroundTransparency = 1
-		button.Text = ""
-		button.ZIndex = 10002
-		button.Parent = mobileToggle
-
-		button.MouseButton1Click:Connect(function()
-			ToggleUI()
-			if not UIClosed then
-				icon.ImageColor3 = Color3.fromRGB(0, 123, 255)
-			else
-				icon.ImageColor3 = Color3.fromRGB(255, 255, 255)
-			end
-		end)
-
-		-- Make it draggable
-		syde:AddDrag(button, mobileToggle, true)
-
-		print("Mobile toggle button created at:", mobileToggle.AbsolutePosition)
+		end
 
 		return InitElement
 
 	end
+
+	-- Mobile Toggle Button (single instance)
+	local mobileToggle = Instance.new("Frame")
+	mobileToggle.Name = "SydeMobileToggle"
+	mobileToggle.Size = UDim2.new(0, 60, 0, 60)
+	mobileToggle.Position = UDim2.new(1, -80, 0, 20) -- Top-right corner
+	mobileToggle.BackgroundColor3 = Color3.fromRGB(26, 26, 26)
+	mobileToggle.BackgroundTransparency = 0
+	mobileToggle.BorderSizePixel = 0
+	mobileToggle.ZIndex = 9999
+	mobileToggle.Parent = coregui
+
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(0, 12)
+	corner.Parent = mobileToggle
+
+	local stroke = Instance.new("UIStroke")
+	stroke.Color = syde.theme.Accent
+	stroke.Transparency = 0.5
+	stroke.Thickness = 2
+	stroke.Parent = mobileToggle
+
+	local icon = Instance.new("ImageLabel")
+	icon.Size = UDim2.new(0, 30, 0, 30)
+	icon.Position = UDim2.new(0.5, 0, 0.5, 0)
+	icon.AnchorPoint = Vector2.new(0.5, 0.5)
+	icon.BackgroundTransparency = 1
+	icon.Image = "rbxassetid://6031094678"
+	icon.ImageColor3 = Color3.fromRGB(255, 255, 255)
+	icon.Parent = mobileToggle
+
+	local button = Instance.new("TextButton")
+	button.Size = UDim2.new(1, 0, 1, 0)
+	button.BackgroundTransparency = 1
+	button.Text = ""
+	button.Parent = mobileToggle
+
+	button.MouseButton1Click:Connect(function()
+		ToggleUI()
+		tweenservice:Create(icon, TweenInfo.new(0.3, Enum.EasingStyle.Exponential), {
+			ImageColor3 = UIClosed and Color3.fromRGB(255, 100, 100) or Color3.fromRGB(100, 255, 100)
+		}):Play()
+	end)
+
+	-- Make it draggable
+	syde:AddDrag(button, mobileToggle, true)
+
+	print("✅ Mobile toggle button created!")
 
 	return ldata
 

@@ -6131,6 +6131,7 @@ function syde:Init(library)
 					Para.Content.Visible = false
 					
 					-- Multiple segments
+					local baseY = Para.Content.Position.Y.Offset
 					local yOffset = 0
 					for i, segment in ipairs(ParaData.Content) do
 						local text = segment.Text or segment
@@ -6138,7 +6139,7 @@ function syde:Init(library)
 
 						local contentLabel = Para.Content:Clone()
 						contentLabel.Text = text
-						contentLabel.Position = UDim2.new(0, 0, 0, yOffset)
+						contentLabel.Position = UDim2.new(Para.Content.Position.X.Scale, Para.Content.Position.X.Offset, 0, baseY + yOffset)
 						contentLabel.Size = UDim2.new(1, 0, 0, 0) -- Will be set by text bounds
 						contentLabel.Visible = true
 						contentLabel.Parent = Para

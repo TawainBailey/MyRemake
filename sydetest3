@@ -6521,6 +6521,13 @@ function syde:Init(library)
 	end
 
 	-- Mobile Toggle Button (single instance)
+	local mobileScreenGui = Instance.new("ScreenGui")
+	mobileScreenGui.Name = "SydeMobileToggleGui"
+	mobileScreenGui.ResetOnSpawn = false
+	mobileScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+	mobileScreenGui.DisplayOrder = 999999 -- HIGHEST PRIORITY
+	mobileScreenGui.Parent = coregui
+
 	local mobileToggle = Instance.new("Frame")
 	mobileToggle.Name = "SydeMobileToggle"
 	mobileToggle.Size = UDim2.new(0, 60, 0, 60)
@@ -6529,7 +6536,7 @@ function syde:Init(library)
 	mobileToggle.BackgroundTransparency = 0
 	mobileToggle.BorderSizePixel = 0
 	mobileToggle.ZIndex = 9999
-	mobileToggle.Parent = coregui
+	mobileToggle.Parent = mobileScreenGui
 
 	local corner = Instance.new("UICorner")
 	corner.CornerRadius = UDim.new(0, 12)
@@ -6566,7 +6573,8 @@ function syde:Init(library)
 	-- Make it draggable
 	syde:AddDrag(button, mobileToggle, true)
 
-	print("✅ Mobile toggle button created!")
+	print("✅ ScreenGui created with DisplayOrder:", mobileScreenGui.DisplayOrder)
+	print("📍 Mobile toggle button created at:", mobileToggle.AbsolutePosition)
 
 	return ldata
 

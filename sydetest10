@@ -6148,6 +6148,7 @@ function syde:Init(library)
 						contentLabel.Position = UDim2.new(Para.Content.Position.X.Scale, Para.Content.Position.X.Offset, 0, baseY + yOffset)
 						contentLabel.Size = UDim2.new(1, 0, 0, 0) -- Will be set by text bounds
 						contentLabel.Visible = true
+						contentLabel.TextColor3 = Color3.new(1, 1, 1) -- White text for visibility
 						contentLabel.Parent = Para
 
 						if gradient then
@@ -6174,6 +6175,7 @@ function syde:Init(library)
 					-- Show original content label
 					Para.Content.Visible = true
 					Para.Content.Text = ParaData.Content
+					Para.Content.TextColor3 = Color3.new(1, 1, 1) -- White text for visibility
 
 					-- Apply gradient to content if specified
 					if ParaData.ContentGradient then

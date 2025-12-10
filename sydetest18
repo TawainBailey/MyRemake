@@ -5379,6 +5379,7 @@ function syde:Init(library)
 			rowFrame.BackgroundTransparency = 1
 			rowFrame.Parent = defaultParent
 			rowFrame.Name = "Row"
+			rowFrame.AutomaticSize = Enum.AutomaticSize.Y
 
 			local layout = Instance.new("UIListLayout")
 			layout.FillDirection = Enum.FillDirection.Horizontal

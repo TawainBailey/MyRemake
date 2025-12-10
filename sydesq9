@@ -5098,10 +5098,12 @@ function syde:Init(library)
 					-- For inline, show container as overlay below the slot
 					local slot = dropdown.Parent
 					dropdown.dropHolder.drop.Container.Parent = Page
-					dropdown.dropHolder.drop.Container.Position = UDim2.new(slot.Position.X.Scale, slot.Position.X.Offset, slot.Position.Y.Scale, slot.Position.Y.Offset + slot.Size.Y.Offset)
-					dropdown.dropHolder.drop.Container.Size = UDim2.new(slot.Size.X.Scale, slot.Size.X.Offset - 20, 0, 260)
+					local pagePos = Page.AbsolutePosition
+					local slotPos = slot.AbsolutePosition
+					dropdown.dropHolder.drop.Container.Position = UDim2.new(0, slotPos.X - pagePos.X, 0, slotPos.Y - pagePos.Y + slot.AbsoluteSize.Y)
+					dropdown.dropHolder.drop.Container.Size = UDim2.new(0, slot.AbsoluteSize.X - 20, 0, 260)
 					dropdown.dropHolder.drop.Container.ZIndex = 10
-					tweenservice:Create(dropdown.dropHolder.drop.Container, TweenInfo.new(1, Enum.EasingStyle.Quint), { Size = UDim2.new(slot.Size.X.Scale, slot.Size.X.Offset - 20, 0, 260) }):Play()
+					tweenservice:Create(dropdown.dropHolder.drop.Container, TweenInfo.new(1, Enum.EasingStyle.Quint), { Size = UDim2.new(0, slot.AbsoluteSize.X - 20, 0, 260) }):Play()
 				else
 					tweenservice:Create(dropdown, TweenInfo.new(1.34, Enum.EasingStyle.Quint), { Size = UDim2.new(1, -15, 0, 300) }):Play()
 					tweenservice:Create(dropdown.dropHolder.drop.Container, TweenInfo.new(1, Enum.EasingStyle.Quint), { Size = UDim2.new(1, -20, 1, -75) }):Play()

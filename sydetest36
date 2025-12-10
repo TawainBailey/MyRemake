@@ -358,6 +358,8 @@ function syde:updateLayout(container, spacing)
 	spacing = spacing or 5
 	local yOffset = 0
 	local containerWidth = container.AbsoluteSize.X 
+	local sideBySideMode = false
+	local sideBySideY = 0
 
 	for _, v in ipairs(container:GetChildren()) do
 		if v:IsA('UIListLayout') then
@@ -368,14 +370,31 @@ function syde:updateLayout(container, spacing)
 	if resizing == false then
 		for _, child in ipairs(container:GetChildren()) do
 			if (child:IsA("Frame") or child:IsA("ImageLabel") or child:IsA("TextLabel") or child:IsA("TextButton")) and child.Visible then
-				--child.Size = UDim2.new(1, -10, 0, child.Size.Y.Offset) -- Full width, fixed height
-				-- child.Position = UDim2.new(0, 0, 0, yOffset)
-				tweenservice:Create(child, TweenInfo.new(0.45, Enum.EasingStyle.Exponential), {Position = UDim2.new(0, 0, 0, yOffset)}):Play()
-				yOffset = yOffset + child.AbsoluteSize.Y + spacing
+				if child.SideBySide then
+					if not sideBySideMode then
+						sideBySideMode = true
+						sideBySideY = yOffset
+						-- place left
+						tweenservice:Create(child, TweenInfo.new(0.45, Enum.EasingStyle.Exponential), {Position = UDim2.new(0, 0, 0, sideBySideY), Size = UDim2.new(0.45, -10, 0, child.Size.Y.Offset)}):Play()
+					else
+						-- place right
+						tweenservice:Create(child, TweenInfo.new(0.45, Enum.EasingStyle.Exponential), {Position = UDim2.new(0.55, 0, 0, sideBySideY), Size = UDim2.new(0.45, -10, 0, child.Size.Y.Offset)}):Play()
+						sideBySideMode = false
+						yOffset = sideBySideY + child.AbsoluteSize.Y + spacing
+					end
+				else
+					if sideBySideMode then
+						-- end side by side mode
+						sideBySideMode = false
+						yOffset = sideBySideY + child.AbsoluteSize.Y + spacing
+					end
+					-- place full
+					tweenservice:Create(child, TweenInfo.new(0.45, Enum.EasingStyle.Exponential), {Position = UDim2.new(0, 0, 0, yOffset), Size = UDim2.new(1, -10, 0, child.Size.Y.Offset)}):Play()
+					yOffset = yOffset + child.AbsoluteSize.Y + spacing
+				end
 			end
 		end
 	end
-
 
 	container.CanvasSize = UDim2.new(0, 0, 0, yOffset)
 end
@@ -4956,6 +4975,7 @@ function syde:Init(library)
 				PlaceHolder = Dropdown.PlaceHolder or "Select Option...";
 				Multi = Dropdown.Multi or false;
 				CallBack = Dropdown.CallBack;
+				SideBySide = Dropdown.SideBySide or false;
 			}
 
 			local dropdown = PAGES.Page.Dropdown:Clone()
@@ -4963,6 +4983,7 @@ function syde:Init(library)
 			dropdown.Parent = Page
 			dropdown.Title.Text = DropdownData.Title
 			dropdown.Name = DropdownData.Title
+			dropdown.SideBySide = DropdownData.SideBySide
 			dropdown.dropHolder.drop.Container.Option.Visible = false
 			dropdown.dropHolder.drop.Container.Visible = false
 			tweenservice:Create(dropdown.dropHolder.drop.Container, TweenInfo.new(1, Enum.EasingStyle.Quint), { Size = UDim2.new(0.33, -20,0.576, -75) }):Play()
@@ -5253,6 +5274,7 @@ function syde:Init(library)
 				ClearOnLost = TextInput.ClearOnLost == nil and true or TextInput.ClearOnLost,
 				MaxSize = TextInput.MaxSize or 100,
 				CallBack = TextInput.CallBack,
+				SideBySide = TextInput.SideBySide or false,
 			}
 
 			local textinput = PAGES.Page.Input:Clone()
@@ -5260,6 +5282,7 @@ function syde:Init(library)
 			textinput.Parent = Page
 			textinput.Name = TextInputData.Title
 			textinput.Title.Text = TextInputData.Title
+			textinput.SideBySide = TextInputData.SideBySide
 			textinput.TextFrame.TextBox.PlaceholderText = TextInputData.PlaceHolder
 
 			local textBox = textinput.TextFrame.TextBox

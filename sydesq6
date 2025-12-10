@@ -4083,8 +4083,8 @@ function syde:Init(library)
 			child.Size = UDim2.new(1, 0, 1, 0)
 
 			-- Store references for resizing
-			slot.Child = child
-			child.Slot = slot
+			slot.Element = child
+			child.SlotRef = slot
 
 			-- Recalculate widths across slots, honoring any provided WidthScale
 			local slots = {}
@@ -5066,7 +5066,7 @@ function syde:Init(library)
 			if IsInline then
 				local widthScale = Dropdown.InlineWidth or nil
 				addInlineSlot(dropdown, widthScale)
-				originalSlotHeight = dropdown.Slot.Size.Y.Offset
+				originalSlotHeight = dropdown.SlotRef.Size.Y.Offset
 			else
 				dropdown.Parent = Page
 				-- Close any active inline row when placing a non-inline control
@@ -5102,7 +5102,7 @@ function syde:Init(library)
 
 				if IsInline then
 					-- For inline, expand the slot height and position container below title
-					tweenservice:Create(dropdown.Slot, TweenInfo.new(1.34, Enum.EasingStyle.Quint), { Size = UDim2.new(dropdown.Slot.Size.X.Scale, dropdown.Slot.Size.X.Offset, 0, 300) }):Play()
+					tweenservice:Create(dropdown.SlotRef, TweenInfo.new(1.34, Enum.EasingStyle.Quint), { Size = UDim2.new(dropdown.SlotRef.Size.X.Scale, dropdown.SlotRef.Size.X.Offset, 0, 300) }):Play()
 					dropdown.dropHolder.drop.Container.Position = UDim2.new(0, 0, 0, 40)
 					tweenservice:Create(dropdown.dropHolder.drop.Container, TweenInfo.new(1, Enum.EasingStyle.Quint), { Size = UDim2.new(1, -20, 0, 260) }):Play()
 				else
@@ -5124,7 +5124,7 @@ function syde:Init(library)
 				DropOpen = false
 				if IsInline then
 					-- For inline, collapse the slot height
-					tweenservice:Create(dropdown.Slot, TweenInfo.new(1, Enum.EasingStyle.Quint), { Size = UDim2.new(dropdown.Slot.Size.X.Scale, dropdown.Slot.Size.X.Offset, 0, originalSlotHeight) }):Play()
+					tweenservice:Create(dropdown.SlotRef, TweenInfo.new(1, Enum.EasingStyle.Quint), { Size = UDim2.new(dropdown.SlotRef.Size.X.Scale, dropdown.SlotRef.Size.X.Offset, 0, originalSlotHeight) }):Play()
 					dropdown.dropHolder.drop.Container.Position = UDim2.new(0, 0, 0, 0)
 					tweenservice:Create(dropdown.dropHolder.drop.Container, TweenInfo.new(1, Enum.EasingStyle.Quint), { Size = UDim2.new(0.33, -20, 0.576, -75) }):Play()
 				else

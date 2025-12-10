@@ -4957,6 +4957,7 @@ function syde:Init(library)
 				Multi = Dropdown.Multi or false;
 				CallBack = Dropdown.CallBack;
 				InRow = Dropdown.InRow or false;
+				RowRef = Dropdown.RowRef;
 			}
 
 			local dropdown = PAGES.Page.Dropdown:Clone()
@@ -4992,10 +4993,12 @@ function syde:Init(library)
 				dropdown.dropHolder.drop.Search.Visible = true
 
 				if DropdownData.InRow then
-					dropHolder.Parent = Page
-					dropHolder.Position = UDim2.new(0, dropdown.AbsolutePosition.X - Page.AbsolutePosition.X, 0, dropdown.AbsolutePosition.Y - Page.AbsolutePosition.Y + dropdown.AbsoluteSize.Y)
-					dropHolder.Size = UDim2.new(0, dropdown.AbsoluteSize.X, 0, 211)
+					dropHolder.Parent = DropdownData.RowRef
+					dropHolder.Position = UDim2.new(dropdown.Position.X.Scale, dropdown.Position.X.Offset, dropdown.Position.Y.Scale, dropdown.Position.Y.Offset + dropdown.Size.Y.Offset)
+					dropHolder.Size = UDim2.new(0, dropdown.Size.X.Offset, 0, 211)
 					isDropOutside = true
+					DropdownData.RowRef.Size = UDim2.new(1, -15, 0, 300)
+					syde:updateLayout(Page, 7)
 					tweenservice:Create(dropdown.dropHolder.drop.Container, TweenInfo.new(1, Enum.EasingStyle.Quint), { Size = UDim2.new(1, -20, 1, -75) }):Play()
 				else
 					tweenservice:Create(dropdown, TweenInfo.new(1.34, Enum.EasingStyle.Quint), { Size = UDim2.new(1, -15, 0, 300) }):Play()
@@ -5019,6 +5022,8 @@ function syde:Init(library)
 					dropHolder.Position = UDim2.new(0, 0, 0, 0)
 					dropHolder.Size = UDim2.new(1, -20, 0.576, -75)
 					isDropOutside = false
+					DropdownData.RowRef.Size = UDim2.new(1, -15, 0, 89)
+					syde:updateLayout(Page, 7)
 					tweenservice:Create(dropdown.dropHolder.drop.Container, TweenInfo.new(1, Enum.EasingStyle.Quint), { Size = UDim2.new(1, -20, 0.576, -75) }):Play()
 				else
 					tweenservice:Create(dropdown, TweenInfo.new(1, Enum.EasingStyle.Quint), { Size = UDim2.new(1, -15, 0, 89) }):Play()
@@ -6179,6 +6184,7 @@ function syde:Init(library)
 			local row = Instance.new("Frame")
 			row.Size = UDim2.new(1, -15, 0, 50) -- Will be updated
 			row.BackgroundTransparency = 1
+			row.ClipsDescendants = false
 			row.Parent = Page
 			row.Name = "Row"
 
@@ -6194,6 +6200,8 @@ function syde:Init(library)
 			for i, item in ipairs(RowData) do
 				local elementHandle
 				if item.Type == "Dropdown" then
+					item.InRow = true
+					item.RowRef = row
 					elementHandle = self:Dropdown(item)
 				elseif item.Type == "TextInput" then
 					elementHandle = self:TextInput(item)

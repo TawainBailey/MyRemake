@@ -4963,6 +4963,8 @@ function syde:Init(library)
 			dropdown.Parent = defaultParent
 			dropdown.Title.Text = DropdownData.Title
 			dropdown.Name = DropdownData.Title
+			dropdown.Title.ZIndex = 10
+			dropdown.dropHolder.ZIndex = 5
 			dropdown.dropHolder.drop.Container.Option.Visible = false
 			dropdown.dropHolder.drop.Container.Visible = false
 			tweenservice:Create(dropdown.dropHolder.drop.Container, TweenInfo.new(1, Enum.EasingStyle.Quint), { Size = UDim2.new(0.33, -20,0.576, -75) }):Play()
@@ -5394,11 +5396,11 @@ function syde:Init(library)
 			for _, element in ipairs(rowConfig) do
 				if element.Type == "Dropdown" then
 					local handle = InitElement:Dropdown(element)
-					handle.Instance.Size = UDim2.new(0.6, 0, 0, 40)
+					handle.Instance.Size = UDim2.new(0.7, 0, 0, 40)
 					table.insert(elements, handle.Instance)
 				elseif element.Type == "TextInput" then
 					local textinput = InitElement:TextInput(element)
-					textinput.Size = UDim2.new(0.4, 0, 0, 40)
+					textinput.Size = UDim2.new(0.3, 0, 0, 40)
 					table.insert(elements, textinput)
 				end
 			end

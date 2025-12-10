@@ -4970,7 +4970,9 @@ function syde:Init(library)
 			tweenservice:Create(dropdown.dropHolder.drop.Container, TweenInfo.new(1, Enum.EasingStyle.Quint), { Size = UDim2.new(0.33, -20,0.576, -75) }):Play()
 			dropdown.dropHolder.drop.Selected.Text = DropdownData.PlaceHolder 
 			dropdown.dropHolder.drop.Selected.TextTruncate = Enum.TextTruncate.None
-			dropdown.dropHolder.drop.Selected.Size = UDim2.new(1, 0, 0, 20)
+			dropdown.dropHolder.drop.Selected.TextXAlignment = Enum.TextXAlignment.Left
+			dropdown.dropHolder.drop.Selected.Position = UDim2.new(0, 10, 0, 0)
+			dropdown.dropHolder.drop.Selected.Size = UDim2.new(1, -50, 0, 20)
 
 			local DropOpen = false
 			local DeBounce = false

@@ -4973,7 +4973,7 @@ function syde:Init(library)
 			dropdown.dropHolder.drop.Selected.TextTruncate = Enum.TextTruncate.None
 			dropdown.dropHolder.drop.Selected.TextXAlignment = Enum.TextXAlignment.Left
 			dropdown.dropHolder.drop.Selected.Position = UDim2.new(0, 10, 0, 0)
-			dropdown.dropHolder.drop.Selected.Size = UDim2.new(1, -50, 0, 20)
+			dropdown.dropHolder.drop.Selected.Size = UDim2.new(1, -20, 0, 20)
 
 			local DropOpen = false
 			local DeBounce = false

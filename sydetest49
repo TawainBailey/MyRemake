@@ -4048,7 +4048,6 @@ function syde:Init(library)
 			Section.Title.Position = UDim2.new(0, 0,0, 0)
 			Section.BackgroundColor3 = Color3.fromRGB(255, 255, 255) -- Reset to default
 			Section.BackgroundTransparency = 1 -- Make background transparent
-			Section.AutomaticSize = Enum.AutomaticSize.Y -- Allow automatic height
 
 			if SectionData.Icon then
 				Section.icon.Image = 'rbxassetid://'..SectionData.Icon
@@ -4105,16 +4104,6 @@ function syde:Init(library)
 					tweenservice:Create(arrowIcon, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {
 						Rotation = targetRotation
 					}):Play()
-					
-					if SectionObject.IsCollapsed then
-						-- Store current height and set fixed height
-						SectionObject.ExpandedHeight = Section.AbsoluteSize.Y
-						Section.AutomaticSize = Enum.AutomaticSize.None
-						Section.Size = UDim2.new(1, 0, 0, 30)
-					else
-						-- Restore automatic sizing
-						Section.AutomaticSize = Enum.AutomaticSize.Y
-					end
 					
 					-- Hide/show elements
 					for _, element in ipairs(SectionObject.Elements) do
@@ -6238,6 +6227,13 @@ function syde:Init(library)
 			end
 
 			row.Size = UDim2.new(1, -15, 0, maxHeight)
+
+			-- Register with current section or border group
+			if CurrentBorderGroup then
+				table.insert(CurrentBorderGroup.Elements, {Instance = row})
+			elseif CurrentSection then
+				table.insert(CurrentSection.Elements, {Instance = row})
+			end
 
 			-- Update layout
 			syde:updateLayout(Page, 7)

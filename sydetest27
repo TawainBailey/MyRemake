@@ -5228,6 +5228,12 @@ function syde:Init(library)
 				end
 			end
 
+			function DropdownHandle:Refresh()
+				OpenDrop()
+				task.wait(0.05)
+				CloseDrop()
+			end
+
 			function DropdownHandle:Destroy()
 				if dropdown and dropdown.Parent then
 					dropdown:Destroy()
@@ -5392,16 +5398,22 @@ function syde:Init(library)
 
 			setInternalParent(rowFrame)
 
-			local elements = {}
+			local handles = {}
 			for _, element in ipairs(rowConfig) do
 				if element.Type == "Dropdown" then
 					local handle = InitElement:Dropdown(element)
 					handle.Instance.Size = UDim2.new(0.7, 0, 0, 40)
-					table.insert(elements, handle.Instance)
+					table.insert(handles, handle)
 				elseif element.Type == "TextInput" then
 					local textinput = InitElement:TextInput(element)
 					textinput.Size = UDim2.new(0.3, 0, 0, 40)
-					table.insert(elements, textinput)
+					table.insert(handles, textinput) -- but textinput is instance, not handle
+				end
+			end
+
+			for _, h in ipairs(handles) do
+				if h.Refresh then
+					h:Refresh()
 				end
 			end
 

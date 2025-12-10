@@ -4968,6 +4968,29 @@ function syde:Init(library)
 			tweenservice:Create(dropdown.dropHolder.drop.Container, TweenInfo.new(1, Enum.EasingStyle.Quint), { Size = UDim2.new(0.33, -20,0.576, -75) }):Play()
 			dropdown.dropHolder.drop.Selected.Text = DropdownData.PlaceHolder 
 
+			-- Fix initial dropdown width
+			task.defer(function()
+				local container = dropdown.dropHolder.drop.Container
+				local longestWidth = 0
+				
+				-- Find the longest option text
+				for _, child in ipairs(container:GetChildren()) do
+					if child:IsA("Frame") and child:FindFirstChild("Title") and child.Name ~= "Option" then
+						local textWidth = textservice:GetTextSize(
+							child.Title.Text,
+							child.Title.TextSize,
+							child.Title.Font,
+							Vector2.new(math.huge, child.Title.AbsoluteSize.Y)
+						).X
+						longestWidth = math.max(longestWidth, textWidth)
+					end
+				end
+				
+				-- Set minimum width based on content
+				local minWidth = math.max(longestWidth + 60, 200) -- +60 for padding, minimum 200
+				dropdown.dropHolder.drop.Size = UDim2.new(1, -20, 0, dropdown.dropHolder.drop.Size.Y.Offset)
+			end)
+
 			local DropOpen = false
 			local DeBounce = false
 			local OptionButton = dropdown.dropHolder.drop.Container.Option
@@ -5131,6 +5154,9 @@ function syde:Init(library)
 					option.Parent = dropdown.dropHolder.drop.Container
 					option.Visible = true
 					option.Name = OptionText
+					
+					-- Ensure option takes full width
+					option.Size = UDim2.new(1, -10, 0, 40)
 
 					if OptionText == DropdownData.StarterOption and not starterSet then
 						starterSet = true
@@ -5261,6 +5287,10 @@ function syde:Init(library)
 			textinput.Name = TextInputData.Title
 			textinput.Title.Text = TextInputData.Title
 			textinput.TextFrame.TextBox.PlaceholderText = TextInputData.PlaceHolder
+
+			-- Ensure proper initial sizing
+			textinput.Size = UDim2.new(1, -15, 0, 89)
+			textinput.TextFrame.Size = UDim2.new(1, -60, 0, 32)
 
 			local textBox = textinput.TextFrame.TextBox
 			local defaultHeight = 32

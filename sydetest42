@@ -4956,6 +4956,7 @@ function syde:Init(library)
 				PlaceHolder = Dropdown.PlaceHolder or "Select Option...";
 				Multi = Dropdown.Multi or false;
 				CallBack = Dropdown.CallBack;
+				InRow = Dropdown.InRow or false;
 			}
 
 			local dropdown = PAGES.Page.Dropdown:Clone()
@@ -4989,7 +4990,11 @@ function syde:Init(library)
 				dropdown.dropHolder.drop.Container.Visible = true
 				dropdown.dropHolder.drop.Search.Visible = true
 
-				tweenservice:Create(dropdown, TweenInfo.new(1.34, Enum.EasingStyle.Quint), { Size = UDim2.new(1, -15, 0, 300) }):Play()
+				if not DropdownData.InRow then
+					dropdown.Size = UDim2.new(1, -15, 0, 300)
+				else
+					dropdown.Size = UDim2.new(dropdown.Size.X.Scale, dropdown.Size.X.Offset, 0, 300)
+				end
 				tweenservice:Create(dropdown.dropHolder.drop.Container, TweenInfo.new(1, Enum.EasingStyle.Quint), { Size = UDim2.new(1, -20, 1, -75) }):Play()
 				tweenservice:Create(dropdown.dropHolder.drop.void, TweenInfo.new(1.34, Enum.EasingStyle.Exponential), { BackgroundTransparency = 0 }):Play()
 				tweenservice:Create(dropdown.dropHolder.drop.down, TweenInfo.new(0.35, Enum.EasingStyle.Quint), { Rotation = 180 }):Play()
@@ -5004,8 +5009,13 @@ function syde:Init(library)
 
 			local function CloseDrop()
 				DropOpen = false
-				tweenservice:Create(dropdown, TweenInfo.new(1, Enum.EasingStyle.Quint), { Size = UDim2.new(1, -15, 0, 89) }):Play()
-				tweenservice:Create(dropdown.dropHolder.drop.Container, TweenInfo.new(1, Enum.EasingStyle.Quint), { Size = UDim2.new(0.33, -20, 0.576, -75) }):Play()
+				if not DropdownData.InRow then
+					dropdown.Size = UDim2.new(1, -15, 0, 89)
+					tweenservice:Create(dropdown.dropHolder.drop.Container, TweenInfo.new(1, Enum.EasingStyle.Quint), { Size = UDim2.new(0.33, -20, 0.576, -75) }):Play()
+				else
+					dropdown.Size = UDim2.new(dropdown.Size.X.Scale, dropdown.Size.X.Offset, 0, 89)
+					tweenservice:Create(dropdown.dropHolder.drop.Container, TweenInfo.new(1, Enum.EasingStyle.Quint), { Size = UDim2.new(1, -20, 0.576, -75) }):Play()
+				end
 				tweenservice:Create(dropdown.dropHolder.drop.void, TweenInfo.new(1.34, Enum.EasingStyle.Exponential), { BackgroundTransparency = 1 }):Play()
 				tweenservice:Create(dropdown.dropHolder.drop.down, TweenInfo.new(0.35, Enum.EasingStyle.Quint), { Rotation = 0 }):Play()
 
@@ -6176,6 +6186,7 @@ function syde:Init(library)
 			for i, item in ipairs(RowData) do
 				local elementHandle
 				if item.Type == "Dropdown" then
+					item.InRow = true
 					elementHandle = self:Dropdown(item)
 				elseif item.Type == "TextInput" then
 					elementHandle = self:TextInput(item)

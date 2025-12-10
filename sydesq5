@@ -5101,9 +5101,10 @@ function syde:Init(library)
 				dropdown.dropHolder.drop.Search.Visible = true
 
 				if IsInline then
-					-- For inline, expand the slot height instead of the dropdown
+					-- For inline, expand the slot height and position container below title
 					tweenservice:Create(dropdown.Slot, TweenInfo.new(1.34, Enum.EasingStyle.Quint), { Size = UDim2.new(dropdown.Slot.Size.X.Scale, dropdown.Slot.Size.X.Offset, 0, 300) }):Play()
-					tweenservice:Create(dropdown.dropHolder.drop.Container, TweenInfo.new(1, Enum.EasingStyle.Quint), { Size = UDim2.new(1, -20, 1, -75) }):Play()
+					dropdown.dropHolder.drop.Container.Position = UDim2.new(0, 0, 0, 40)
+					tweenservice:Create(dropdown.dropHolder.drop.Container, TweenInfo.new(1, Enum.EasingStyle.Quint), { Size = UDim2.new(1, -20, 0, 260) }):Play()
 				else
 					tweenservice:Create(dropdown, TweenInfo.new(1.34, Enum.EasingStyle.Quint), { Size = UDim2.new(1, -15, 0, 300) }):Play()
 					tweenservice:Create(dropdown.dropHolder.drop.Container, TweenInfo.new(1, Enum.EasingStyle.Quint), { Size = UDim2.new(1, -20, 1, -75) }):Play()
@@ -5124,6 +5125,7 @@ function syde:Init(library)
 				if IsInline then
 					-- For inline, collapse the slot height
 					tweenservice:Create(dropdown.Slot, TweenInfo.new(1, Enum.EasingStyle.Quint), { Size = UDim2.new(dropdown.Slot.Size.X.Scale, dropdown.Slot.Size.X.Offset, 0, originalSlotHeight) }):Play()
+					dropdown.dropHolder.drop.Container.Position = UDim2.new(0, 0, 0, 0)
 					tweenservice:Create(dropdown.dropHolder.drop.Container, TweenInfo.new(1, Enum.EasingStyle.Quint), { Size = UDim2.new(0.33, -20, 0.576, -75) }):Play()
 				else
 					tweenservice:Create(dropdown, TweenInfo.new(1, Enum.EasingStyle.Quint), { Size = UDim2.new(1, -15, 0, 89) }):Play()

@@ -4965,6 +4965,7 @@ function syde:Init(library)
 			dropdown.Name = DropdownData.Title
 			dropdown.Title.ZIndex = 10
 			dropdown.dropHolder.ZIndex = 5
+			dropdown.dropHolder.Position = UDim2.new(0, 0, 0, 25)
 			dropdown.dropHolder.drop.Container.Option.Visible = false
 			dropdown.dropHolder.drop.Container.Visible = false
 			tweenservice:Create(dropdown.dropHolder.drop.Container, TweenInfo.new(1, Enum.EasingStyle.Quint), { Size = UDim2.new(0.33, -20,0.576, -75) }):Play()

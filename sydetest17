@@ -5369,6 +5369,8 @@ function syde:Init(library)
 			elseif CurrentSection then
 				table.insert(CurrentSection.Elements, {Instance = textinput})
 			end
+
+			return textinput
 		end
 
 		function InitElement:Row(rowConfig)
@@ -5387,11 +5389,16 @@ function syde:Init(library)
 
 			setInternalParent(rowFrame)
 
+			local elements = {}
 			for _, element in ipairs(rowConfig) do
 				if element.Type == "Dropdown" then
-					InitElement:Dropdown(element)
+					local handle = InitElement:Dropdown(element)
+					handle.Instance.Size = UDim2.new(0.65, -15, 0, 40)
+					table.insert(elements, handle.Instance)
 				elseif element.Type == "TextInput" then
-					InitElement:TextInput(element)
+					local textinput = InitElement:TextInput(element)
+					textinput.Size = UDim2.new(0.35, -15, 0, 40)
+					table.insert(elements, textinput)
 				end
 			end
 

@@ -5369,6 +5369,10 @@ function syde:Init(library)
 			elseif CurrentSection then
 				table.insert(CurrentSection.Elements, {Instance = textinput})
 			end
+
+			local TextInputHandle = {}
+			TextInputHandle.Instance = textinput
+			return TextInputHandle
 		end
 
 		function InitElement:ColorPicker(ColorPicker)
@@ -6171,22 +6175,23 @@ function syde:Init(library)
 			local elements = {}
 
 			for i, item in ipairs(RowData) do
-				local element
+				local elementHandle
 				if item.Type == "Dropdown" then
-					element = self:Dropdown(item)
+					elementHandle = self:Dropdown(item)
 				elseif item.Type == "TextInput" then
-					element = self:TextInput(item)
+					elementHandle = self:TextInput(item)
 				else
 					warn("Unknown row element type: " .. item.Type)
 					continue
 				end
 
-				element.Size = UDim2.new(0.5, -5, 0, element.Size.Y.Offset) -- Half width minus padding
-				element.Parent = row
-				table.insert(elements, element)
+				local elementFrame = elementHandle.Instance
+				elementFrame.Size = UDim2.new(0.5, -5, 0, elementFrame.Size.Y.Offset) -- Half width minus padding
+				elementFrame.Parent = row
+				table.insert(elements, elementFrame)
 
-				if element.Size.Y.Offset > maxHeight then
-					maxHeight = element.Size.Y.Offset
+				if elementFrame.Size.Y.Offset > maxHeight then
+					maxHeight = elementFrame.Size.Y.Offset
 				end
 			end
 

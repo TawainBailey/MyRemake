@@ -5394,11 +5394,11 @@ function syde:Init(library)
 			for _, element in ipairs(rowConfig) do
 				if element.Type == "Dropdown" then
 					local handle = InitElement:Dropdown(element)
-					handle.Instance.Size = UDim2.new(0.7, -15, 0, 40)
+					handle.Instance.Size = UDim2.new(0.7, 0, 0, 40)
 					table.insert(elements, handle.Instance)
 				elseif element.Type == "TextInput" then
 					local textinput = InitElement:TextInput(element)
-					textinput.Size = UDim2.new(0.3, -15, 0, 40)
+					textinput.Size = UDim2.new(0.3, 0, 0, 40)
 					table.insert(elements, textinput)
 				end
 			end

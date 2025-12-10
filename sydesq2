@@ -4306,6 +4306,8 @@ function syde:Init(library)
 				HoldTime = Button.HoldTime or 3;
 			}
 
+			-- Close any open inline row before adding a full-width element
+			closeInlineRow()
 			local button = PAGES.Page.Button:Clone()
 			button.Visible = true
 			button.Parent = Page
@@ -4493,6 +4495,8 @@ function syde:Init(library)
 				Flag = Toggle.Flag;
 			}
 
+			-- Close any open inline row before adding a full-width element
+			closeInlineRow()
 			local toggle = PAGES.Page.Toggle:Clone()
 			toggle.Visible = true
 			toggle.Parent = Page

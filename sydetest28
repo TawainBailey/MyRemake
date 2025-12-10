@@ -4969,6 +4969,7 @@ function syde:Init(library)
 			dropdown.dropHolder.drop.Container.Visible = false
 			tweenservice:Create(dropdown.dropHolder.drop.Container, TweenInfo.new(1, Enum.EasingStyle.Quint), { Size = UDim2.new(0.33, -20,0.576, -75) }):Play()
 			dropdown.dropHolder.drop.Selected.Text = DropdownData.PlaceHolder 
+			dropdown.dropHolder.drop.Selected.TextTruncate = Enum.TextTruncate.None
 
 			local DropOpen = false
 			local DeBounce = false
@@ -5228,12 +5229,6 @@ function syde:Init(library)
 				end
 			end
 
-			function DropdownHandle:Refresh()
-				OpenDrop()
-				task.wait(0.05)
-				CloseDrop()
-			end
-
 			function DropdownHandle:Destroy()
 				if dropdown and dropdown.Parent then
 					dropdown:Destroy()
@@ -5398,22 +5393,16 @@ function syde:Init(library)
 
 			setInternalParent(rowFrame)
 
-			local handles = {}
+			local elements = {}
 			for _, element in ipairs(rowConfig) do
 				if element.Type == "Dropdown" then
 					local handle = InitElement:Dropdown(element)
-					handle.Instance.Size = UDim2.new(0.7, 0, 0, 40)
-					table.insert(handles, handle)
+					handle.Instance.Size = UDim2.new(0.8, 0, 0, 40)
+					table.insert(elements, handle.Instance)
 				elseif element.Type == "TextInput" then
 					local textinput = InitElement:TextInput(element)
-					textinput.Size = UDim2.new(0.3, 0, 0, 40)
-					table.insert(handles, textinput) -- but textinput is instance, not handle
-				end
-			end
-
-			for _, h in ipairs(handles) do
-				if h.Refresh then
-					h:Refresh()
+					textinput.Size = UDim2.new(0.2, 0, 0, 40)
+					table.insert(elements, textinput)
 				end
 			end
 

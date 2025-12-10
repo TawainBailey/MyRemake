@@ -4960,7 +4960,7 @@ function syde:Init(library)
 
 			local dropdown = PAGES.Page.Dropdown:Clone()
 			dropdown.Visible = true
-			dropdown.Parent = Page
+			dropdown.Parent = defaultParent
 			dropdown.Title.Text = DropdownData.Title
 			dropdown.Name = DropdownData.Title
 			dropdown.dropHolder.drop.Container.Option.Visible = false
@@ -5257,7 +5257,7 @@ function syde:Init(library)
 
 			local textinput = PAGES.Page.Input:Clone()
 			textinput.Visible = true
-			textinput.Parent = Page
+			textinput.Parent = defaultParent
 			textinput.Name = TextInputData.Title
 			textinput.Title.Text = TextInputData.Title
 			textinput.TextFrame.TextBox.PlaceholderText = TextInputData.PlaceHolder
@@ -5371,6 +5371,33 @@ function syde:Init(library)
 			end
 		end
 
+		function InitElement:Row(rowConfig)
+			local rowFrame = Instance.new("Frame")
+			rowFrame.Size = UDim2.new(1, -15, 0, 40)
+			rowFrame.BackgroundTransparency = 1
+			rowFrame.Parent = defaultParent
+			rowFrame.Name = "Row"
+
+			local layout = Instance.new("UIListLayout")
+			layout.FillDirection = Enum.FillDirection.Horizontal
+			layout.HorizontalAlignment = Enum.HorizontalAlignment.Left
+			layout.VerticalAlignment = Enum.VerticalAlignment.Top
+			layout.Padding = UDim.new(0, 10)
+			layout.Parent = rowFrame
+
+			setInternalParent(rowFrame)
+
+			for _, element in ipairs(rowConfig) do
+				if element.Type == "Dropdown" then
+					InitElement:Dropdown(element)
+				elseif element.Type == "TextInput" then
+					InitElement:TextInput(element)
+				end
+			end
+
+			setInternalParent(Page)
+		end
+
 		function InitElement:ColorPicker(ColorPicker)
 			local ColorPickerData = {
 				Title = ColorPicker.Title;
@@ -5385,7 +5412,7 @@ function syde:Init(library)
 
 			local colorpicker = PAGES.Page.ColorPicker:Clone()
 			colorpicker.Visible = true
-			colorpicker.Parent = Page
+			colorpicker.Parent = defaultParent
 			colorpicker.Title.Text = ColorPickerData.Title
 			colorpicker.Name = ColorPickerData.Title
 

@@ -6164,15 +6164,14 @@ function syde:Init(library)
 			row.Parent = Page
 			row.Name = "Row"
 
-			local uilist = Instance.new("UIListLayout")
-			uilist.FillDirection = Enum.FillDirection.Horizontal
-			uilist.HorizontalAlignment = Enum.HorizontalAlignment.Left
-			uilist.VerticalAlignment = Enum.VerticalAlignment.Top
-			uilist.Padding = UDim.new(0, 10)
-			uilist.Parent = row
-
 			local maxHeight = 0
 			local elements = {}
+
+			local numElements = #RowData
+			local elementWidth = 1 / numElements
+			local padding = 10
+			local totalPadding = padding * (numElements - 1)
+			local availableWidth = 1 - (totalPadding / row.AbsoluteSize.X) -- but since scale, approximate
 
 			for i, item in ipairs(RowData) do
 				local elementHandle
@@ -6186,13 +6185,26 @@ function syde:Init(library)
 				end
 
 				local elementFrame = elementHandle.Instance
-				elementFrame.Size = UDim2.new(0.5, -5, 0, elementFrame.Size.Y.Offset) -- Half width minus padding
+				elementFrame.Size = UDim2.new(elementWidth, -padding/2, 0, elementFrame.Size.Y.Offset)
+				elementFrame.Position = UDim2.new((i-1) * elementWidth, (i-1) * padding / numElements, 0, 0) -- approximate
 				elementFrame.Parent = row
 				table.insert(elements, elementFrame)
 
 				if elementFrame.Size.Y.Offset > maxHeight then
 					maxHeight = elementFrame.Size.Y.Offset
 				end
+
+				-- Listen to size changes
+				elementFrame:GetPropertyChangedSignal("Size"):Connect(function()
+					local newMaxHeight = 0
+					for _, e in ipairs(elements) do
+						if e.Size.Y.Offset > newMaxHeight then
+							newMaxHeight = e.Size.Y.Offset
+						end
+					end
+					row.Size = UDim2.new(1, -15, 0, newMaxHeight)
+					syde:updateLayout(Page, 7)
+				end)
 			end
 
 			row.Size = UDim2.new(1, -15, 0, maxHeight)

@@ -4125,6 +4125,8 @@ function syde:Init(library)
 				SectionData.Collapsible = false
 			end
 
+			-- Close inline row before starting a new section
+			closeInlineRow()
 			local Section = PAGES.Page.Section:Clone()
 			Section.Visible = true
 			Section.Title.Text = SectionData.Title
@@ -4816,6 +4818,8 @@ function syde:Init(library)
 				Sliders = Slider.Sliders
 			}
 
+			-- Close any open inline row before adding a full-width element
+			closeInlineRow()
 			local slider = PAGES.Page.Slider:Clone()
 			slider.Visible = true
 			slider.Parent = Page
@@ -5490,6 +5494,8 @@ function syde:Init(library)
 			ColorPicker.Linkable = ColorPicker.Linkable or true
 			ColorPickerData.Type = 'ColorPicker'
 
+			-- Close any open inline row before adding a full-width element
+			closeInlineRow()
 			local colorpicker = PAGES.Page.ColorPicker:Clone()
 			colorpicker.Visible = true
 			colorpicker.Parent = Page
@@ -6076,6 +6082,8 @@ function syde:Init(library)
 				Holding = false
 			}
 
+			-- Close any open inline row before adding a full-width element
+			closeInlineRow()
 			local KeyBind = PAGES.Page.KeyBind:Clone()
 			KeyBind.Visible = true
 			KeyBind.Parent = Page
@@ -6156,6 +6164,8 @@ function syde:Init(library)
 				img = Img.Image
 			}
 
+			-- Close any active inline row before adding full-width image block
+			closeInlineRow()
 			local ImageBlock = PAGES.Page.img:Clone()
 			ImageBlock.Visible = true
 			ImageBlock.Parent = Page
@@ -6165,6 +6175,8 @@ function syde:Init(library)
 
 		function InitElement:Label(Text, Alignment)
 
+			-- Close any open inline row before adding a full-width element
+			closeInlineRow()
 			local Label = PAGES.Page.Label:Clone()
 			Label.Visible = true
 			Label.Parent = Page
@@ -6202,6 +6214,8 @@ function syde:Init(library)
 				}
 			end
 
+			-- Close any open inline row before adding a full-width element
+			closeInlineRow()
 			local Para = PAGES.Page.Paragraph:Clone()
 			Para.Visible = true
 			Para.Parent = Page
@@ -6552,6 +6566,8 @@ function syde:Init(library)
 				WebHook = Rate.WebHook;
 			}
 
+			-- Close any active inline row before adding full-width rate block
+			closeInlineRow()
 			local RateBlock = PAGES.Page.Rate:Clone()
 			RateBlock.Visible = true
 			RateBlock.Parent = Page

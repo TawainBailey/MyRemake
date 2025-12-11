@@ -1227,6 +1227,14 @@ end
 local UI = Library
 local WINDOW = UI.lib
 WINDOW.BackgroundColor3 = Color3.new(0, 0, 0)
+
+-- Fix black boxes at top (utility buttons)
+WINDOW.Top.UHolder.Util.Mini.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+WINDOW.Top.UHolder.Util.Close.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+WINDOW.Top.UHolder.Util.Plugin.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+WINDOW.Top.UHolder.Util.Settings.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+WINDOW.Top.UHolder.Frame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+
 local TOPBAR = WINDOW.Top
 local TABS = WINDOW.Tab.ScrollingFrame
 local PAGES = WINDOW.Pages
@@ -3363,7 +3371,7 @@ function syde:Init(library)
 					Title = 'Glow Density',
 					Range = {0, 1},
 					Increment = 0.1,
-					StarterValue = 0,
+					StarterValue = 0.1,
 					CallBack = function(v)
 						tweenservice:Create(WINDOW.Shadow.ImageLabel, TweenInfo.new(0.65, Enum.EasingStyle.Exponential), {ImageTransparency = 1 - v}):Play()
 					end,

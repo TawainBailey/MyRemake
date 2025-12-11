@@ -1226,7 +1226,6 @@ end
 -- [UI SETUP]
 local UI = Library
 local WINDOW = UI.lib
-WINDOW.BackgroundColor3 = Color3.new(0, 0, 0)
 local TOPBAR = WINDOW.Top
 local TABS = WINDOW.Tab.ScrollingFrame
 local PAGES = WINDOW.Pages

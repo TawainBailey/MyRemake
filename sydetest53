@@ -45,9 +45,9 @@ local loaded = false
 local syde = {
 
 	theme = {
-		['Accent'] = Color3.fromRGB(0, 123, 255);
-		['HitBox'] = Color3.fromRGB(0, 123, 255);
-		['DropShadow']   = Color3.fromRGB(0, 0, 0);
+		['Accent'] = Color3.fromRGB(220, 20, 60);
+		['HitBox'] = Color3.fromRGB(220, 20, 60);
+		['DropShadow']   = Color3.fromRGB(139, 0, 0);
 
 	};
 	Connections = {};
@@ -1453,9 +1453,9 @@ function syde:Init(library)
 	TOPBAR.Title.Sub.TextColor3 = Color3.new(1,1,1)
 	local subGradient = Instance.new("UIGradient")
 	subGradient.Color = ColorSequence.new{
-		ColorSequenceKeypoint.new(0, Color3.fromRGB(135, 206, 250)),
-		ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 255, 255)),
-		ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 120, 255))
+		ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 102, 102)),    -- light red
+		ColorSequenceKeypoint.new(0.5, Color3.fromRGB(220, 20, 60)),  -- crimson red
+		ColorSequenceKeypoint.new(1, Color3.fromRGB(139, 0, 0))       -- dark red
 	}
 	subGradient.Parent = TOPBAR.Title.Sub
 
@@ -4085,7 +4085,7 @@ function syde:Init(library)
 				arrowIcon.Position = UDim2.new(1, -25, 0.5, -8)
 				arrowIcon.BackgroundTransparency = 1
 				arrowIcon.Image = "rbxassetid://6034818372" -- Down arrow
-				arrowIcon.ImageColor3 = Color3.fromRGB(150, 200, 255)
+				arrowIcon.ImageColor3 = Color3.fromRGB(220, 20, 60)
 				arrowIcon.Parent = Section
 
 				-- Make title clickable
@@ -6103,9 +6103,9 @@ function syde:Init(library)
 			-- Set default bright gradient if not specified
 			if not ParaData.Gradient then
 				ParaData.Gradient = ColorSequence.new{
-					ColorSequenceKeypoint.new(0, Color3.fromRGB(135, 206, 250)),    -- sky blue
-					ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 255, 255)),  -- bright white
-					ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 120, 255))       -- deeper blue
+					ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 102, 102)),    -- light red
+					ColorSequenceKeypoint.new(0.5, Color3.fromRGB(220, 20, 60)),  -- crimson red
+					ColorSequenceKeypoint.new(1, Color3.fromRGB(139, 0, 0))       -- dark red
 				}
 			end
 

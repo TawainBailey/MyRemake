@@ -6618,6 +6618,10 @@ function syde:Init(library)
 						Duration = 3,
 					}
 					print("Configuration loaded successfully from a previous session.")
+					-- Force default settings
+					syde.settings['GDensity'] = 0.7
+					syde.settings['DSmooth'] = 0.5
+					syde.settings['Anon'] = true
 				elseif not success then
 					warn("Syde Configurations Error 〡 " .. tostring(result))
 				end

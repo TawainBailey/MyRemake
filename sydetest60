@@ -3356,7 +3356,7 @@ function syde:Init(library)
 					Title = 'Glow Density',
 					Range = {0, 1},
 					Increment = 0.1,
-					StarterValue = WINDOW.Shadow.ImageLabel.ImageTransparency,
+					StarterValue = 0.7,
 					CallBack = function(v)
 						tweenservice:Create(WINDOW.Shadow.ImageLabel, TweenInfo.new(0.65, Enum.EasingStyle.Exponential), {ImageTransparency = v}):Play()
 					end,
@@ -6619,8 +6619,8 @@ function syde:Init(library)
 					}
 					print("Configuration loaded successfully from a previous session.")
 					-- Force default settings
-					if syde.Flags['GDensity'] then syde.Flags['GDensity'].Value = 0.7 end
-					if syde.Flags['DSmooth'] then syde.Flags['DSmooth'].Value = 0.5 end
+					if syde.SettingsFlags['GDensity'] then syde.SettingsFlags['GDensity'].Value = 0.7 end
+					if syde.SettingsFlags['DSmoothness'] then syde.SettingsFlags['DSmoothness'].Value = 0.5 end
 					if syde.Flags['Anon'] then syde.Flags['Anon'].Value = true end
 				elseif not success then
 					warn("Syde Configurations Error 〡 " .. tostring(result))

@@ -3513,6 +3513,20 @@ function syde:Init(library)
 			end,
 			SFlag = 'Anon'
 		}, WINDOW.Settings.Pages.Privacy.Container)
+
+		if UserInfoDisabled then
+			WINDOW.UserInfo.ImageLabel.text.Username.TextTransparency = 1
+			WINDOW.UserInfo.ImageLabel.text.Display.TextTransparency = 1
+			WINDOW.UserInfo.ImageLabel.UIStroke.Transparency = 1
+			WINDOW.UserInfo.ImageLabel.ImageTransparency = 1
+			WINDOW.UserInfo.ImageLabel.BackgroundTransparency = 1
+			WINDOW.UserInfo.ConnectionStatus.Status.BackgroundTransparency = 1
+			WINDOW.UserInfo.ConnectionStatus.Status.TextLabel.TextTransparency = 1
+			WINDOW.Tab.Size = UDim2.new(0, 200,1, -50)
+			WINDOW.UserInfo.ImageLabel.Image = "rbxassetid://0"
+			WINDOW.UserInfo.ImageLabel.text.Username.Text = '???'
+			WINDOW.UserInfo.ImageLabel.text.Display.Text = '@???'
+		end
 		--local startTime = tick()
 
 		-- breaks ui may add later

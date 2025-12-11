@@ -2739,6 +2739,11 @@ function syde:Init(library)
 					local decimalPlaces = tostring(Options.Increment):match("%.([^0]*)") and #tostring(Options.Increment):match("%.([^0]*)") or 0
 					Slider.v.Text = string.format("<font size='14'>%." .. decimalPlaces .. "f</font><font color='#434343'>/%." .. decimalPlaces .. "f</font>", Options.StarterValue, Options.Range[2])
 
+					-- Apply initial value
+					if Options.CallBack then
+						Options.CallBack(Options.StarterValue)
+					end
+
 
 					local function UpdateSlider(x)
 						if dragging then

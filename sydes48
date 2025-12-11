@@ -45,9 +45,9 @@ local loaded = false
 local syde = {
 
 	theme = {
-		['Accent'] = Color3.fromRGB(0, 123, 255);
-		['HitBox'] = Color3.fromRGB(0, 123, 255);
-		['DropShadow']   = Color3.fromRGB(0, 0, 0);
+		['Accent'] = Color3.fromRGB(220, 20, 60);
+		['HitBox'] = Color3.fromRGB(220, 20, 60);
+		['DropShadow']   = Color3.fromRGB(139, 0, 0);
 
 	};
 	Connections = {};
@@ -380,7 +380,7 @@ function syde:updateLayout(container, spacing)
 	container.CanvasSize = UDim2.new(0, 0, 0, yOffset)
 end
 
-local dragSpeed = 0.6
+local dragSpeed = 0.5
 local LockToScreen = false
 
 function syde:AddDrag(Object, Main, ConstrainToParent)
@@ -1233,7 +1233,7 @@ local settingsOpen = false
 local pluginsOpen = false
 local UIClosed = false
 local Connected = false
-local UserInfoDisabled = false
+local UserInfoDisabled = true
 local UIToggle = Enum.KeyCode.RightShift
 
 function SetUserInfo()
@@ -1311,7 +1311,7 @@ function OpenUI()
 	tweenservice:Create(WINDOW.Top.div, TweenInfo.new(0.4, Enum.EasingStyle.Exponential), {BackgroundTransparency = 0.7 }):Play()
 	tweenservice:Create(WINDOW.Top.Title, TweenInfo.new(0.4, Enum.EasingStyle.Exponential), {TextTransparency = 0 }):Play()
 	tweenservice:Create(WINDOW.Top.Title.Sub, TweenInfo.new(0.4, Enum.EasingStyle.Exponential), {TextTransparency = 0 }):Play()
-	tweenservice:Create(WINDOW.Shadow.ImageLabel, TweenInfo.new(0.4, Enum.EasingStyle.Exponential), {ImageTransparency = 0.5 }):Play()
+	tweenservice:Create(WINDOW.Shadow.ImageLabel, TweenInfo.new(0.4, Enum.EasingStyle.Exponential), {ImageTransparency = 0.7 }):Play()
 	tweenservice:Create(WINDOW.resize, TweenInfo.new(0.4, Enum.EasingStyle.Exponential), {ImageTransparency = 0 }):Play()
 	tweenservice:Create(WINDOW.Top.UHolder.Util.Mini.interact, TweenInfo.new(0.4, Enum.EasingStyle.Exponential), {ImageTransparency = 0 }):Play()
 	tweenservice:Create(WINDOW.Top.UHolder.Util.Close.interact, TweenInfo.new(0.4, Enum.EasingStyle.Exponential), {ImageTransparency = 0 }):Play()
@@ -1321,13 +1321,13 @@ function OpenUI()
 	tweenservice:Create(WINDOW.Top.UHolder.Util.Plugin, TweenInfo.new(0.4, Enum.EasingStyle.Exponential), {BackgroundTransparency = 0.05 }):Play()
 	tweenservice:Create(WINDOW.Top.UHolder.Util.Settings, TweenInfo.new(0.4, Enum.EasingStyle.Exponential), {BackgroundTransparency = 0.05 }):Play()
 	tweenservice:Create(WINDOW.Top.UHolder.Frame, TweenInfo.new(0.4, Enum.EasingStyle.Exponential), {BackgroundTransparency = 0 }):Play()
-	tweenservice:Create(WINDOW.UserInfo.ImageLabel.UIStroke, TweenInfo.new(0.4, Enum.EasingStyle.Exponential), {Transparency = 0 }):Play()
-	tweenservice:Create(WINDOW.UserInfo.ImageLabel, TweenInfo.new(0.4, Enum.EasingStyle.Exponential), {ImageTransparency = 0 }):Play()
-	tweenservice:Create(WINDOW.UserInfo.ImageLabel, TweenInfo.new(0.4, Enum.EasingStyle.Exponential), {BackgroundTransparency = 0 }):Play()
-	tweenservice:Create(WINDOW.UserInfo.ImageLabel.text.Username, TweenInfo.new(0.4, Enum.EasingStyle.Exponential), {TextTransparency = 0 }):Play()
-	tweenservice:Create(WINDOW.UserInfo.ImageLabel.text.Display, TweenInfo.new(0.4, Enum.EasingStyle.Exponential), {TextTransparency = 0 }):Play()
-	tweenservice:Create(WINDOW.UserInfo.ConnectionStatus.Status, TweenInfo.new(0.4, Enum.EasingStyle.Exponential), {BackgroundTransparency = 0 }):Play()
-	tweenservice:Create(WINDOW.UserInfo.ConnectionStatus.Status.TextLabel, TweenInfo.new(0.4, Enum.EasingStyle.Exponential), {TextTransparency = 0 }):Play()
+	tweenservice:Create(WINDOW.UserInfo.ImageLabel.UIStroke, TweenInfo.new(0.4, Enum.EasingStyle.Exponential), {Transparency = UserInfoDisabled and 1 or 0 }):Play()
+	tweenservice:Create(WINDOW.UserInfo.ImageLabel, TweenInfo.new(0.4, Enum.EasingStyle.Exponential), {ImageTransparency = UserInfoDisabled and 1 or 0 }):Play()
+	tweenservice:Create(WINDOW.UserInfo.ImageLabel, TweenInfo.new(0.4, Enum.EasingStyle.Exponential), {BackgroundTransparency = UserInfoDisabled and 1 or 0 }):Play()
+	tweenservice:Create(WINDOW.UserInfo.ImageLabel.text.Username, TweenInfo.new(0.4, Enum.EasingStyle.Exponential), {TextTransparency = UserInfoDisabled and 1 or 0 }):Play()
+	tweenservice:Create(WINDOW.UserInfo.ImageLabel.text.Display, TweenInfo.new(0.4, Enum.EasingStyle.Exponential), {TextTransparency = UserInfoDisabled and 1 or 0 }):Play()
+	tweenservice:Create(WINDOW.UserInfo.ConnectionStatus.Status, TweenInfo.new(0.4, Enum.EasingStyle.Exponential), {BackgroundTransparency = UserInfoDisabled and 1 or 0 }):Play()
+	tweenservice:Create(WINDOW.UserInfo.ConnectionStatus.Status.TextLabel, TweenInfo.new(0.4, Enum.EasingStyle.Exponential), {TextTransparency = UserInfoDisabled and 1 or 0 }):Play()
 end
 
 local BOUNCE = false
@@ -1453,9 +1453,9 @@ function syde:Init(library)
 	TOPBAR.Title.Sub.TextColor3 = Color3.new(1,1,1)
 	local subGradient = Instance.new("UIGradient")
 	subGradient.Color = ColorSequence.new{
-		ColorSequenceKeypoint.new(0, Color3.fromRGB(135, 206, 250)),
-		ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 255, 255)),
-		ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 120, 255))
+		ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)),    -- bright red
+		ColorSequenceKeypoint.new(0.5, Color3.fromRGB(220, 20, 60)),  -- crimson red
+		ColorSequenceKeypoint.new(1, Color3.fromRGB(139, 0, 0))       -- dark red
 	}
 	subGradient.Parent = TOPBAR.Title.Sub
 
@@ -2648,6 +2648,7 @@ function syde:Init(library)
 				Para.Parent = Parent
 				Para.Title.Text = ParaData.Title
 				Para.Content.Text = ParaData.Content
+				Para.Content.TextColor3 = Color3.new(1, 1, 1)
 
 				Para.Content.Size = UDim2.new(1, -20, 0, Para.Content.TextBounds.Y)
 				Para.Size = UDim2.new(1, -15, 0, Para.Content.Size.Y.Offset + 45)
@@ -2738,6 +2739,11 @@ function syde:Init(library)
 
 					local decimalPlaces = tostring(Options.Increment):match("%.([^0]*)") and #tostring(Options.Increment):match("%.([^0]*)") or 0
 					Slider.v.Text = string.format("<font size='14'>%." .. decimalPlaces .. "f</font><font color='#434343'>/%." .. decimalPlaces .. "f</font>", Options.StarterValue, Options.Range[2])
+
+					-- Apply initial value
+					if Options.CallBack then
+						Options.CallBack(Options.StarterValue)
+					end
 
 
 					local function UpdateSlider(x)
@@ -3356,9 +3362,9 @@ function syde:Init(library)
 					Title = 'Glow Density',
 					Range = {0, 1},
 					Increment = 0.1,
-					StarterValue = WINDOW.Shadow.ImageLabel.ImageTransparency,
+					StarterValue = 0.3,
 					CallBack = function(v)
-						tweenservice:Create(WINDOW.Shadow.ImageLabel, TweenInfo.new(0.65, Enum.EasingStyle.Exponential), {ImageTransparency = v}):Play()
+						tweenservice:Create(WINDOW.Shadow.ImageLabel, TweenInfo.new(0.65, Enum.EasingStyle.Exponential), {ImageTransparency = 1 - v}):Play()
 					end,
 					SFlag = 'GDensity',
 					SettingConfig = true,
@@ -3513,6 +3519,20 @@ function syde:Init(library)
 			end,
 			SFlag = 'Anon'
 		}, WINDOW.Settings.Pages.Privacy.Container)
+
+		if UserInfoDisabled then
+			WINDOW.UserInfo.ImageLabel.text.Username.TextTransparency = 1
+			WINDOW.UserInfo.ImageLabel.text.Display.TextTransparency = 1
+			WINDOW.UserInfo.ImageLabel.UIStroke.Transparency = 1
+			WINDOW.UserInfo.ImageLabel.ImageTransparency = 1
+			WINDOW.UserInfo.ImageLabel.BackgroundTransparency = 1
+			WINDOW.UserInfo.ConnectionStatus.Status.BackgroundTransparency = 1
+			WINDOW.UserInfo.ConnectionStatus.Status.TextLabel.TextTransparency = 1
+			WINDOW.Tab.Size = UDim2.new(0, 200,1, -50)
+			WINDOW.UserInfo.ImageLabel.Image = "rbxassetid://0"
+			WINDOW.UserInfo.ImageLabel.text.Username.Text = '???'
+			WINDOW.UserInfo.ImageLabel.text.Display.Text = '@???'
+		end
 		--local startTime = tick()
 
 		-- breaks ui may add later
@@ -4061,9 +4081,9 @@ function syde:Init(library)
 			Section.Title.TextColor3 = Color3.new(1, 1, 1) -- White text for bright gradient
 			local gradient = Instance.new("UIGradient")
 			gradient.Color = ColorSequence.new{
-				ColorSequenceKeypoint.new(0, Color3.fromRGB(135, 206, 250)),    -- sky blue
-				ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 255, 255)),  -- bright white
-				ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 120, 255))       -- deeper blue
+				ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)),    -- bright red
+				ColorSequenceKeypoint.new(0.5, Color3.fromRGB(220, 20, 60)),  -- crimson red
+				ColorSequenceKeypoint.new(1, Color3.fromRGB(139, 0, 0))       -- dark red
 			}
 			gradient.Rotation = 0
 			gradient.Parent = Section.Title
@@ -4085,7 +4105,7 @@ function syde:Init(library)
 				arrowIcon.Position = UDim2.new(1, -25, 0.5, -8)
 				arrowIcon.BackgroundTransparency = 1
 				arrowIcon.Image = "rbxassetid://6034818372" -- Down arrow
-				arrowIcon.ImageColor3 = Color3.fromRGB(150, 200, 255)
+				arrowIcon.ImageColor3 = Color3.fromRGB(220, 20, 60)
 				arrowIcon.Parent = Section
 
 				-- Make title clickable
@@ -6103,9 +6123,9 @@ function syde:Init(library)
 			-- Set default bright gradient if not specified
 			if not ParaData.Gradient then
 				ParaData.Gradient = ColorSequence.new{
-					ColorSequenceKeypoint.new(0, Color3.fromRGB(135, 206, 250)),    -- sky blue
-					ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 255, 255)),  -- bright white
-					ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 120, 255))       -- deeper blue
+					ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)),    -- bright red
+					ColorSequenceKeypoint.new(0.5, Color3.fromRGB(220, 20, 60)),  -- crimson red
+					ColorSequenceKeypoint.new(1, Color3.fromRGB(139, 0, 0))       -- dark red
 				}
 			end
 
@@ -6114,6 +6134,7 @@ function syde:Init(library)
 			Para.Parent = Page
 			Para.Title.Text = ParaData.Title
 			Para.Content.Text = ParaData.Content
+			Para.Content.TextColor3 = Color3.new(1, 1, 1)
 
 			-- Apply gradient to title
 			Para.Title.TextTransparency = 0
@@ -6604,6 +6625,10 @@ function syde:Init(library)
 						Duration = 3,
 					}
 					print("Configuration loaded successfully from a previous session.")
+					-- Force default settings
+					if syde.SettingsFlags['GDensity'] then syde.SettingsFlags['GDensity'].Value = 0.3 end
+					if syde.SettingsFlags['DSmoothness'] then syde.SettingsFlags['DSmoothness'].Value = 0.5 end
+					if syde.Flags['Anon'] then syde.Flags['Anon'].Value = true end
 				elseif not success then
 					warn("Syde Configurations Error 〡 " .. tostring(result))
 				end

@@ -6134,6 +6134,7 @@ function syde:Init(library)
 			Para.Parent = Page
 			Para.Title.Text = ParaData.Title
 			Para.Content.Text = ParaData.Content
+			Para.Content.TextColor3 = Color3.new(1, 1, 1)
 
 			-- Apply gradient to title
 			Para.Title.TextTransparency = 0

@@ -1341,11 +1341,12 @@ function ToggleUI()
 			OpenUI()
 		else
 			CloseUI()
-		end
-	end
-
-	task.delay(0.4, function()
-		BOUNCE = false
+            -- Remove mobile toggle when UI is unloaded
+            local coreGui = game:GetService("CoreGui")
+            local mobilePill = coreGui:FindFirstChild("VexMobilePill")
+            if mobilePill then
+                mobilePill:Destroy()
+            end
 	end)
 end
 

@@ -4086,7 +4086,7 @@ function syde:Init(library)
 			local gradient = Instance.new("UIGradient")
 			gradient.Color = ColorSequence.new{
 				ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 123, 255)),    -- blue
-				ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 255, 255)),  -- white
+				ColorSequenceKeypoint.new(0.5, Color3.fromRGB(135, 206, 235)),  -- sky blue
 				ColorSequenceKeypoint.new(1, Color3.fromRGB(25, 25, 112))       -- midnight blue
 			}
 			gradient.Rotation = 0
@@ -4109,7 +4109,7 @@ function syde:Init(library)
 				arrowIcon.Position = UDim2.new(1, -25, 0.5, -8)
 				arrowIcon.BackgroundTransparency = 1
 				arrowIcon.Image = "rbxassetid://6034818372" -- Down arrow
-				arrowIcon.ImageColor3 = Color3.fromRGB(220, 20, 60)
+				arrowIcon.ImageColor3 = Color3.fromRGB(0, 123, 255)
 				arrowIcon.Parent = Section
 
 				-- Make title clickable
@@ -6128,7 +6128,7 @@ function syde:Init(library)
 			if not ParaData.Gradient then
 				ParaData.Gradient = ColorSequence.new{
 					ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 123, 255)),    -- blue
-					ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 255, 255)),  -- white
+					ColorSequenceKeypoint.new(0.5, Color3.fromRGB(135, 206, 235)),  -- sky blue
 					ColorSequenceKeypoint.new(1, Color3.fromRGB(25, 25, 112))       -- midnight blue
 				}
 			end

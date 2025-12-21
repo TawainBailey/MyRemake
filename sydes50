@@ -45,9 +45,9 @@ local loaded = false
 local syde = {
 
 	theme = {
-		['Accent'] = Color3.fromRGB(220, 20, 60);
-		['HitBox'] = Color3.fromRGB(220, 20, 60);
-		['DropShadow']   = Color3.fromRGB(139, 0, 0);
+		['Accent'] = Color3.fromRGB(0, 123, 255);
+		['HitBox'] = Color3.fromRGB(0, 123, 255);
+		['DropShadow']   = Color3.fromRGB(0, 47, 95);
 
 	};
 	Connections = {};
@@ -709,17 +709,17 @@ do
 		local Styles = {
 			GitHub = {
 				BackGroundColor = Color3.fromRGB(39, 39, 39);
-				GradColor = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(255, 255, 255)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(129, 129, 129))};
+				GradColor = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(255, 255, 255)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(70, 130, 180))};
 				StrokeColor = Color3.fromRGB(34, 34, 34)
 			},
 			Discord = {
 				BackGroundColor = Color3.fromRGB(88, 141, 255);
-				GradColor = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(255, 255, 255)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(91, 125, 147))};
+				GradColor = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(255, 255, 255)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(0, 123, 255))};
 				StrokeColor = Color3.fromRGB(88, 141, 255)
 			},
 			Site = {
 				BackGroundColor = Color3.fromRGB(39, 11, 34);
-				GradColor = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(255, 255, 255)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(181, 33, 255))};
+				GradColor = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(255, 255, 255)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(25, 25, 112))};
 				StrokeColor = Color3.fromRGB(67, 19, 59)
 			}
 		}
@@ -1453,9 +1453,9 @@ function syde:Init(library)
 	TOPBAR.Title.Sub.TextColor3 = Color3.new(1,1,1)
 	local subGradient = Instance.new("UIGradient")
 	subGradient.Color = ColorSequence.new{
-		ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)),    -- bright red
-		ColorSequenceKeypoint.new(0.5, Color3.fromRGB(220, 20, 60)),  -- crimson red
-		ColorSequenceKeypoint.new(1, Color3.fromRGB(139, 0, 0))       -- dark red
+		ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 123, 255)),    -- blue
+		ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 255, 255)),  -- white
+		ColorSequenceKeypoint.new(1, Color3.fromRGB(25, 25, 112))       -- midnight blue
 	}
 	subGradient.Parent = TOPBAR.Title.Sub
 
@@ -1612,6 +1612,10 @@ function syde:Init(library)
 			Content = 'Are You Sure You Want To Close This UI?',
 			ConfimCallBack = function()
 				task.wait(1)
+				if _G.mobilePill then
+					_G.mobilePill:Destroy()
+					_G.mobilePill = nil
+				end
 				Library:Destroy()
 			end,
 		})
@@ -4081,9 +4085,9 @@ function syde:Init(library)
 			Section.Title.TextColor3 = Color3.new(1, 1, 1) -- White text for bright gradient
 			local gradient = Instance.new("UIGradient")
 			gradient.Color = ColorSequence.new{
-				ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)),    -- bright red
-				ColorSequenceKeypoint.new(0.5, Color3.fromRGB(220, 20, 60)),  -- crimson red
-				ColorSequenceKeypoint.new(1, Color3.fromRGB(139, 0, 0))       -- dark red
+				ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 123, 255)),    -- blue
+				ColorSequenceKeypoint.new(0.5, Color3.fromRGB(135, 206, 235)),  -- sky blue
+				ColorSequenceKeypoint.new(1, Color3.fromRGB(25, 25, 112))       -- midnight blue
 			}
 			gradient.Rotation = 0
 			gradient.Parent = Section.Title
@@ -4105,7 +4109,7 @@ function syde:Init(library)
 				arrowIcon.Position = UDim2.new(1, -25, 0.5, -8)
 				arrowIcon.BackgroundTransparency = 1
 				arrowIcon.Image = "rbxassetid://6034818372" -- Down arrow
-				arrowIcon.ImageColor3 = Color3.fromRGB(220, 20, 60)
+				arrowIcon.ImageColor3 = Color3.fromRGB(0, 123, 255)
 				arrowIcon.Parent = Section
 
 				-- Make title clickable
@@ -6123,9 +6127,9 @@ function syde:Init(library)
 			-- Set default bright gradient if not specified
 			if not ParaData.Gradient then
 				ParaData.Gradient = ColorSequence.new{
-					ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)),    -- bright red
-					ColorSequenceKeypoint.new(0.5, Color3.fromRGB(220, 20, 60)),  -- crimson red
-					ColorSequenceKeypoint.new(1, Color3.fromRGB(139, 0, 0))       -- dark red
+					ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 123, 255)),    -- blue
+					ColorSequenceKeypoint.new(0.5, Color3.fromRGB(135, 206, 235)),  -- sky blue
+					ColorSequenceKeypoint.new(1, Color3.fromRGB(25, 25, 112))       -- midnight blue
 				}
 			end
 

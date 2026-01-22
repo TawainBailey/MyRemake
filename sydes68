@@ -6716,6 +6716,50 @@ function syde:Init(library)
 				syde:updateLayout(Page, 7)
 			end
 
+			local function loadTabContent(tabId)
+				-- Load content for a tab without the same-tab check (used for initialization)
+				currentTab = tabId
+
+				-- Update tab button styles
+				for _, tabBtn in ipairs(tabButtons) do
+					local isActive = (tabBtn.Name == tabId)
+					tweenservice:Create(tabBtn, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {
+						BackgroundColor3 = isActive and syde.theme.Accent or Color3.fromRGB(35, 35, 35),
+						BackgroundTransparency = isActive and 0 or 0.8
+					}):Play()
+					tweenservice:Create(tabBtn, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {
+						TextColor3 = isActive and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(140, 140, 140)
+					}):Play()
+				end
+
+				-- Clear existing content completely
+				clearTabContent()
+
+				-- Load new content only for the active tab
+				if TabGroupData.Content[tabId] then
+					-- Create a local parent management system for this TabGroup
+					local originalDefaultParent = defaultParent
+					local function localSetParent(newParent)
+						defaultParent = newParent
+					end
+					
+					-- Temporarily set parent to this TabGroup's content container
+					localSetParent(contentContainer)
+					
+					-- Execute the content function for this tab
+					local success, errorMsg = pcall(TabGroupData.Content[tabId])
+					if not success then
+						warn("[TabGroup] Error loading content for tab '" .. tabId .. "': " .. errorMsg)
+					end
+					
+					-- Restore original parent
+					localSetParent(originalDefaultParent)
+				end
+
+				-- Update layout after content change
+				syde:updateLayout(Page, 7)
+			end
+
 			-- Create tab buttons
 			for i, tabData in ipairs(TabGroupData.Tabs) do
 				local tabButton = Instance.new("TextButton")
@@ -6765,7 +6809,7 @@ function syde:Init(library)
 
 			-- Initialize first tab
 			if currentTab then
-				switchTab(currentTab)
+				loadTabContent(currentTab)
 			end
 
 			-- Register with current section

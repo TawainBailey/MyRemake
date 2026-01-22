@@ -3609,32 +3609,52 @@ function syde:Init(library)
 		--[Category Setup]
 		if tab.Category then
 			if not ldata.categories[tab.Category] then
-				ldata.categories[tab.Category] = {}
+				ldata.categories[tab.Category] = { container = nil, tabs = {} }
+				local CategoryContainer = Instance.new("Frame")
+				CategoryContainer.Name = "CategoryContainer_" .. tab.Category
+				CategoryContainer.Size = UDim2.new(1, 0, 0, 0)
+				CategoryContainer.BackgroundTransparency = 1
+				CategoryContainer.Parent = TABS
+				
+				local stroke = Instance.new("UIStroke")
+				stroke.Color = Color3.fromRGB(100, 100, 100)
+				stroke.Thickness = 1
+				stroke.Parent = CategoryContainer
+				
+				local corner = Instance.new("UICorner")
+				corner.CornerRadius = UDim.new(0, 6)
+				corner.Parent = CategoryContainer
+				
+				local listLayout = Instance.new("UIListLayout")
+				listLayout.Parent = CategoryContainer
+				listLayout.SortOrder = Enum.SortOrder.LayoutOrder
+				listLayout.Padding = UDim.new(0, 2)
+				
+				ldata.categories[tab.Category].container = CategoryContainer
+				
 				local CategoryLabel = Instance.new("TextLabel")
 				CategoryLabel.Name = "Category_" .. tab.Category
 				CategoryLabel.Text = tab.Category
 				CategoryLabel.Size = UDim2.new(1, -8, 0, 20)
 				CategoryLabel.BackgroundTransparency = 1
-				CategoryLabel.TextColor3 = Color3.fromRGB(169, 169, 169) -- light gray
+				CategoryLabel.TextColor3 = Color3.fromRGB(169, 169, 169)
 				CategoryLabel.TextXAlignment = Enum.TextXAlignment.Left
 				CategoryLabel.Font = Enum.Font.SourceSans
 				CategoryLabel.TextSize = 14
-				CategoryLabel.Parent = TABS
+				CategoryLabel.LayoutOrder = 1
+				CategoryLabel.Parent = CategoryContainer
 			end
-			table.insert(ldata.categories[tab.Category], Tab)
+			table.insert(ldata.categories[tab.Category].tabs, Tab)
 		end
 		
 		--[Tab Setup]
 		local Tab = TABS.Tb:Clone()
 		Tab.Visible = true
-		Tab.Parent = TABS
-		
-		-- Add border for categorized tabs
 		if tab.Category then
-			local stroke = Instance.new("UIStroke")
-			stroke.Color = Color3.fromRGB(100, 100, 100) -- gray
-			stroke.Thickness = 1
-			stroke.Parent = Tab
+			Tab.Parent = ldata.categories[tab.Category].container
+			Tab.LayoutOrder = #ldata.categories[tab.Category].tabs + 1
+		else
+			Tab.Parent = TABS
 		end
 		Tab.Size = UDim2.new(1, -8, 0, 35)
 		Tab.Title.Text = TabData.Title

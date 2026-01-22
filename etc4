@@ -1,0 +1,1201 @@
+-- Modern Dark UI Library for Roblox
+-- Exact color theme from the React version
+-- Place this in StarterGui or StarterPlayerScripts as a LocalScript
+
+local UILibrary = {}
+
+-- Services
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+local Players = game:GetService("Players")
+
+-- Wait for player
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
+-- Create ScreenGui
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "ModernRobloxUI"
+screenGui.ResetOnSpawn = false
+screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+screenGui.Parent = playerGui
+
+-- Theme Colors (Darker, more polished look)
+local theme = {
+	background = Color3.fromRGB(18, 18, 18),      -- Darker background
+	foreground = Color3.fromRGB(242, 242, 242),
+	panel = Color3.fromRGB(26, 26, 26),           -- Darker panel
+	accentPanel = Color3.fromRGB(32, 32, 32),     -- Darker accent
+	hover = Color3.fromRGB(45, 45, 45),
+	active = Color3.fromRGB(55, 55, 55),
+	accentBright = Color3.fromRGB(89, 89, 89),
+	muted = Color3.fromRGB(140, 140, 140),
+	mutedDark = Color3.fromRGB(100, 100, 100),    -- Darker muted text
+	border = Color3.fromRGB(40, 40, 40),
+}
+
+-- State
+local currentSection = "aimbot-main"
+local currentTab = "common"
+local sectionConfigs = {}
+
+-- Helper Functions
+local function createRound(parent, radius)
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(0, radius or 12)
+	corner.Parent = parent
+	return corner
+end
+
+local function tween(object, properties, duration)
+	local tweenInfo = TweenInfo.new(duration or 0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+	local tweenObj = TweenService:Create(object, tweenInfo, properties)
+	tweenObj:Play()
+	return tweenObj
+end
+
+function UILibrary:Init(config)
+	config = config or {}
+	local title = config.Title or "Roblox UI"
+	local subText = config.SubText or "Modern Dark UI"
+
+	-- Main Container
+	local mainFrame = Instance.new("Frame")
+	mainFrame.Name = "MainContainer"
+	mainFrame.Size = UDim2.new(0, 1100, 0, 650)
+	mainFrame.Position = UDim2.new(0.5, -550, 0.5, -325)
+	mainFrame.BackgroundColor3 = theme.background
+	mainFrame.BorderSizePixel = 0
+	mainFrame.Parent = screenGui
+	createRound(mainFrame, 12)
+
+-- Sidebar
+local sidebar = Instance.new("ScrollingFrame")
+sidebar.Name = "Sidebar"
+sidebar.Size = UDim2.new(0, 270, 1, 0)
+sidebar.BackgroundColor3 = theme.panel
+sidebar.BorderSizePixel = 0
+sidebar.ScrollBarThickness = 0
+sidebar.CanvasSize = UDim2.new(0, 0, 0, 0)
+sidebar.AutomaticCanvasSize = Enum.AutomaticSize.Y
+sidebar.Parent = mainFrame
+createRound(sidebar, 12)
+
+local sidebarPadding = Instance.new("UIPadding")
+sidebarPadding.PaddingTop = UDim.new(0, 16)
+sidebarPadding.PaddingBottom = UDim.new(0, 16)
+sidebarPadding.PaddingLeft = UDim.new(0, 16)
+sidebarPadding.PaddingRight = UDim.new(0, 16)
+sidebarPadding.Parent = sidebar
+
+local sidebarList = Instance.new("UIListLayout")
+sidebarList.Padding = UDim.new(0, 12)
+sidebarList.SortOrder = Enum.SortOrder.LayoutOrder
+sidebarList.Parent = sidebar
+
+-- Sidebar Header
+local sidebarHeader = Instance.new("Frame")
+sidebarHeader.Name = "Header"
+sidebarHeader.Size = UDim2.new(1, 0, 0, 32)
+sidebarHeader.BackgroundTransparency = 1
+sidebarHeader.LayoutOrder = 0
+sidebarHeader.Parent = sidebar
+
+local headerIcon = Instance.new("Frame")
+headerIcon.Size = UDim2.new(0, 32, 0, 32)
+headerIcon.Position = UDim2.new(0, 0, 0, 0)
+headerIcon.BackgroundColor3 = theme.accentPanel
+headerIcon.BorderSizePixel = 0
+headerIcon.Parent = sidebarHeader
+createRound(headerIcon, 8)
+
+local headerTitle = Instance.new("TextLabel")
+headerTitle.Size = UDim2.new(1, -40, 1, 0)
+headerTitle.Position = UDim2.new(0, 40, 0, 0)
+headerTitle.BackgroundTransparency = 1
+headerTitle.Font = Enum.Font.GothamBold
+headerTitle.Text = "Roblox UI"
+headerTitle.TextColor3 = theme.foreground
+headerTitle.TextSize = 14
+headerTitle.TextXAlignment = Enum.TextXAlignment.Left
+headerTitle.Parent = sidebarHeader
+
+-- Main Panel
+local mainPanel = Instance.new("Frame")
+mainPanel.Name = "MainPanel"
+mainPanel.Size = UDim2.new(1, -282, 1, -12)
+mainPanel.Position = UDim2.new(0, 276, 0, 6)
+mainPanel.BackgroundColor3 = theme.panel
+mainPanel.BorderSizePixel = 0
+mainPanel.Parent = mainFrame
+createRound(mainPanel, 12)
+
+local panelPadding = Instance.new("UIPadding")
+panelPadding.PaddingTop = UDim.new(0, 24)
+panelPadding.PaddingBottom = UDim.new(0, 24)
+panelPadding.PaddingLeft = UDim.new(0, 24)
+panelPadding.PaddingRight = UDim.new(0, 24)
+panelPadding.Parent = mainPanel
+
+-- Panel Header Container
+local panelHeaderContainer = Instance.new("Frame")
+panelHeaderContainer.Name = "HeaderContainer"
+panelHeaderContainer.Size = UDim2.new(1, 0, 0, 0)
+panelHeaderContainer.AutomaticSize = Enum.AutomaticSize.Y
+panelHeaderContainer.BackgroundTransparency = 1
+panelHeaderContainer.Parent = mainPanel
+
+local headerLayout = Instance.new("UIListLayout")
+headerLayout.Padding = UDim.new(0, 16)
+headerLayout.SortOrder = Enum.SortOrder.LayoutOrder
+headerLayout.Parent = panelHeaderContainer
+
+-- Panel Header
+local panelHeader = Instance.new("Frame")
+panelHeader.Name = "Header"
+panelHeader.Size = UDim2.new(1, 0, 0, 60)
+panelHeader.BackgroundTransparency = 1
+panelHeader.LayoutOrder = 1
+panelHeader.Parent = panelHeaderContainer
+
+local panelIcon = Instance.new("Frame")
+panelIcon.Name = "Icon"
+panelIcon.Size = UDim2.new(0, 48, 0, 48)
+panelIcon.BackgroundColor3 = theme.accentPanel
+panelIcon.BorderSizePixel = 0
+panelIcon.Parent = panelHeader
+createRound(panelIcon, 12)
+
+local panelTitle = Instance.new("TextLabel")
+panelTitle.Name = "Title"
+panelTitle.Size = UDim2.new(1, -60, 0, 24)
+panelTitle.Position = UDim2.new(0, 60, 0, 0)
+panelTitle.BackgroundTransparency = 1
+panelTitle.Font = Enum.Font.GothamBold
+panelTitle.Text = "Aimbot Settings"
+panelTitle.TextColor3 = theme.foreground
+panelTitle.TextSize = 20
+panelTitle.TextXAlignment = Enum.TextXAlignment.Left
+panelTitle.Parent = panelHeader
+
+local panelDesc = Instance.new("TextLabel")
+panelDesc.Name = "Description"
+panelDesc.Size = UDim2.new(1, -60, 0, 18)
+panelDesc.Position = UDim2.new(0, 60, 0, 30)
+panelDesc.BackgroundTransparency = 1
+panelDesc.Font = Enum.Font.Gotham
+panelDesc.Text = "Configure your aimbot preferences"
+panelDesc.TextColor3 = theme.mutedDark
+panelDesc.TextSize = 13
+panelDesc.TextXAlignment = Enum.TextXAlignment.Left
+panelDesc.Parent = panelHeader
+
+-- Tab Container
+local tabContainerOuter = Instance.new("Frame")
+tabContainerOuter.Name = "TabContainerOuter"
+tabContainerOuter.Size = UDim2.new(1, 0, 0, 48)
+tabContainerOuter.BackgroundColor3 = theme.accentPanel
+tabContainerOuter.BorderSizePixel = 0
+tabContainerOuter.LayoutOrder = 2
+tabContainerOuter.Parent = panelHeaderContainer
+createRound(tabContainerOuter, 10)
+
+local tabContainerPadding = Instance.new("UIPadding")
+tabContainerPadding.PaddingTop = UDim.new(0, 6)
+tabContainerPadding.PaddingBottom = UDim.new(0, 6)
+tabContainerPadding.PaddingLeft = UDim.new(0, 6)
+tabContainerPadding.PaddingRight = UDim.new(0, 6)
+tabContainerPadding.Parent = tabContainerOuter
+
+local tabContainer = Instance.new("Frame")
+tabContainer.Name = "Tabs"
+tabContainer.Size = UDim2.new(1, 0, 1, 0)
+tabContainer.BackgroundTransparency = 1
+tabContainer.Parent = tabContainerOuter
+
+local tabList = Instance.new("UIListLayout")
+tabList.FillDirection = Enum.FillDirection.Horizontal
+tabList.Padding = UDim.new(0, 4)
+tabList.SortOrder = Enum.SortOrder.LayoutOrder
+tabList.Parent = tabContainer
+
+-- Content Container
+local contentContainer = Instance.new("ScrollingFrame")
+contentContainer.Name = "Content"
+contentContainer.Size = UDim2.new(1, 0, 1, 0)
+contentContainer.BackgroundTransparency = 1
+contentContainer.BorderSizePixel = 0
+contentContainer.ScrollBarThickness = 0
+contentContainer.CanvasSize = UDim2.new(0, 0, 0, 0)
+contentContainer.AutomaticCanvasSize = Enum.AutomaticSize.Y
+contentContainer.Parent = mainPanel
+
+local contentList = Instance.new("UIListLayout")
+contentList.Padding = UDim.new(0, 16)
+contentList.SortOrder = Enum.SortOrder.LayoutOrder
+contentList.Parent = contentContainer
+
+local contentPadding = Instance.new("UIPadding")
+contentPadding.PaddingTop = UDim.new(0, 140)
+contentPadding.Parent = contentContainer
+
+-- Tab Buttons Storage
+local tabButtons = {}
+
+-- Functions
+local function clearContent()
+	for _, child in ipairs(contentContainer:GetChildren()) do
+		if child:IsA("Frame") and child.Name == "SettingCard" then 
+			child:Destroy() 
+		end
+	end
+end
+
+local function updateTabs(sectionId)
+	for _, tab in ipairs(tabButtons) do
+		tab:Destroy()
+	end
+	tabButtons = {}
+	
+	local config = sectionConfigs[sectionId]
+	if not config then return end
+	
+	for i, tabData in ipairs(config.tabs) do
+		local isActive = (tabData.id == currentTab)
+		
+		local tab = Instance.new("TextButton")
+		tab.Name = tabData.id
+		tab.Size = UDim2.new(0, 100, 1, 0)
+		tab.BackgroundColor3 = isActive and theme.active or Color3.fromRGB(0, 0, 0)
+		tab.BackgroundTransparency = isActive and 0 or 1
+		tab.BorderSizePixel = 0
+		tab.AutoButtonColor = false
+		tab.Font = Enum.Font.GothamMedium
+		tab.Text = tabData.label
+		tab.TextColor3 = isActive and theme.foreground or theme.muted
+		tab.TextSize = 13
+		tab.LayoutOrder = i
+		tab.Parent = tabContainer
+		createRound(tab, 8)
+		
+		tab.MouseEnter:Connect(function()
+			if currentTab ~= tabData.id then
+				tween(tab, {BackgroundColor3 = theme.hover, BackgroundTransparency = 0})
+			end
+		end)
+		
+		tab.MouseLeave:Connect(function()
+			if currentTab ~= tabData.id then
+				tween(tab, {BackgroundTransparency = 1})
+			end
+		end)
+		
+		tab.MouseButton1Click:Connect(function()
+			currentTab = tabData.id
+			
+			for _, otherTab in ipairs(tabButtons) do
+				local isNowActive = (otherTab.Name == tabData.id)
+				tween(otherTab, {
+					BackgroundColor3 = isNowActive and theme.active or Color3.fromRGB(0, 0, 0),
+					BackgroundTransparency = isNowActive and 0 or 1,
+					TextColor3 = isNowActive and theme.foreground or theme.muted
+				})
+			end
+			
+			clearContent()
+			if config.content[tabData.id] then
+				config.content[tabData.id]()
+			end
+		end)
+		
+		table.insert(tabButtons, tab)
+	end
+end
+
+local function switchSection(sectionId)
+	currentSection = sectionId
+	local config = sectionConfigs[sectionId]
+	if not config then return end
+	
+	panelTitle.Text = config.title
+	panelDesc.Text = config.description
+	currentTab = config.tabs[1].id
+	
+	updateTabs(sectionId)
+	clearContent()
+	if config.content[currentTab] then
+		config.content[currentTab]()
+	end
+end
+
+-- UI Component Functions
+function UILibrary:CreateSidebarCategory(title, order)
+	local categoryFrame = Instance.new("Frame")
+	categoryFrame.Name = title
+	categoryFrame.Size = UDim2.new(1, 0, 0, 0)
+	categoryFrame.AutomaticSize = Enum.AutomaticSize.Y
+	categoryFrame.BackgroundTransparency = 1
+	categoryFrame.LayoutOrder = order
+	categoryFrame.Parent = sidebar
+	
+	local categoryList = Instance.new("UIListLayout")
+	categoryList.Padding = UDim.new(0, 4)
+	categoryList.SortOrder = Enum.SortOrder.LayoutOrder
+	categoryList.Parent = categoryFrame
+	
+	local header = Instance.new("TextLabel")
+	header.Name = "Header"
+	header.Size = UDim2.new(1, 0, 0, 28)
+	header.BackgroundTransparency = 1
+	header.Font = Enum.Font.GothamBold
+	header.Text = title:upper()
+	header.TextColor3 = theme.mutedDark
+	header.TextSize = 10
+	header.TextXAlignment = Enum.TextXAlignment.Left
+	header.LayoutOrder = 0
+	header.Parent = categoryFrame
+	
+	local itemsContainer = Instance.new("Frame")
+	itemsContainer.Name = "Items"
+	itemsContainer.Size = UDim2.new(1, 0, 0, 0)
+	itemsContainer.AutomaticSize = Enum.AutomaticSize.Y
+	itemsContainer.BackgroundColor3 = theme.accentPanel
+	itemsContainer.BorderSizePixel = 0
+	itemsContainer.LayoutOrder = 1
+	itemsContainer.Parent = categoryFrame
+	createRound(itemsContainer, 12)
+	
+	local itemsPadding = Instance.new("UIPadding")
+	itemsPadding.PaddingTop = UDim.new(0, 8)
+	itemsPadding.PaddingBottom = UDim.new(0, 8)
+	itemsPadding.PaddingLeft = UDim.new(0, 8)
+	itemsPadding.PaddingRight = UDim.new(0, 8)
+	itemsPadding.Parent = itemsContainer
+	
+	local itemsList = Instance.new("UIListLayout")
+	itemsList.Padding = UDim.new(0, 4)
+	itemsList.SortOrder = Enum.SortOrder.LayoutOrder
+	itemsList.Parent = itemsContainer
+	
+	return itemsContainer
+end
+
+function UILibrary:CreateSidebarButton(parent, label, sectionId, order)
+	local button = Instance.new("TextButton")
+	button.Name = sectionId
+	button.Size = UDim2.new(1, 0, 0, 40)
+	button.BackgroundColor3 = theme.accentPanel
+	button.BorderSizePixel = 0
+	button.AutoButtonColor = false
+	button.Font = Enum.Font.GothamMedium
+	button.Text = "  " .. label
+	button.TextColor3 = theme.mutedDark
+	button.TextSize = 14
+	button.TextXAlignment = Enum.TextXAlignment.Left
+	button.LayoutOrder = order
+	button.Parent = parent
+	createRound(button, 10)
+	
+	button.MouseEnter:Connect(function()
+		if currentSection ~= sectionId then
+			tween(button, {BackgroundColor3 = theme.hover, TextColor3 = theme.foreground})
+		end
+	end)
+	
+	button.MouseLeave:Connect(function()
+		if currentSection ~= sectionId then
+			tween(button, {BackgroundColor3 = theme.accentPanel, TextColor3 = theme.mutedDark})
+		end
+	end)
+	
+	button.MouseButton1Click:Connect(function()
+		for _, btn in ipairs(parent:GetChildren()) do
+			if btn:IsA("TextButton") then
+				local isActive = (btn.Name == sectionId)
+				tween(btn, {
+					BackgroundColor3 = isActive and theme.active or theme.accentPanel,
+					TextColor3 = isActive and theme.foreground or theme.mutedDark
+				})
+			end
+		end
+		switchSection(sectionId)
+	end)
+	
+	return button
+end
+
+function UILibrary:CreateSettingCard(title)
+	local card = Instance.new("Frame")
+	card.Name = "SettingCard"
+	card.Size = UDim2.new(1, 0, 0, 0)
+	card.AutomaticSize = Enum.AutomaticSize.Y
+	card.BackgroundColor3 = theme.accentPanel
+	card.BorderSizePixel = 0
+	card.Parent = contentContainer
+	createRound(card, 12)
+	
+	local cardPadding = Instance.new("UIPadding")
+	cardPadding.PaddingTop = UDim.new(0, 20)
+	cardPadding.PaddingBottom = UDim.new(0, 20)
+	cardPadding.PaddingLeft = UDim.new(0, 20)
+	cardPadding.PaddingRight = UDim.new(0, 20)
+	cardPadding.Parent = card
+	
+	local cardList = Instance.new("UIListLayout")
+	cardList.Padding = UDim.new(0, 16)
+	cardList.SortOrder = Enum.SortOrder.LayoutOrder
+	cardList.Parent = card
+	
+	if title then
+		local dividerContainer = Instance.new("Frame")
+		dividerContainer.Size = UDim2.new(1, 0, 0, 20)
+		dividerContainer.BackgroundTransparency = 1
+		dividerContainer.LayoutOrder = 0
+		dividerContainer.Parent = card
+		
+		local leftLine = Instance.new("Frame")
+		leftLine.Size = UDim2.new(0.35, 0, 0, 1)
+		leftLine.Position = UDim2.new(0, 0, 0.5, 0)
+		leftLine.BackgroundColor3 = theme.border
+		leftLine.BorderSizePixel = 0
+		leftLine.Parent = dividerContainer
+		
+		local titleLabel = Instance.new("TextLabel")
+		titleLabel.Size = UDim2.new(0, 0, 1, 0)
+		titleLabel.Position = UDim2.new(0.5, 0, 0, 0)
+		titleLabel.AnchorPoint = Vector2.new(0.5, 0)
+		titleLabel.AutomaticSize = Enum.AutomaticSize.X
+		titleLabel.BackgroundTransparency = 1
+		titleLabel.Font = Enum.Font.GothamMedium
+		titleLabel.Text = title:upper()
+		titleLabel.TextColor3 = theme.mutedDark
+		titleLabel.TextSize = 10
+		titleLabel.Parent = dividerContainer
+		
+		local rightLine = Instance.new("Frame")
+		rightLine.Size = UDim2.new(0.35, 0, 0, 1)
+		rightLine.Position = UDim2.new(0.65, 0, 0.5, 0)
+		rightLine.BackgroundColor3 = theme.border
+		rightLine.BorderSizePixel = 0
+		rightLine.Parent = dividerContainer
+	end
+	
+	return card
+end
+
+function UILibrary:CreateToggle(parent, label, description, default, callback)
+	local container = Instance.new("Frame")
+	container.Size = UDim2.new(1, 0, 0, description and 48 or 32)
+	container.BackgroundTransparency = 1
+	container.Parent = parent
+	
+	local labelText = Instance.new("TextLabel")
+	labelText.Size = UDim2.new(1, -56, 0, 18)
+	labelText.BackgroundTransparency = 1
+	labelText.Font = Enum.Font.GothamMedium
+	labelText.Text = label
+	labelText.TextColor3 = theme.foreground
+	labelText.TextSize = 13
+	labelText.TextXAlignment = Enum.TextXAlignment.Left
+	labelText.TextYAlignment = Enum.TextYAlignment.Top
+	labelText.Parent = container
+	
+	if description then
+		local descText = Instance.new("TextLabel")
+		descText.Size = UDim2.new(1, -56, 0, 16)
+		descText.Position = UDim2.new(0, 0, 0, 20)
+		descText.BackgroundTransparency = 1
+		descText.Font = Enum.Font.Gotham
+		descText.Text = description
+		descText.TextColor3 = theme.muted
+		descText.TextSize = 11
+		descText.TextXAlignment = Enum.TextXAlignment.Left
+		descText.TextYAlignment = Enum.TextYAlignment.Top
+		descText.Parent = container
+	end
+	
+	local toggle = Instance.new("TextButton")
+	toggle.Size = UDim2.new(0, 44, 0, 24)
+	toggle.Position = UDim2.new(1, -44, 0, 4)
+	toggle.BackgroundColor3 = default and theme.accentBright or theme.accentPanel
+	toggle.BorderSizePixel = 0
+	toggle.AutoButtonColor = false
+	toggle.Text = ""
+	toggle.Parent = container
+	createRound(toggle, 12)
+	
+	local knob = Instance.new("Frame")
+	knob.Size = UDim2.new(0, 16, 0, 16)
+	knob.Position = default and UDim2.new(1, -20, 0.5, -8) or UDim2.new(0, 4, 0.5, -8)
+	knob.BackgroundColor3 = theme.foreground
+	knob.BorderSizePixel = 0
+	knob.Parent = toggle
+	createRound(knob, 8)
+	
+	local enabled = default
+	toggle.MouseButton1Click:Connect(function()
+		enabled = not enabled
+		tween(toggle, {BackgroundColor3 = enabled and theme.accentBright or theme.accentPanel})
+		tween(knob, {Position = enabled and UDim2.new(1, -20, 0.5, -8) or UDim2.new(0, 4, 0.5, -8)})
+		if callback then callback(enabled) end
+	end)
+	
+	return container
+end
+
+function UILibrary:CreateSlider(parent, label, description, value, min, max, unit, callback)
+	local container = Instance.new("Frame")
+	container.Size = UDim2.new(1, 0, 0, description and 68 or 52)
+	container.BackgroundTransparency = 1
+	container.Parent = parent
+	
+	local labelText = Instance.new("TextLabel")
+	labelText.Size = UDim2.new(1, -60, 0, 18)
+	labelText.BackgroundTransparency = 1
+	labelText.Font = Enum.Font.GothamMedium
+	labelText.Text = label
+	labelText.TextColor3 = theme.foreground
+	labelText.TextSize = 13
+	labelText.TextXAlignment = Enum.TextXAlignment.Left
+	labelText.Parent = container
+	
+	local valueLabel = Instance.new("TextLabel")
+	valueLabel.Size = UDim2.new(0, 55, 0, 18)
+	valueLabel.Position = UDim2.new(1, -55, 0, 0)
+	valueLabel.BackgroundTransparency = 1
+	valueLabel.Font = Enum.Font.GothamMedium
+	valueLabel.Text = tostring(value) .. (unit or "")
+	valueLabel.TextColor3 = theme.muted
+	valueLabel.TextSize = 13
+	valueLabel.TextXAlignment = Enum.TextXAlignment.Right
+	valueLabel.Parent = container
+	
+	if description then
+		local descText = Instance.new("TextLabel")
+		descText.Size = UDim2.new(1, -60, 0, 16)
+		descText.Position = UDim2.new(0, 0, 0, 20)
+		descText.BackgroundTransparency = 1
+		descText.Font = Enum.Font.Gotham
+		descText.Text = description
+		descText.TextColor3 = theme.muted
+		descText.TextSize = 11
+		descText.TextXAlignment = Enum.TextXAlignment.Left
+		descText.Parent = container
+	end
+	
+	local sliderBg = Instance.new("Frame")
+	sliderBg.Size = UDim2.new(1, 0, 0, 8)
+	sliderBg.Position = UDim2.new(0, 0, 1, -8)
+	sliderBg.BackgroundColor3 = theme.accentPanel
+	sliderBg.BorderSizePixel = 0
+	sliderBg.Parent = container
+	createRound(sliderBg, 4)
+	
+	local sliderFill = Instance.new("Frame")
+	sliderFill.Size = UDim2.new((value - min) / (max - min), 0, 1, 0)
+	sliderFill.BackgroundColor3 = theme.accentBright
+	sliderFill.BorderSizePixel = 0
+	sliderFill.Parent = sliderBg
+	createRound(sliderFill, 4)
+	
+	local sliderKnob = Instance.new("Frame")
+	sliderKnob.Size = UDim2.new(0, 16, 0, 16)
+	sliderKnob.Position = UDim2.new(1, -8, 0.5, -8)
+	sliderKnob.BackgroundColor3 = theme.foreground
+	sliderKnob.BorderSizePixel = 0
+	sliderKnob.ZIndex = 2
+	sliderKnob.Parent = sliderFill
+	createRound(sliderKnob, 8)
+	
+	local dragging = false
+	local function updateSlider(input)
+		local pos = math.clamp((input.Position.X - sliderBg.AbsolutePosition.X) / sliderBg.AbsoluteSize.X, 0, 1)
+		local newValue = math.floor(min + (max - min) * pos)
+		sliderFill.Size = UDim2.new(pos, 0, 1, 0)
+		valueLabel.Text = tostring(newValue) .. (unit or "")
+		if callback then callback(newValue) end
+	end
+	
+	sliderBg.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 then
+			dragging = true
+			updateSlider(input)
+		end
+	end)
+	
+	UserInputService.InputChanged:Connect(function(input)
+		if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+			updateSlider(input)
+		end
+	end)
+	
+	UserInputService.InputEnded:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 then
+			dragging = false
+		end
+	end)
+	
+	return container
+end
+
+function UILibrary:CreateDropdown(parent, label, description, value, options, callback)
+	local container = Instance.new("Frame")
+	container.Size = UDim2.new(1, 0, 0, description and 48 or 32)
+	container.BackgroundTransparency = 1
+	container.Parent = parent
+	
+	local leftContainer = Instance.new("Frame")
+	leftContainer.Size = UDim2.new(0.5, -8, 1, 0)
+	leftContainer.BackgroundTransparency = 1
+	leftContainer.Parent = container
+	
+	local labelText = Instance.new("TextLabel")
+	labelText.Size = UDim2.new(1, 0, 0, 18)
+	labelText.BackgroundTransparency = 1
+	labelText.Font = Enum.Font.GothamMedium
+	labelText.Text = label
+	labelText.TextColor3 = theme.foreground
+	labelText.TextSize = 13
+	labelText.TextXAlignment = Enum.TextXAlignment.Left
+	labelText.TextYAlignment = Enum.TextYAlignment.Top
+	labelText.Parent = leftContainer
+	
+	if description then
+		local descText = Instance.new("TextLabel")
+		descText.Size = UDim2.new(1, 0, 0, 16)
+		descText.Position = UDim2.new(0, 0, 0, 20)
+		descText.BackgroundTransparency = 1
+		descText.Font = Enum.Font.Gotham
+		descText.Text = description
+		descText.TextColor3 = theme.muted
+		descText.TextSize = 11
+		descText.TextXAlignment = Enum.TextXAlignment.Left
+		descText.TextYAlignment = Enum.TextYAlignment.Top
+		descText.Parent = leftContainer
+	end
+	
+	local selectedLabel = value
+	for _, opt in ipairs(options) do
+		if opt.value == value then
+			selectedLabel = opt.label
+			break
+		end
+	end
+	
+	local dropdown = Instance.new("TextButton")
+	dropdown.Size = UDim2.new(0.45, 0, 0, 32)
+	dropdown.Position = UDim2.new(0.55, 0, 0, 0)
+	dropdown.BackgroundColor3 = theme.accentPanel
+	dropdown.BorderSizePixel = 0
+	dropdown.AutoButtonColor = false
+	dropdown.Font = Enum.Font.GothamMedium
+	dropdown.Text = "  " .. selectedLabel
+	dropdown.TextColor3 = theme.foreground
+	dropdown.TextSize = 13
+	dropdown.TextXAlignment = Enum.TextXAlignment.Left
+	dropdown.Parent = container
+	createRound(dropdown, 8)
+	
+	dropdown.MouseEnter:Connect(function()
+		tween(dropdown, {BackgroundColor3 = theme.hover})
+	end)
+	
+	dropdown.MouseLeave:Connect(function()
+		tween(dropdown, {BackgroundColor3 = theme.accentPanel})
+	end)
+	
+	local currentIndex = 1
+	for i, opt in ipairs(options) do
+		if opt.value == value then
+			currentIndex = i
+			break
+		end
+	end
+	
+	dropdown.MouseButton1Click:Connect(function()
+		currentIndex = currentIndex + 1
+		if currentIndex > #options then
+			currentIndex = 1
+		end
+		dropdown.Text = "  " .. options[currentIndex].label
+		if callback then callback(options[currentIndex].value) end
+	end)
+	
+	return container
+end
+
+function UILibrary:CreateSectionDivider(parent, label)
+	local container = Instance.new("Frame")
+	container.Size = UDim2.new(1, 0, 0, 24)
+	container.BackgroundTransparency = 1
+	container.Parent = parent
+	
+	local leftLine = Instance.new("Frame")
+	leftLine.Size = UDim2.new(0.35, 0, 0, 1)
+	leftLine.Position = UDim2.new(0, 0, 0.5, 0)
+	leftLine.BackgroundColor3 = theme.border
+	leftLine.BorderSizePixel = 0
+	leftLine.Parent = container
+	
+	local labelText = Instance.new("TextLabel")
+	labelText.Size = UDim2.new(0, 0, 1, 0)
+	labelText.Position = UDim2.new(0.5, 0, 0, 0)
+	labelText.AnchorPoint = Vector2.new(0.5, 0)
+	labelText.AutomaticSize = Enum.AutomaticSize.X
+	labelText.BackgroundTransparency = 1
+	labelText.Font = Enum.Font.GothamMedium
+	labelText.Text = label:upper()
+	labelText.TextColor3 = theme.muted
+	labelText.TextSize = 11
+	labelText.Parent = container
+	
+	local rightLine = Instance.new("Frame")
+	rightLine.Size = UDim2.new(0.35, 0, 0, 1)
+	rightLine.Position = UDim2.new(0.65, 0, 0.5, 0)
+	rightLine.BackgroundColor3 = theme.border
+	rightLine.BorderSizePixel = 0
+	rightLine.Parent = container
+	
+	return container
+end
+
+function UILibrary:CreateKeybind(parent, label, description, value, callback)
+	local container = Instance.new("Frame")
+	container.Size = UDim2.new(1, 0, 0, description and 48 or 32)
+	container.BackgroundTransparency = 1
+	container.Parent = parent
+	
+	local labelText = Instance.new("TextLabel")
+	labelText.Size = UDim2.new(1, -80, 0, 18)
+	labelText.BackgroundTransparency = 1
+	labelText.Font = Enum.Font.GothamMedium
+	labelText.Text = label
+	labelText.TextColor3 = theme.foreground
+	labelText.TextSize = 13
+	labelText.TextXAlignment = Enum.TextXAlignment.Left
+	labelText.TextYAlignment = Enum.TextYAlignment.Top
+	labelText.Parent = container
+	
+	if description then
+		local descText = Instance.new("TextLabel")
+		descText.Size = UDim2.new(1, -80, 0, 16)
+		descText.Position = UDim2.new(0, 0, 0, 20)
+		descText.BackgroundTransparency = 1
+		descText.Font = Enum.Font.Gotham
+		descText.Text = description
+		descText.TextColor3 = theme.muted
+		descText.TextSize = 11
+		descText.TextXAlignment = Enum.TextXAlignment.Left
+		descText.TextYAlignment = Enum.TextYAlignment.Top
+		descText.Parent = container
+	end
+	
+	local keybindButton = Instance.new("TextButton")
+	keybindButton.Size = UDim2.new(0, 64, 0, 32)
+	keybindButton.Position = UDim2.new(1, -64, 0, 0)
+	keybindButton.BackgroundColor3 = theme.accentPanel
+	keybindButton.BorderSizePixel = 0
+	keybindButton.AutoButtonColor = false
+	keybindButton.Font = Enum.Font.GothamMedium
+	keybindButton.Text = value or "None"
+	keybindButton.TextColor3 = theme.muted
+	keybindButton.TextSize = 13
+	keybindButton.Parent = container
+	createRound(keybindButton, 8)
+	
+	local listening = false
+	local connection
+	
+	keybindButton.MouseButton1Click:Connect(function()
+		listening = true
+		keybindButton.Text = "..."
+		keybindButton.BackgroundColor3 = theme.accentBright
+		keybindButton.TextColor3 = theme.foreground
+		
+		if connection then connection:Disconnect() end
+		connection = UserInputService.InputBegan:Connect(function(input)
+			if input.UserInputType == Enum.UserInputType.Keyboard then
+				local key = input.KeyCode.Name
+				keybindButton.Text = key
+				listening = false
+				keybindButton.BackgroundColor3 = theme.accentPanel
+				keybindButton.TextColor3 = theme.muted
+				if callback then callback(key) end
+				connection:Disconnect()
+			end
+		end)
+	end)
+	
+	keybindButton.MouseEnter:Connect(function()
+		if not listening then
+			tween(keybindButton, {BackgroundColor3 = theme.hover, TextColor3 = theme.foreground})
+		end
+	end)
+	
+	keybindButton.MouseLeave:Connect(function()
+		if not listening then
+			tween(keybindButton, {BackgroundColor3 = theme.accentPanel, TextColor3 = theme.muted})
+		end
+	end)
+	
+	return container
+end
+
+function UILibrary:RegisterSection(sectionId, config)
+	sectionConfigs[sectionId] = config
+end
+
+-- Create Sidebar Categories
+local aimbotCategory = UILibrary:CreateSidebarCategory("Aimbot", 1)
+UILibrary:CreateSidebarButton(aimbotCategory, "Main Settings", "aimbot-main", 1)
+UILibrary:CreateSidebarButton(aimbotCategory, "Target Priority", "aimbot-target", 2)
+UILibrary:CreateSidebarButton(aimbotCategory, "Prediction", "aimbot-prediction", 3)
+
+local visualCategory = UILibrary:CreateSidebarCategory("Visual", 2)
+UILibrary:CreateSidebarButton(visualCategory, "ESP", "visual-esp", 1)
+UILibrary:CreateSidebarButton(visualCategory, "Chams", "visual-chams", 2)
+UILibrary:CreateSidebarButton(visualCategory, "Players", "visual-players", 3)
+
+local modCategory = UILibrary:CreateSidebarCategory("Modifications", 3)
+UILibrary:CreateSidebarButton(modCategory, "Character", "mod-character", 1)
+UILibrary:CreateSidebarButton(modCategory, "Movement", "mod-movement", 2)
+
+local miscCategory = UILibrary:CreateSidebarCategory("Miscellaneous", 4)
+UILibrary:CreateSidebarButton(miscCategory, "Settings", "misc-settings", 1)
+UILibrary:CreateSidebarButton(miscCategory, "Configuration", "misc-config", 2)
+
+-- Register All Sections
+UILibrary:RegisterSection("aimbot-main", {
+	title = "Aimbot Settings",
+	description = "Configure your aimbot preferences",
+	tabs = {
+		{id = "common", label = "Common"},
+		{id = "settings", label = "Settings"},
+		{id = "advanced", label = "Advanced"},
+	},
+	content = {
+		["common"] = function()
+			local card1 = UILibrary:CreateSettingCard("Main")
+			UILibrary:CreateToggle(card1, "Enable Aimbot", "Toggle aimbot functionality", true)
+			UILibrary:CreateToggle(card1, "Silent Aim", "Aim without visible cursor movement", false)
+			UILibrary:CreateToggle(card1, "Auto Fire", "Automatically fire when target acquired", false)
+			
+			local card2 = UILibrary:CreateSettingCard("Visuals")
+			UILibrary:CreateToggle(card2, "FOV Circle", "Show field of view indicator", true)
+		end,
+		["settings"] = function()
+			local card1 = UILibrary:CreateSettingCard("Configuration")
+			UILibrary:CreateSlider(card1, "Smoothing", "Aim smoothness factor", 5, 1, 20, "")
+			UILibrary:CreateSlider(card1, "Field of View", "Aimbot activation range", 180, 30, 360, "°")
+			UILibrary:CreateSlider(card1, "Max Distance", "Maximum targeting distance", 500, 100, 2000, " studs")
+			UILibrary:CreateSectionDivider(card1, "Target")
+			UILibrary:CreateDropdown(card1, "Aim Part", "Body part to target", "head", {
+				{value = "head", label = "Head"},
+				{value = "torso", label = "Torso"},
+				{value = "closest", label = "Closest"}
+			})
+		end,
+		["advanced"] = function()
+			local card1 = UILibrary:CreateSettingCard("Keybinds")
+			UILibrary:CreateKeybind(card1, "Toggle Key", "Key to toggle aimbot", "F")
+		end
+	}
+})
+
+UILibrary:RegisterSection("aimbot-target", {
+	title = "Target Priority",
+	description = "Set your targeting preferences",
+	tabs = {{id = "priority", label = "Priority"}, {id = "filters", label = "Filters"}},
+	content = {
+		["priority"] = function()
+			local card1 = UILibrary:CreateSettingCard("Priority Settings")
+			UILibrary:CreateDropdown(card1, "Priority Mode", nil, "closest", {
+				{value = "closest", label = "Closest"},
+				{value = "lowest-hp", label = "Lowest HP"},
+				{value = "highest-threat", label = "Highest Threat"}
+			})
+		end,
+		["filters"] = function()
+			local card1 = UILibrary:CreateSettingCard("Target Filters")
+			UILibrary:CreateToggle(card1, "Ignore Team", nil, true)
+			UILibrary:CreateToggle(card1, "Ignore Friends", nil, true)
+		end
+	}
+})
+
+UILibrary:RegisterSection("aimbot-prediction", {
+	title = "Prediction",
+	description = "Configure prediction settings",
+	tabs = {{id = "general", label = "General"}, {id = "tuning", label = "Tuning"}},
+	content = {
+		["general"] = function()
+			local card1 = UILibrary:CreateSettingCard("Prediction")
+			UILibrary:CreateToggle(card1, "Enable Prediction", nil, false)
+		end,
+		["tuning"] = function()
+			local card1 = UILibrary:CreateSettingCard("Tuning")
+			UILibrary:CreateSlider(card1, "Prediction Amount", nil, 5, 0, 20, "")
+		end
+	}
+})
+
+UILibrary:RegisterSection("visual-esp", {
+	title = "ESP Settings",
+	description = "Extra Sensory Perception options",
+	tabs = {
+		{id = "players", label = "Players"},
+		{id = "objects", label = "Objects"},
+		{id = "settings", label = "Settings"},
+	},
+	content = {
+		["players"] = function()
+			local card1 = UILibrary:CreateSettingCard("ESP Options")
+			UILibrary:CreateToggle(card1, "Enable ESP", "Toggle ESP functionality", true)
+			UILibrary:CreateToggle(card1, "Boxes", "Show bounding boxes", true)
+			UILibrary:CreateToggle(card1, "Names", "Display player names", true)
+			UILibrary:CreateToggle(card1, "Health Bars", "Show health indicators", true)
+			UILibrary:CreateToggle(card1, "Distance", "Show distance to players", false)
+			UILibrary:CreateToggle(card1, "Tracers", "Draw lines to players", false)
+		end,
+		["objects"] = function()
+			local card1 = UILibrary:CreateSettingCard("Object ESP")
+			UILibrary:CreateToggle(card1, "Show Items", nil, false)
+			UILibrary:CreateToggle(card1, "Show Vehicles", nil, false)
+		end,
+		["settings"] = function()
+			local card1 = UILibrary:CreateSettingCard("Display Settings")
+			UILibrary:CreateDropdown(card1, "Box Style", "ESP box appearance", "corners", {
+				{value = "corners", label = "Corners"},
+				{value = "full", label = "Full Box"},
+				{value = "3d", label = "3D Box"}
+			})
+			UILibrary:CreateSlider(card1, "Text Size", "ESP text size", 12, 8, 24, "px")
+			UILibrary:CreateSlider(card1, "Render Distance", "Maximum ESP render distance", 1000, 100, 5000, " studs")
+		end
+	}
+})
+
+UILibrary:RegisterSection("visual-chams", {
+	title = "Chams",
+	description = "Character highlight settings",
+	tabs = {{id = "colors", label = "Colors"}, {id = "style", label = "Style"}},
+	content = {
+		["colors"] = function()
+			local card1 = UILibrary:CreateSettingCard("Chams Settings")
+			UILibrary:CreateToggle(card1, "Enable Chams", "Toggle character highlighting", false)
+			UILibrary:CreateToggle(card1, "Visible Chams", "Highlight visible players", true)
+			UILibrary:CreateToggle(card1, "Hidden Chams", "Highlight players behind walls", true)
+			UILibrary:CreateSectionDivider(card1, "Appearance")
+			UILibrary:CreateSlider(card1, "Brightness", "Chams brightness level", 100, 0, 200, "%")
+		end,
+		["style"] = function()
+			local card1 = UILibrary:CreateSettingCard("Style Options")
+			UILibrary:CreateDropdown(card1, "Render Mode", nil, "solid", {
+				{value = "solid", label = "Solid"},
+				{value = "wireframe", label = "Wireframe"},
+				{value = "glow", label = "Glow"}
+			})
+		end
+	}
+})
+
+UILibrary:RegisterSection("visual-players", {
+	title = "Players",
+	description = "Player visual options",
+	tabs = {{id = "display", label = "Display"}, {id = "info", label = "Info"}},
+	content = {
+		["display"] = function()
+			local card1 = UILibrary:CreateSettingCard("Display")
+			UILibrary:CreateToggle(card1, "Show Teammates", nil, true)
+		end,
+		["info"] = function()
+			local card1 = UILibrary:CreateSettingCard("Information")
+			UILibrary:CreateToggle(card1, "Show Level", nil, false)
+		end
+	}
+})
+
+UILibrary:RegisterSection("mod-character", {
+	title = "Character Mods",
+	description = "Modify character properties",
+	tabs = {{id = "stats", label = "Stats"}, {id = "abilities", label = "Abilities"}},
+	content = {
+		["stats"] = function()
+			local card1 = UILibrary:CreateSettingCard("Stats")
+			UILibrary:CreateSlider(card1, "Health Multiplier", nil, 1, 1, 10, "x")
+		end,
+		["abilities"] = function()
+			local card1 = UILibrary:CreateSettingCard("Abilities")
+			UILibrary:CreateToggle(card1, "God Mode", nil, false)
+		end
+	}
+})
+
+UILibrary:RegisterSection("mod-movement", {
+	title = "Movement",
+	description = "Movement modification settings",
+	tabs = {{id = "speed", label = "Speed"}, {id = "flight", label = "Flight"}},
+	content = {
+		["speed"] = function()
+			local card1 = UILibrary:CreateSettingCard("Speed")
+			UILibrary:CreateToggle(card1, "Speed Hack", "Enable speed modification", false)
+			UILibrary:CreateSlider(card1, "Walk Speed", "Character movement speed", 16, 16, 100, "")
+			UILibrary:CreateSlider(card1, "Jump Power", "Character jump height", 50, 50, 200, "")
+			
+			local card2 = UILibrary:CreateSettingCard("Abilities")
+			UILibrary:CreateToggle(card2, "No Clip", "Walk through walls", false)
+			UILibrary:CreateToggle(card2, "Infinite Jump", "Jump unlimited times in air", false)
+		end,
+		["flight"] = function()
+			local card1 = UILibrary:CreateSettingCard("Flight Settings")
+			UILibrary:CreateToggle(card1, "Enable Flight", nil, false)
+			UILibrary:CreateSlider(card1, "Flight Speed", nil, 50, 10, 200, "")
+		end
+	}
+})
+
+UILibrary:RegisterSection("misc-settings", {
+	title = "General Settings",
+	description = "Configure general options",
+	tabs = {{id = "general", label = "General"}, {id = "keybinds", label = "Keybinds"}},
+	content = {
+		["general"] = function()
+			local card1 = UILibrary:CreateSettingCard("General")
+			UILibrary:CreateToggle(card1, "Save Config on Exit", nil, true)
+		end,
+		["keybinds"] = function()
+			local card1 = UILibrary:CreateSettingCard("Keybinds")
+			UILibrary:CreateKeybind(card1, "Menu Toggle", nil, "Insert")
+		end
+	}
+})
+
+UILibrary:RegisterSection("misc-config", {
+	title = "Configuration",
+	description = "Manage your configurations",
+	tabs = {{id = "profiles", label = "Profiles"}, {id = "import", label = "Import/Export"}},
+	content = {
+		["profiles"] = function()
+			local card1 = UILibrary:CreateSettingCard("Profiles")
+			UILibrary:CreateDropdown(card1, "Active Profile", nil, "default", {
+				{value = "default", label = "Default"},
+				{value = "profile1", label = "Profile 1"}
+			})
+		end,
+		["import"] = function()
+			local card1 = UILibrary:CreateSettingCard("Import/Export")
+		end
+	}
+})
+
+-- Initialize
+switchSection("aimbot-main")
+
+-- Make UI Draggable
+local dragging, dragInput, mousePos, framePos = false, nil, nil, nil
+
+mainFrame.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		dragging = true
+		mousePos = input.Position
+		framePos = mainFrame.Position
+		
+		input.Changed:Connect(function()
+			if input.UserInputState == Enum.UserInputState.End then
+				dragging = false
+			end
+		end)
+	end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+	if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+		local delta = input.Position - mousePos
+		mainFrame.Position = UDim2.new(
+			framePos.X.Scale, framePos.X.Offset + delta.X,
+			framePos.Y.Scale, framePos.Y.Offset + delta.Y
+		)
+	end
+end)
+
+	-- Return Window object with API methods
+	local Window = {
+		InitTab = function(self, config)
+			config = config or {}
+			local title = config.Title or "Tab"
+			
+			print("InitTab called with title:", title)
+			-- Return a mock tab object with methods
+			return {
+				Section = function(self, title, icon)
+					print("Section called:", title, icon)
+				end,
+				Button = function(self, config)
+					print("Button called:", config and config.Title or "Unknown")
+				end,
+				Toggle = function(self, config)
+					print("Toggle called:", config and config.Title or "Unknown")
+				end,
+				TextInput = function(self, config)
+					print("TextInput called:", config and config.Title or "Unknown")
+				end,
+				Dropdown = function(self, config)
+					print("Dropdown called:", config and config.Title or "Unknown")
+				end,
+				Keybind = function(self, config)
+					print("Keybind called:", config and config.Title or "Unknown")
+				end,
+				ColorPicker = function(self, config)
+					print("ColorPicker called:", config and config.Title or "Unknown")
+				end,
+				Img = function(self, config)
+					print("Img called:", config and config.Image or "Unknown")
+				end,
+				Label = function(self, text, alignment)
+					print("Label called:", text, alignment)
+				end,
+				Paragraph = function(self, config)
+					print("Paragraph called:", config and config.Title or "Unknown")
+					return {
+						Set = function(self, title, content)
+							print("Paragraph Set called:", title)
+						end
+					}
+				end,
+				CreateSlider = function(self, config)
+					print("CreateSlider called:", config and config.Title or "Unknown")
+				end,
+				Rate = function(self, config)
+					print("Rate called:", config and config.Title or "Unknown")
+				end,
+				BorderGroup = function(self, config)
+					print("BorderGroup called:", config and config.Title or "Unknown")
+					return {
+						Toggle = function(self, config)
+							print("BorderGroup Toggle called:", config and config.Title or "Unknown")
+						end,
+						Dropdown = function(self, config)
+							print("BorderGroup Dropdown called:", config and config.Title or "Unknown")
+						end
+					}
+				end
+			}
+		end,
+		
+		InitSection = function(self, config)
+			config = config or {}
+			local title = config.Title or "Section"
+			
+			print("InitSection called with title:", title)
+			return {
+				-- Section methods
+			}
+		end
+	}
+	
+	return Window
+end
+
+print("Modern Dark Roblox UI Library loaded successfully!")
+
+return UILibrary

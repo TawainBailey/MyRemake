@@ -1515,8 +1515,467 @@ function syde:Init(library)
 	camera:GetPropertyChangedSignal("ViewportSize"):Connect(updateLayout)
 	userinput:GetPropertyChangedSignal("TouchEnabled"):Connect(updateLayout)
 
-	-- Syde Connection (Coming Soon)
-	SetUserInfo()
+	-- [Setup Content Sections like Ui test]
+	local contentConfig = {
+		["aimbot-main"] = {
+			title = "Aimbot",
+			description = "Main aimbot settings",
+			tabs = {
+				{id = "common", label = "Common"},
+				{id = "settings", label = "Settings"},
+				{id = "advanced", label = "Advanced"}
+			}
+		},
+		["visual-esp"] = {
+			title = "ESP",
+			description = "Visual player indicators",
+			tabs = {
+				{id = "players", label = "Players"},
+				{id = "settings", label = "Settings"}
+			}
+		},
+		["mod-character"] = {
+			title = "Character Mods",
+			description = "Modify character properties",
+			tabs = {
+				{id = "stats", label = "Stats"},
+				{id = "abilities", label = "Abilities"}
+			}
+		},
+		["mod-movement"] = {
+			title = "Movement",
+			description = "Movement modification settings",
+			tabs = {
+				{id = "speed", label = "Speed"},
+				{id = "flight", label = "Flight"}
+			}
+		},
+		["misc-settings"] = {
+			title = "General Settings",
+			description = "Configure general options",
+			tabs = {
+				{id = "general", label = "General"},
+				{id = "keybinds", label = "Keybinds"}
+			}
+		}
+	}
+
+	local activeSection = "aimbot-main"
+	local activeTab = "common"
+
+	-- [Setup Sidebar with Sections]
+	local sections = {
+		{
+			title = "Aimbot",
+			items = {
+				{ id = "aimbot-main", label = "Main Settings" }
+			}
+		},
+		{
+			title = "Visual",
+			items = {
+				{ id = "visual-esp", label = "ESP" }
+			}
+		},
+		{
+			title = "Modifications",
+			items = {
+				{ id = "mod-character", label = "Character" },
+				{ id = "mod-movement", label = "Movement" }
+			}
+		},
+		{
+			title = "Miscellaneous",
+			items = {
+				{ id = "misc-settings", label = "Settings" }
+			}
+		}
+	}
+
+	-- Hide existing tab system for Ui test style
+	WINDOW.Tab.Visible = false
+	PAGES.Visible = false
+
+	-- Build sidebar
+	local SIDEBAR = Instance.new("ScrollingFrame")
+	SIDEBAR.Size = UDim2.new(0, 200, 1, -80) -- Leave space for topbar
+	SIDEBAR.Position = UDim2.new(0, 0, 0, 80)
+	SIDEBAR.BackgroundTransparency = 1
+	SIDEBAR.ScrollBarThickness = 4
+	SIDEBAR.Parent = WINDOW
+	
+	syde:BuildSidebar(SIDEBAR, sections)
+	
+	-- Create content area
+	local CONTENT = Instance.new("Frame")
+	CONTENT.Size = UDim2.new(1, -220, 1, -80) -- Leave space for sidebar and topbar
+	CONTENT.Position = UDim2.new(0, 220, 0, 80)
+	CONTENT.BackgroundTransparency = 1
+	CONTENT.Parent = WINDOW
+	
+	-- Create tabs frame for content
+	local tabsFrame = Instance.new("Frame")
+	tabsFrame.Name = "Tabs"
+	tabsFrame.Size = UDim2.new(1, 0, 0, 40)
+	tabsFrame.Position = UDim2.new(0, 0, 0, 80)
+	tabsFrame.BackgroundTransparency = 1
+	tabsFrame.Parent = CONTENT
+	
+	-- Initialize first section
+	syde:SwitchToSection("aimbot-main")
+
+function syde:BuildSidebar(sidebar, sections)
+	-- Clear existing
+	for _, child in ipairs(sidebar:GetChildren()) do
+		if child:IsA("Frame") then
+			child:Destroy()
+		end
+	end
+	
+	local yOffset = 0
+	for _, section in ipairs(sections) do
+		-- Section header
+		local header = Instance.new("TextLabel")
+		header.Size = UDim2.new(1, -20, 0, 20)
+		header.Position = UDim2.new(0, 10, 0, yOffset)
+		header.BackgroundTransparency = 1
+		header.Text = section.title
+		header.TextColor3 = Color3.fromRGB(150, 150, 150)
+		header.TextSize = 12
+		header.Font = Enum.Font.GothamBold
+		header.TextXAlignment = Enum.TextXAlignment.Left
+		header.Parent = sidebar
+		yOffset = yOffset + 25
+		
+		-- Section items
+		for _, item in ipairs(section.items) do
+			local itemFrame = Instance.new("Frame")
+			itemFrame.Size = UDim2.new(1, -20, 0, 35)
+			itemFrame.Position = UDim2.new(0, 10, 0, yOffset)
+			itemFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+			itemFrame.BackgroundTransparency = 0.8
+			
+			local corner = Instance.new("UICorner")
+			corner.CornerRadius = UDim.new(0, 8)
+			corner.Parent = itemFrame
+			
+			local label = Instance.new("TextLabel")
+			label.Size = UDim2.new(1, -20, 1, 0)
+			label.Position = UDim2.new(0, 10, 0, 0)
+			label.BackgroundTransparency = 1
+			label.Text = item.label
+			label.TextColor3 = Color3.fromRGB(255, 255, 255)
+			label.TextSize = 14
+			label.Font = Enum.Font.Gotham
+			label.TextXAlignment = Enum.TextXAlignment.Left
+			label.Parent = itemFrame
+			
+			-- Click handler
+			local button = Instance.new("TextButton")
+			button.Size = UDim2.new(1, 0, 1, 0)
+			button.BackgroundTransparency = 1
+			button.Text = ""
+			button.Parent = itemFrame
+			
+			button.MouseButton1Click:Connect(function()
+				syde:SwitchToSection(item.id)
+			end)
+			
+			itemFrame.Parent = sidebar
+			yOffset = yOffset + 40
+		end
+		
+		yOffset = yOffset + 10 -- Spacing between sections
+	end
+	
+	sidebar.CanvasSize = UDim2.new(0, 0, 0, yOffset)
+end
+
+function syde:SwitchToSection(sectionId)
+	activeSection = sectionId
+	local config = contentConfig[sectionId]
+	if config and config.tabs and config.tabs[1] then
+		activeTab = config.tabs[1].id
+	end
+	
+	-- Update content based on section and tab
+	syde:UpdateContent()
+	
+	print("Switched to section:", sectionId, "tab:", activeTab)
+end
+
+function syde:UpdateContent()
+	-- Clear current content
+	for _, child in ipairs(CONTENT:GetChildren()) do
+		if child:IsA("Frame") and child.Name ~= "Tabs" then
+			child:Destroy()
+		end
+	end
+	
+	local config = contentConfig[activeSection]
+	if not config then return end
+	
+	-- Update header
+	local header = CONTENT:FindFirstChild("Header") or Instance.new("Frame")
+	header.Name = "Header"
+	header.Size = UDim2.new(1, 0, 0, 80)
+	header.BackgroundTransparency = 1
+	header.Parent = CONTENT
+	
+	local title = header:FindFirstChild("Title") or Instance.new("TextLabel")
+	title.Name = "Title"
+	title.Size = UDim2.new(1, 0, 0, 24)
+	title.Position = UDim2.new(0, 20, 0, 20)
+	title.BackgroundTransparency = 1
+	title.Text = config.title or "Settings"
+	title.TextColor3 = Color3.fromRGB(255, 255, 255)
+	title.TextSize = 18
+	title.Font = Enum.Font.GothamBold
+	title.TextXAlignment = Enum.TextXAlignment.Left
+	title.Parent = header
+	
+	local desc = header:FindFirstChild("Description") or Instance.new("TextLabel")
+	desc.Name = "Description"
+	desc.Size = UDim2.new(1, 0, 0, 16)
+	desc.Position = UDim2.new(0, 20, 0, 44)
+	desc.BackgroundTransparency = 1
+	desc.Text = config.description or ""
+	desc.TextColor3 = Color3.fromRGB(150, 150, 150)
+	desc.TextSize = 14
+	desc.Font = Enum.Font.Gotham
+	desc.TextXAlignment = Enum.TextXAlignment.Left
+	desc.Parent = header
+	
+	-- Update tabs
+	local tabsFrame = CONTENT.Tabs
+	-- Clear existing tabs
+	for _, child in ipairs(tabsFrame:GetChildren()) do
+		if child:IsA("Frame") then
+			child:Destroy()
+		end
+	end
+	
+	if config.tabs then
+		local xOffset = 20
+		for i, tab in ipairs(config.tabs) do
+			local tabButton = Instance.new("TextButton")
+			tabButton.Size = UDim2.new(0, 80, 0, 32)
+			tabButton.Position = UDim2.new(0, xOffset, 0, 4)
+			tabButton.BackgroundTransparency = 1
+			tabButton.Text = tab.label
+			tabButton.TextColor3 = (tab.id == activeTab) and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(150, 150, 150)
+			tabButton.TextSize = 13
+			tabButton.Font = Enum.Font.GothamMedium
+			
+			local tabCorner = Instance.new("UICorner")
+			tabCorner.CornerRadius = UDim.new(0, 8)
+			tabCorner.Parent = tabButton
+			
+			if tab.id == activeTab then
+				tabButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+				tabButton.BackgroundTransparency = 0.8
+			end
+			
+			tabButton.MouseButton1Click:Connect(function()
+				activeTab = tab.id
+				syde:UpdateContent() -- Refresh to show new tab
+			end)
+			
+			tabButton.Parent = tabsFrame
+			xOffset = xOffset + 85
+		end
+	end
+	
+	-- Add content based on section and tab
+	syde:AddContentForSection(activeSection, activeTab)
+end
+
+function syde:AddContentForSection(sectionId, tabId)
+	local contentArea = Instance.new("Frame")
+	contentArea.Size = UDim2.new(1, 0, 1, -160) -- Leave space for header and tabs
+	contentArea.Position = UDim2.new(0, 0, 0, 120)
+	contentArea.BackgroundTransparency = 1
+	contentArea.Parent = CONTENT
+	
+	-- Add content based on section and tab
+	if sectionId == "aimbot-main" then
+		if tabId == "common" then
+			-- Aimbot common settings
+			local section = Instance.new("Frame")
+			section.Size = UDim2.new(1, -20, 0, 100)
+			section.Position = UDim2.new(0, 10, 0, 10)
+			section.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+			section.BackgroundTransparency = 0.5
+			local corner = Instance.new("UICorner")
+			corner.CornerRadius = UDim.new(0, 8)
+			corner.Parent = section
+			
+			local title = Instance.new("TextLabel")
+			title.Size = UDim2.new(1, -20, 0, 20)
+			title.Position = UDim2.new(0, 10, 0, 10)
+			title.BackgroundTransparency = 1
+			title.Text = "Main Settings"
+			title.TextColor3 = Color3.fromRGB(255, 255, 255)
+			title.TextSize = 14
+			title.Font = Enum.Font.GothamBold
+			title.TextXAlignment = Enum.TextXAlignment.Left
+			title.Parent = section
+			
+			local toggle1 = Instance.new("TextLabel")
+			toggle1.Size = UDim2.new(1, -20, 0, 20)
+			toggle1.Position = UDim2.new(0, 10, 0, 40)
+			toggle1.BackgroundTransparency = 1
+			toggle1.Text = "Enable Aimbot: ON"
+			toggle1.TextColor3 = Color3.fromRGB(200, 200, 200)
+			toggle1.TextSize = 12
+			toggle1.Font = Enum.Font.Gotham
+			toggle1.TextXAlignment = Enum.TextXAlignment.Left
+			toggle1.Parent = section
+			
+			local toggle2 = Instance.new("TextLabel")
+			toggle2.Size = UDim2.new(1, -20, 0, 20)
+			toggle2.Position = UDim2.new(0, 10, 0, 60)
+			toggle2.BackgroundTransparency = 1
+			toggle2.Text = "Silent Aim: OFF"
+			toggle2.TextColor3 = Color3.fromRGB(200, 200, 200)
+			toggle2.TextSize = 12
+			toggle2.Font = Enum.Font.Gotham
+			toggle2.TextXAlignment = Enum.TextXAlignment.Left
+			toggle2.Parent = section
+			
+			section.Parent = contentArea
+			
+		elseif tabId == "settings" then
+			-- Aimbot settings
+			local section = Instance.new("Frame")
+			section.Size = UDim2.new(1, -20, 0, 100)
+			section.Position = UDim2.new(0, 10, 0, 10)
+			section.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+			section.BackgroundTransparency = 0.5
+			local corner = Instance.new("UICorner")
+			corner.CornerRadius = UDim.new(0, 8)
+			corner.Parent = section
+			
+			local title = Instance.new("TextLabel")
+			title.Size = UDim2.new(1, -20, 0, 20)
+			title.Position = UDim2.new(0, 10, 0, 10)
+			title.BackgroundTransparency = 1
+			title.Text = "Configuration"
+			title.TextColor3 = Color3.fromRGB(255, 255, 255)
+			title.TextSize = 14
+			title.Font = Enum.Font.GothamBold
+			title.TextXAlignment = Enum.TextXAlignment.Left
+			title.Parent = section
+			
+			local slider1 = Instance.new("TextLabel")
+			slider1.Size = UDim2.new(1, -20, 0, 20)
+			slider1.Position = UDim2.new(0, 10, 0, 40)
+			slider1.BackgroundTransparency = 1
+			slider1.Text = "FOV: 180°"
+			slider1.TextColor3 = Color3.fromRGB(200, 200, 200)
+			slider1.TextSize = 12
+			slider1.Font = Enum.Font.Gotham
+			slider1.TextXAlignment = Enum.TextXAlignment.Left
+			slider1.Parent = section
+			
+			local slider2 = Instance.new("TextLabel")
+			slider2.Size = UDim2.new(1, -20, 0, 20)
+			slider2.Position = UDim2.new(0, 10, 0, 60)
+			slider2.BackgroundTransparency = 1
+			slider2.Text = "Smoothing: 5"
+			slider2.TextColor3 = Color3.fromRGB(200, 200, 200)
+			slider2.TextSize = 12
+			slider2.Font = Enum.Font.Gotham
+			slider2.TextXAlignment = Enum.TextXAlignment.Left
+			slider2.Parent = section
+			
+			section.Parent = contentArea
+		end
+		
+	elseif sectionId == "visual-esp" then
+		if tabId == "players" then
+			local section = Instance.new("Frame")
+			section.Size = UDim2.new(1, -20, 0, 100)
+			section.Position = UDim2.new(0, 10, 0, 10)
+			section.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+			section.BackgroundTransparency = 0.5
+			local corner = Instance.new("UICorner")
+			corner.CornerRadius = UDim.new(0, 8)
+			corner.Parent = section
+			
+			local title = Instance.new("TextLabel")
+			title.Size = UDim2.new(1, -20, 0, 20)
+			title.Position = UDim2.new(0, 10, 0, 10)
+			title.BackgroundTransparency = 1
+			title.Text = "ESP Settings"
+			title.TextColor3 = Color3.fromRGB(255, 255, 255)
+			title.TextSize = 14
+			title.Font = Enum.Font.GothamBold
+			title.TextXAlignment = Enum.TextXAlignment.Left
+			title.Parent = section
+			
+			local toggle1 = Instance.new("TextLabel")
+			toggle1.Size = UDim2.new(1, -20, 0, 20)
+			toggle1.Position = UDim2.new(0, 10, 0, 40)
+			toggle1.BackgroundTransparency = 1
+			toggle1.Text = "ESP Boxes: ON"
+			toggle1.TextColor3 = Color3.fromRGB(200, 200, 200)
+			toggle1.TextSize = 12
+			toggle1.Font = Enum.Font.Gotham
+			toggle1.TextXAlignment = Enum.TextXAlignment.Left
+			toggle1.Parent = section
+			
+			local toggle2 = Instance.new("TextLabel")
+			toggle2.Size = UDim2.new(1, -20, 0, 20)
+			toggle2.Position = UDim2.new(0, 10, 0, 60)
+			toggle2.BackgroundTransparency = 1
+			toggle2.Text = "ESP Names: ON"
+			toggle2.TextColor3 = Color3.fromRGB(200, 200, 200)
+			toggle2.TextSize = 12
+			toggle2.Font = Enum.Font.Gotham
+			toggle2.TextXAlignment = Enum.TextXAlignment.Left
+			toggle2.Parent = section
+			
+			section.Parent = contentArea
+		end
+		
+	elseif sectionId == "misc-settings" then
+		if tabId == "keybinds" then
+			local section = Instance.new("Frame")
+			section.Size = UDim2.new(1, -20, 0, 60)
+			section.Position = UDim2.new(0, 10, 0, 10)
+			section.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+			section.BackgroundTransparency = 0.5
+			local corner = Instance.new("UICorner")
+			corner.CornerRadius = UDim.new(0, 8)
+			corner.Parent = section
+			
+			local title = Instance.new("TextLabel")
+			title.Size = UDim2.new(1, -20, 0, 20)
+			title.Position = UDim2.new(0, 10, 0, 10)
+			title.BackgroundTransparency = 1
+			title.Text = "Keybinds"
+			title.TextColor3 = Color3.fromRGB(255, 255, 255)
+			title.TextSize = 14
+			title.Font = Enum.Font.GothamBold
+			title.TextXAlignment = Enum.TextXAlignment.Left
+			title.Parent = section
+			
+			local keybind = Instance.new("TextLabel")
+			keybind.Size = UDim2.new(1, -20, 0, 20)
+			keybind.Position = UDim2.new(0, 10, 0, 30)
+			keybind.BackgroundTransparency = 1
+			keybind.Text = "Toggle UI: F1"
+			keybind.TextColor3 = Color3.fromRGB(200, 200, 200)
+			keybind.TextSize = 12
+			keybind.Font = Enum.Font.Gotham
+			keybind.TextXAlignment = Enum.TextXAlignment.Left
+			keybind.Parent = section
+			
+			section.Parent = contentArea
+		end
+	end
+end
 
 	if not UserInfoDisabled then
 		tweenservice:Create(WINDOW.Tab, TweenInfo.new(0.4, Enum.EasingStyle.Exponential), {Size = UDim2.new(0, 200,1, -150) }):Play()
@@ -6708,14 +7167,19 @@ function syde:Init(library)
 		TabList.Position = UDim2.new(0, 0, 0, 20)
 		TabList.BackgroundTransparency = 1
 		TabList.Parent = SectionFrame
-		local Border = Instance.new("UIStroke")
-		Border.Color = Color3.fromRGB(150, 150, 150)
-		Border.Thickness = 0.5
-		Border.Transparency = 0.5
-		Border.Parent = TabList
-		local Corner = Instance.new("UICorner")
-		Corner.CornerRadius = UDim.new(0, 4)
-		Corner.Parent = TabList
+		local leftBorder = Instance.new("Frame")
+		leftBorder.Size = UDim2.new(0, 1, 1, 0)
+		leftBorder.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+		leftBorder.BackgroundTransparency = 0
+		leftBorder.BorderSizePixel = 0
+		leftBorder.Parent = TabList
+		local rightBorder = Instance.new("Frame")
+		rightBorder.Size = UDim2.new(0, 1, 1, 0)
+		rightBorder.Position = UDim2.new(1, -1, 0, 0)
+		rightBorder.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+		rightBorder.BackgroundTransparency = 0
+		rightBorder.BorderSizePixel = 0
+		rightBorder.Parent = TabList
 		local Layout = Instance.new("UIListLayout")
 		Layout.Padding = UDim.new(0, 0)
 		Layout.SortOrder = Enum.SortOrder.LayoutOrder

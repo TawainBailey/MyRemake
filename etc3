@@ -89,13 +89,13 @@ function RobloxUI:CreateUI()
 	TopBar.Parent = MainFrame
 
 	local TitleFrame = Instance.new("Frame")
+	TitleFrame.Name = "Title"
 	TitleFrame.Size = UDim2.new(1, -80, 1, 0)
 	TitleFrame.Position = UDim2.new(0, 20, 0, 0)
 	TitleFrame.BackgroundTransparency = 1
 	TitleFrame.Parent = TopBar
 
 	local TitleLabel = Instance.new("TextLabel")
-	TitleLabel.Name = "Title"
 	TitleLabel.Size = UDim2.new(1, 0, 0, 20)
 	TitleLabel.Position = UDim2.new(0, 0, 0, 5)
 	TitleLabel.BackgroundTransparency = 1
@@ -502,7 +502,7 @@ function RobloxUI:Init(config)
 	UI.Enabled = true
 
 	-- Configure window
-	TOPBAR.Title.Text = config.Title
+	TOPBAR.Title.Title.Text = config.Title
 	TOPBAR.Title.Sub.Text = config.SubText
 	TOPBAR.Title.Sub.TextColor3 = Color3.new(1,1,1)
 

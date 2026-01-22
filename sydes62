@@ -3620,13 +3620,17 @@ function syde:Init(library)
 		Tab.Visible = true
 		Tab.Parent = parent
 		if parent ~= TABS then
-			local line = Instance.new("Frame")
-			line.Size = UDim2.new(1, 0, 0, 1)
-			line.Position = UDim2.new(0, 0, 1, -1)
-			line.BackgroundColor3 = Color3.fromRGB(150, 150, 150)
-			line.BackgroundTransparency = 0
-			line.BorderSizePixel = 0
-			line.Parent = Tab
+			local tabOrder = (#parent:GetChildren() - 1) * 2 + 1
+			Tab.LayoutOrder = tabOrder
+			if #parent:GetChildren() > 1 then
+				local line = Instance.new("Frame")
+				line.Size = UDim2.new(1, 0, 0, 1)
+				line.BackgroundColor3 = Color3.fromRGB(150, 150, 150)
+				line.BackgroundTransparency = 0
+				line.BorderSizePixel = 0
+				line.LayoutOrder = tabOrder - 1
+				line.Parent = parent
+			end
 		end
 		if parent == TABS then
 			local stroke = Instance.new("UIStroke")
@@ -6714,6 +6718,7 @@ function syde:Init(library)
 		Corner.Parent = TabList
 		local Layout = Instance.new("UIListLayout")
 		Layout.Padding = UDim.new(0, 0)
+		Layout.SortOrder = Enum.SortOrder.LayoutOrder
 		Layout.Parent = TabList
 		return TabList
 	end

@@ -3607,7 +3607,7 @@ function syde:Init(library)
 			local IconContainer = Instance.new("Frame")
 			IconContainer.Name = "IconContainer"
 			IconContainer.Size = UDim2.new(0, 20, 0, 20)
-			IconContainer.Position = UDim2.new(0, 8, 0.5, -10)
+			IconContainer.Position = UDim2.new(0, 6, 0.5, -10) -- Moved 2px left for better spacing
 			IconContainer.BackgroundTransparency = 1
 			IconContainer.Parent = Tab
 
@@ -3648,9 +3648,16 @@ function syde:Init(library)
 			IconImage.ScaleType = Enum.ScaleType.Fit
 			IconImage.Parent = IconInner
 
+			-- Calculate text positioning based on icon
+			local iconEndX = 6 + 20 -- Icon starts at 6, width 20, so ends at 26
+			local textStartX = iconEndX + 6 -- Add 6px padding between icon and text = 32
+			local tabWidth = 100 -- Fixed tab width
+			local rightPadding = 6 -- Right padding
+			local textWidth = tabWidth - textStartX - rightPadding -- 100 - 32 - 6 = 62
+
 			-- Adjust title position to make room for icon
-			Tab.Title.Position = UDim2.new(0, 32, 0.5, -8) -- Position after icon
-			Tab.Title.Size = UDim2.new(0, 60, 0, 16) -- Fixed width for text
+			Tab.Title.Position = UDim2.new(0, textStartX, 0.5, -8) -- Position after icon with calculated padding
+			Tab.Title.Size = UDim2.new(0, textWidth, 0, 16) -- Calculated width for text
 		end
 
 		Tab.Title.TextTransparency = 1
@@ -3659,7 +3666,7 @@ function syde:Init(library)
 		-- Set default title position if no icon
 		if not TabData.Icon then
 			Tab.Title.Position = UDim2.new(0, 4, 0.5, -8)
-			Tab.Title.Size = UDim2.new(0, 88, 0, 16) -- Fixed width for tabs without icons
+			Tab.Title.Size = UDim2.new(0, 88, 0, 16) -- 100 - 4 - 8 = 88 (left padding 4, right padding 8)
 		end
 
 		for _, temp in ipairs(PAGES.Page:GetChildren()) do
@@ -3758,8 +3765,17 @@ function syde:Init(library)
 
 		local function ApplyTabStyle(tabButton, isSelected)
 			local hasIcon = tabButton:FindFirstChild("IconContainer") ~= nil
-			local targetSize = hasIcon and UDim2.new(0, 60, 0, 16) or UDim2.new(0, 88, 0, 16)
-			local targetPosition = hasIcon and UDim2.new(0, 32, 0.5, -8) or UDim2.new(0, 4, 0.5, -8)
+			local targetPosition, targetSize
+			
+			if hasIcon then
+				-- Calculate based on icon position: icon at X=6, width=20, ends at X=26
+				-- Text starts at X=26 + 6 = 32, width = 100 - 32 - 6 = 62
+				targetPosition = UDim2.new(0, 32, 0.5, -8)
+				targetSize = UDim2.new(0, 62, 0, 16)
+			else
+				targetPosition = UDim2.new(0, 4, 0.5, -8)
+				targetSize = UDim2.new(0, 88, 0, 16)
+			end
 			local targetTextColor = isSelected and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(52, 52, 52)
 			local targetTransparency = isSelected and 0 or 1
 			local targetColor = isSelected and syde.theme.Accent or Color3.fromRGB(29, 29, 29)

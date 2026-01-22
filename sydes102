@@ -3591,6 +3591,67 @@ function syde:Init(library)
 		selected = false
 	}
 
+	-- Create a category container inside the Tabs scrolling frame.
+	-- Usage: local cat = ldata:CreateCategory({Title = 'Aimbot'})
+	--        cat:AddTab({Title = 'Aimassist', Icon = 'rbxassetid://...'})
+	function ldata:CreateCategory(data)
+		assert(type(data) == 'table' and data.Title, '[CreateCategory] Expect table with Title')
+
+		local CategoryFrame = Instance.new('Frame')
+		CategoryFrame.Name = data.Title .. '_Category'
+		CategoryFrame.BackgroundTransparency = 1
+		CategoryFrame.Size = UDim2.new(1, -8, 0, 20)
+		CategoryFrame.Parent = TABS
+
+		local TitleLabel = Instance.new('TextLabel')
+		TitleLabel.Name = 'CategoryTitle'
+		TitleLabel.BackgroundTransparency = 1
+		TitleLabel.Size = UDim2.new(1, 0, 0, 18)
+		TitleLabel.Position = UDim2.new(0, 6, 0, 0)
+		TitleLabel.Font = Enum.Font.SourceSansBold
+		TitleLabel.TextSize = 14
+		TitleLabel.TextColor3 = Color3.fromRGB(200,200,200)
+		TitleLabel.Text = data.Title
+		TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+		TitleLabel.Parent = CategoryFrame
+
+		local TabsContainer = Instance.new('Frame')
+		TabsContainer.Name = 'TabsContainer'
+		TabsContainer.BackgroundTransparency = 1
+		TabsContainer.Size = UDim2.new(1, 0, 0, 0)
+		TabsContainer.Position = UDim2.new(0, 0, 0, 20)
+		TabsContainer.Parent = CategoryFrame
+
+		local layout = Instance.new('UIListLayout')
+		layout.Name = 'TabsLayout'
+		layout.Parent = TabsContainer
+		layout.SortOrder = Enum.SortOrder.LayoutOrder
+		layout.Padding = UDim.new(0, 6)
+
+		-- Keep TabsContainer sized to its contents
+		TabsContainer:GetPropertyChangedSignal('AbsoluteSize'):Connect(function()
+			local h = 0
+			for _, child in ipairs(TabsContainer:GetChildren()) do
+				if child:IsA('Frame') then
+					h = h + child.Size.Y.Offset + (layout.Padding.Offset)
+				end
+			end
+			CategoryFrame.Size = UDim2.new(1, -8, 0, 20 + h)
+		end)
+
+		local Category = {}
+
+		function Category:AddTab(tab)
+			assert(type(tab) == 'table' and tab.Title, '[Category:AddTab] Expected table with Title')
+			-- parent the tab into this category's TabsContainer using InitTab's Parent support
+			tab.Parent = TabsContainer
+			return ldata:InitTab(tab)
+		end
+
+		-- return the category object and the created frame
+		return Category, CategoryFrame
+	end
+
 	--[TAB INITIALIZATION]
 	function ldata:InitTab(tab)
 		local isFirstTab = not ldata.first
@@ -3600,13 +3661,15 @@ function syde:Init(library)
 			Icon = tab.Icon;
 			Locked = tab.Locked or false;
 			Key = tab.Key;
+			Parent = tab.Parent or nil;
 		}
 		
 		local LockedFrames = {}
 		--[Tab Setup]
 		local Tab = TABS.Tb:Clone()
 		Tab.Visible = true
-		Tab.Parent = TABS
+		-- Parent the tab either to a provided parent (category container) or the main TABS scrolling frame
+		Tab.Parent = TabData.Parent or TABS
 		Tab.Size = UDim2.new(1, -8, 0, 35)
 		Tab.Title.Text = TabData.Title
 		-- Reserve space on the left for the icon so the title doesn't overlap

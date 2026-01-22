@@ -4068,7 +4068,7 @@ function syde:Init(library)
 			local Section = PAGES.Page.Section:Clone()
 			Section.Visible = true
 			Section.Title.Text = SectionData.Title
-			Section.Parent = Page
+			Section.Parent = defaultParent
 			Section.Title.Position = UDim2.new(0, 0,0, 0)
 			Section.BackgroundColor3 = Color3.fromRGB(255, 255, 255) -- Reset to default
 			Section.BackgroundTransparency = 1 -- Make background transparent
@@ -4185,7 +4185,7 @@ function syde:Init(library)
 			BorderLabel.TextColor3 = BorderData.Color or Color3.fromRGB(100, 200, 255) -- Default to bright blue
 			BorderLabel.TextXAlignment = Enum.TextXAlignment.Left
 			BorderLabel.Text = BorderData.Title
-			BorderLabel.Parent = Page
+			BorderLabel.Parent = defaultParent
 
 			-- Register border label with current section for collapsible functionality
 			if CurrentSection then
@@ -4244,7 +4244,7 @@ function syde:Init(library)
 
 			local button = PAGES.Page.Button:Clone()
 			button.Visible = true
-			button.Parent = Page
+			button.Parent = defaultParent
 			button.Title.Text = ButtonData.Title
 			button.Name = ButtonData.Title
 			button.Title.Size = UDim2.new(0, button.Title.TextBounds.X + 15,0, 35)
@@ -4431,7 +4431,7 @@ function syde:Init(library)
 
 			local toggle = PAGES.Page.Toggle:Clone()
 			toggle.Visible = true
-			toggle.Parent = Page
+			toggle.Parent = defaultParent
 			toggle.Title.Text = ToggleData.Title
 			toggle.Name = ToggleData.Title
 
@@ -4750,7 +4750,7 @@ function syde:Init(library)
 
 			local slider = PAGES.Page.Slider:Clone()
 			slider.Visible = true
-			slider.Parent = Page
+			slider.Parent = defaultParent
 			slider.Title.Text = SliderData.Title
 			slider.Name = SliderData.Title
 			slider.slideholder.slider.Visible = false
@@ -4985,7 +4985,7 @@ function syde:Init(library)
 
 			local dropdown = PAGES.Page.Dropdown:Clone()
 			dropdown.Visible = true
-			dropdown.Parent = Page
+			dropdown.Parent = defaultParent
 			dropdown.Title.Text = DropdownData.Title
 			dropdown.Name = DropdownData.Title
 			dropdown.dropHolder.drop.Container.Option.Visible = false
@@ -5291,7 +5291,7 @@ function syde:Init(library)
 
 			local textinput = PAGES.Page.Input:Clone()
 			textinput.Visible = true
-			textinput.Parent = Page
+			textinput.Parent = defaultParent
 			textinput.Name = TextInputData.Title
 			textinput.Title.Text = TextInputData.Title
 			textinput.TextFrame.TextBox.PlaceholderText = TextInputData.PlaceHolder
@@ -5423,7 +5423,7 @@ function syde:Init(library)
 
 			local colorpicker = PAGES.Page.ColorPicker:Clone()
 			colorpicker.Visible = true
-			colorpicker.Parent = Page
+			colorpicker.Parent = defaultParent
 			colorpicker.Title.Text = ColorPickerData.Title
 			colorpicker.Name = ColorPickerData.Title
 
@@ -6009,7 +6009,7 @@ function syde:Init(library)
 
 			local KeyBind = PAGES.Page.KeyBind:Clone()
 			KeyBind.Visible = true
-			KeyBind.Parent = Page
+			KeyBind.Parent = defaultParent
 			KeyBind.Title.Text = KeybindData.Title
 			KeyBind.Name = KeybindData.Title
 
@@ -6089,7 +6089,7 @@ function syde:Init(library)
 
 			local ImageBlock = PAGES.Page.img:Clone()
 			ImageBlock.Visible = true
-			ImageBlock.Parent = Page
+			ImageBlock.Parent = defaultParent
 			ImageBlock.ImageLabel.Image = 'rbxassetid://'..imgData.img
 
 		end
@@ -6098,7 +6098,7 @@ function syde:Init(library)
 
 			local Label = PAGES.Page.Label:Clone()
 			Label.Visible = true
-			Label.Parent = Page
+			Label.Parent = defaultParent
 			Label.Text.Text = Text
 
 			if Alignment == 'Center' then
@@ -6135,7 +6135,7 @@ function syde:Init(library)
 
 			local Para = PAGES.Page.Paragraph:Clone()
 			Para.Visible = true
-			Para.Parent = Page
+			Para.Parent = defaultParent
 			Para.Title.Text = ParaData.Title
 			Para.Content.Text = ParaData.Content
 			Para.Content.TextColor3 = Color3.new(1, 1, 1)
@@ -6196,7 +6196,7 @@ function syde:Init(library)
 			local row = Instance.new("Frame")
 			row.Size = UDim2.new(1, -15, 0, 50) -- Will be updated
 			row.BackgroundTransparency = 1
-			row.Parent = Page
+			row.Parent = defaultParent
 			row.Name = "Row"
 
 			local maxHeight = 0
@@ -6276,7 +6276,7 @@ function syde:Init(library)
 
 			local EnchancedView = PAGES.Page["3DView"]:Clone()
 			EnchancedView.Visible = true
-			EnchancedView.Parent = Page
+			EnchancedView.Parent = defaultParent
 			EnchancedView.Title.Text = Viewdata.Title
 
 			local Viewport = EnchancedView.ViewFrame.ViewportFrame
@@ -6559,7 +6559,7 @@ function syde:Init(library)
 
 			local RateBlock = PAGES.Page.Rate:Clone()
 			RateBlock.Visible = true
-			RateBlock.Parent = Page
+			RateBlock.Parent = defaultParent
 			RateBlock.Title.Text = RateData.Title
 
 			local starsFrame = RateBlock.stars
@@ -6622,7 +6622,7 @@ function syde:Init(library)
 			tabContainer.Size = UDim2.new(1, -30, 0, 40)
 			tabContainer.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 			tabContainer.BorderSizePixel = 0
-			tabContainer.Parent = Page
+			tabContainer.Parent = defaultParent
 
 			local tabContainerCorner = Instance.new("UICorner")
 			tabContainerCorner.CornerRadius = UDim.new(0, 8)
@@ -6648,7 +6648,7 @@ function syde:Init(library)
 			contentContainer.Size = UDim2.new(1, -30, 0, 0)
 			contentContainer.AutomaticSize = Enum.AutomaticSize.Y
 			contentContainer.BackgroundTransparency = 1
-			contentContainer.Parent = Page
+			contentContainer.Parent = defaultParent
 
 			local contentList = Instance.new("UIListLayout")
 			contentList.Padding = UDim.new(0, 8)
@@ -6693,9 +6693,14 @@ function syde:Init(library)
 
 				-- Load new content only for the active tab
 				if TabGroupData.Content[tabId] then
-					-- Temporarily change defaultParent to contentContainer for tab content
-					local originalParent = defaultParent
-					setInternalParent(contentContainer)
+					-- Create a local parent management system for this TabGroup
+					local originalDefaultParent = defaultParent
+					local function localSetParent(newParent)
+						defaultParent = newParent
+					end
+					
+					-- Temporarily set parent to this TabGroup's content container
+					localSetParent(contentContainer)
 					
 					-- Execute the content function for this tab
 					local success, errorMsg = pcall(TabGroupData.Content[tabId])
@@ -6703,7 +6708,8 @@ function syde:Init(library)
 						warn("[TabGroup] Error loading content for tab '" .. tabId .. "': " .. errorMsg)
 					end
 					
-					setInternalParent(originalParent)
+					-- Restore original parent
+					localSetParent(originalDefaultParent)
 				end
 
 				-- Update layout after content change

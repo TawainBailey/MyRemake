@@ -3628,7 +3628,8 @@ function syde:Init(library)
 				CategoryContainer.Name = "CategoryContainer_" .. tab.Category
 				CategoryContainer.Size = UDim2.new(1, -10, 0, 0)
 				CategoryContainer.AutomaticSize = Enum.AutomaticSize.Y
-				CategoryContainer.BackgroundTransparency = 1
+				CategoryContainer.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+				CategoryContainer.BackgroundTransparency = 0
 				CategoryContainer.Parent = TABS
 				
 				local stroke = Instance.new("UIStroke")
@@ -4044,10 +4045,25 @@ function syde:Init(library)
 
 			syde:replayLoadTweens()
 
-			for _, otherTab in ipairs(TABS:GetChildren()) do
-				if otherTab:IsA("Frame") then
-					ApplyTabStyle(otherTab, otherTab == Tab)
+			local function getAllTabs()
+				local tabs = {}
+				for _, child in ipairs(TABS:GetChildren()) do
+					if child:IsA("Frame") and child:FindFirstChild("Title") then
+						table.insert(tabs, child)
+					elseif child:IsA("Frame") and child.Name:match("^CategoryContainer_") then
+						for _, subchild in ipairs(child:GetChildren()) do
+							if subchild:IsA("Frame") and subchild:FindFirstChild("Title") then
+								table.insert(tabs, subchild)
+							end
+						end
+					end
 				end
+				return tabs
+			end
+
+			local allTabs = getAllTabs()
+			for _, otherTab in ipairs(allTabs) do
+				ApplyTabStyle(otherTab, otherTab == Tab)
 			end
 		end)
 		

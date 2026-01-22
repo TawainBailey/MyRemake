@@ -3597,6 +3597,10 @@ function syde:Init(library)
 		local Tab = TABS.Tb:Clone()
 		Tab.Visible = true
 		Tab.Parent = TABS
+		local stroke = Instance.new("UIStroke")
+		stroke.Color = Color3.fromRGB(100, 100, 100)
+		stroke.Thickness = 1
+		stroke.Parent = Tab
 		Tab.Title.Text = TabData.Title
 		Tab.Name = TabData.Title
 

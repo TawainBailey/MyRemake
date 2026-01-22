@@ -3607,7 +3607,7 @@ function syde:Init(library)
 			local IconContainer = Instance.new("Frame")
 			IconContainer.Name = "IconContainer"
 			IconContainer.Size = UDim2.new(0, 20, 0, 20)
-			IconContainer.Position = UDim2.new(0, 6, 0.5, -10) -- Moved 2px left for better spacing
+			IconContainer.Position = UDim2.new(0, 8, 0.5, -10)
 			IconContainer.BackgroundTransparency = 1
 			IconContainer.Parent = Tab
 
@@ -3640,34 +3640,20 @@ function syde:Init(library)
 			-- Create the icon image
 			local IconImage = Instance.new("ImageLabel")
 			IconImage.Name = "Icon"
-			IconImage.Size = UDim2.new(1, -6, 1, -6) -- Slightly larger
-			IconImage.Position = UDim2.new(0, 3, 0, 3) -- Center it better
+			IconImage.Size = UDim2.new(1, -4, 1, -4)
+			IconImage.Position = UDim2.new(0, 2, 0, 2)
 			IconImage.BackgroundTransparency = 1
 			IconImage.Image = TabData.Icon
 			IconImage.ImageColor3 = Color3.fromRGB(140, 140, 140) -- Grey icon
-			IconImage.ScaleType = Enum.ScaleType.Fit
 			IconImage.Parent = IconInner
 
-			-- Calculate text positioning based on icon
-			local iconEndX = 6 + 20 -- Icon starts at 6, width 20, so ends at 26
-			local textStartX = iconEndX + 6 -- Add 6px padding between icon and text = 32
-			local tabWidth = 100 -- Fixed tab width
-			local rightPadding = 6 -- Right padding
-			local textWidth = tabWidth - textStartX - rightPadding -- 100 - 32 - 6 = 62
-
 			-- Adjust title position to make room for icon
-			Tab.Title.Position = UDim2.new(0, textStartX, 0.5, -8) -- Position after icon with calculated padding
-			Tab.Title.Size = UDim2.new(0, textWidth, 0, 16) -- Calculated width for text
+			Tab.Title.Position = UDim2.new(0, 36, 0, 0) -- Move title to the right
+			Tab.Title.Size = UDim2.new(1, -44, 1, 0) -- Adjust size
 		end
 
 		Tab.Title.TextTransparency = 1
 		Tab.indicator.BackgroundTransparency = 1
-
-		-- Set default title position if no icon
-		if not TabData.Icon then
-			Tab.Title.Position = UDim2.new(0, 4, 0.5, -8)
-			Tab.Title.Size = UDim2.new(0, 88, 0, 16) -- 100 - 4 - 8 = 88 (left padding 4, right padding 8)
-		end
 
 		for _, temp in ipairs(PAGES.Page:GetChildren()) do
 			if temp:IsA("Frame") then
@@ -3739,10 +3725,8 @@ function syde:Init(library)
 
 
 		if ldata.first then
-			local hasIcon = Tab:FindFirstChild("IconContainer") ~= nil
-			local titleSize = hasIcon and UDim2.new(1, -40, 0, 16) or UDim2.new(1, -8, 1, 0)
-			local titlePosition = hasIcon and UDim2.new(0, 32, 0.5, -8) or UDim2.new(0, 4, 0.5, -8)
-			tweenservice:Create(Tab.Title, TweenInfo.new(2, Enum.EasingStyle.Quint), { Size = titleSize, Position = titlePosition }):Play()
+			local titleSize = TabData.Icon and UDim2.new(1, -44, 1, 0) or UDim2.new(1, -8, 1, 0)
+			tweenservice:Create(Tab.Title, TweenInfo.new(2, Enum.EasingStyle.Quint), { Size = titleSize }):Play()
 			tweenservice:Create(Tab.Title, TweenInfo.new(2, Enum.EasingStyle.Quint), { TextColor3 = Color3.fromRGB(52, 52, 52) }):Play()
 			tweenservice:Create(Tab.indicator, TweenInfo.new(2, Enum.EasingStyle.Quint), { Size = UDim2.new(0, 2, 0, 10) }):Play()
 			tweenservice:Create(Tab.Title, TweenInfo.new(2, Enum.EasingStyle.Exponential), { TextTransparency = 0 }):Play()
@@ -3750,10 +3734,8 @@ function syde:Init(library)
 			tweenservice:Create(Tab.indicator.ImageLabel, TweenInfo.new(1, Enum.EasingStyle.Exponential), { ImageTransparency = 1 }):Play()
 		else
 			ldata.first = TabData.Title
-			local hasIcon = Tab:FindFirstChild("IconContainer") ~= nil
-			local titleSize = hasIcon and UDim2.new(1, -40, 0, 16) or UDim2.new(1, -10, 1, 0)
-			local titlePosition = hasIcon and UDim2.new(0, 32, 0.5, -8) or UDim2.new(0, 4, 0.5, -8)
-			tweenservice:Create(Tab.Title, TweenInfo.new(2, Enum.EasingStyle.Quint), { Size = titleSize, Position = titlePosition }):Play()
+			local titleSize = TabData.Icon and UDim2.new(1, -46, 1, 0) or UDim2.new(1, -10, 1, 0)
+			tweenservice:Create(Tab.Title, TweenInfo.new(2, Enum.EasingStyle.Quint), { Size = titleSize }):Play()
 			tweenservice:Create(Tab.Title, TweenInfo.new(2, Enum.EasingStyle.Exponential), { TextTransparency = 0 }):Play()
 			tweenservice:Create(Tab.indicator, TweenInfo.new(2, Enum.EasingStyle.Exponential), { BackgroundColor3 = syde.theme.Accent }):Play()
 			tweenservice:Create(Tab.indicator, TweenInfo.new(2, Enum.EasingStyle.Quint), { Size = UDim2.new(0, 2, 0, 2) }):Play()
@@ -3765,23 +3747,13 @@ function syde:Init(library)
 
 		local function ApplyTabStyle(tabButton, isSelected)
 			local hasIcon = tabButton:FindFirstChild("IconContainer") ~= nil
-			local targetPosition, targetSize
-			
-			if hasIcon then
-				-- Calculate based on icon position: icon at X=6, width=20, ends at X=26
-				-- Text starts at X=26 + 6 = 32, width = 100 - 32 - 6 = 62
-				targetPosition = UDim2.new(0, 32, 0.5, -8)
-				targetSize = UDim2.new(0, 62, 0, 16)
-			else
-				targetPosition = UDim2.new(0, 4, 0.5, -8)
-				targetSize = UDim2.new(0, 88, 0, 16)
-			end
+			local targetSize = isSelected and UDim2.new(1, -12, 1, 0) or UDim2.new(1, -12, 1, 0)
 			local targetTextColor = isSelected and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(52, 52, 52)
 			local targetTransparency = isSelected and 0 or 1
 			local targetColor = isSelected and syde.theme.Accent or Color3.fromRGB(29, 29, 29)
 			local indicatorSize = isSelected and UDim2.new(0, 2, 0, 10) or UDim2.new(0, 2, 0, 5)
 
-			tweenservice:Create(tabButton.Title, positionTweenInfo, { Size = targetSize, Position = targetPosition, TextColor3 = targetTextColor }):Play()
+			tweenservice:Create(tabButton.Title, positionTweenInfo, { Size = targetSize, TextColor3 = targetTextColor }):Play()
 			tweenservice:Create(tabButton.indicator, colorTweenInfo, { BackgroundTransparency = targetTransparency, BackgroundColor3 = targetColor, Size = indicatorSize }):Play()
 			tweenservice:Create(tabButton.indicator.ImageLabel, colorTweenInfo, { ImageColor3 = targetColor }):Play()
 			tweenservice:Create(tabButton.indicator.ImageLabel, colorTweenInfo, { ImageTransparency = isSelected and 0.6 or 1 }):Play()
@@ -6518,21 +6490,7 @@ function syde:Init(library)
 			local ZoomFrame   = EnchancedView.ViewFrame.Zoom
 			local ClipFrame   = ZoomFrame.clipframe
 			local ScrollFrame = ClipFrame.scroll
-			local ZoomAmountLabel = nil
-			-- Try multiple possible paths for the zoom amount label
-			if ZoomFrame:FindFirstChild("Frame") and ZoomFrame.Frame:FindFirstChild("ZoomAmount") then
-				ZoomAmountLabel = ZoomFrame.Frame.ZoomAmount
-			elseif ZoomFrame:FindFirstChild("ZoomAmount") then
-				ZoomAmountLabel = ZoomFrame.ZoomAmount
-			else
-				-- Search recursively
-				ZoomAmountLabel = ZoomFrame:FindFirstChild("ZoomAmount", true)
-			end
-
-			-- If still not found, create a warning
-			if not ZoomAmountLabel then
-				warn("[3D View] ZoomAmount label not found in template. Zoom display will be disabled.")
-			end
+			local ZoomAmountLabel = ZoomFrame.Frame.ZoomAmount -- << change to your label path
 
 			-- Zoom range (studs)
 			local minZoomDistance = maxDimension * 0.5
@@ -6872,7 +6830,7 @@ function syde:Init(library)
 			for i, tabData in ipairs(TabGroupData.Tabs) do
 				local tabButton = Instance.new("TextButton")
 				tabButton.Name = tabData.id
-				tabButton.Size = UDim2.new(0, 100, 1, 0) -- Increased width for icons
+				tabButton.Size = UDim2.new(0, 80, 1, 0)
 				tabButton.BackgroundColor3 = (i == 1) and syde.theme.Accent or Color3.fromRGB(35, 35, 35)
 				tabButton.BackgroundTransparency = (i == 1) and 0 or 0.8
 				tabButton.BorderSizePixel = 0

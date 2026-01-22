@@ -2650,25 +2650,32 @@ function syde:Init(library)
 				local Para = Library.Settings.Paragraph:Clone()
 				Para.Visible = true
 				Para.Parent = Parent
-				Para.Title.Text = ParaData.Title
-				Para.Content.Text = ParaData.Content
-				Para.Content.TextColor3 = Color3.new(1, 1, 1)
+				
+				local titleLabel = Para:FindFirstChild("Title")
+				local contentLabel = Para:FindFirstChild("Content")
+				
+				if titleLabel then titleLabel.Text = ParaData.Title end
+				if contentLabel then contentLabel.Text = ParaData.Content end
+				if contentLabel then contentLabel.TextColor3 = Color3.new(1, 1, 1) end
 
-				Para.Content.Size = UDim2.new(1, -20, 0, Para.Content.TextBounds.Y)
-				Para.Size = UDim2.new(1, -15, 0, Para.Content.Size.Y.Offset + 45)
+				if contentLabel then
+					contentLabel.Size = UDim2.new(1, -20, 0, contentLabel.TextBounds.Y)
+					Para.Size = UDim2.new(1, -15, 0, contentLabel.Size.Y.Offset + 45)
+				end
 
 				local function updateSize()
+					if not contentLabel then return end
 					local textSize = textservice:GetTextSize(
-						Para.Content.Text,
-						Para.Content.TextSize,
-						Para.Content.Font,
-						Vector2.new(Para.Content.AbsoluteSize.X, math.huge) -- Allows vertical expansion
+						contentLabel.Text,
+						contentLabel.TextSize,
+						contentLabel.Font,
+						Vector2.new(contentLabel.AbsoluteSize.X, math.huge) -- Allows vertical expansion
 					)
 
 					local newDescSize = UDim2.new(1, -20, 0, textSize.Y)
 					local newButtonSize = UDim2.new(Para.Size.X.Scale, -40, 0, textSize.Y + 40) -- Adding extra padding
 
-					local descTween = tweenservice:Create(Para.Content, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), { Size = newDescSize })
+					local descTween = tweenservice:Create(contentLabel, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), { Size = newDescSize })
 					descTween:Play()
 
 					local buttonTween = tweenservice:Create(Para, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), { Size = newButtonSize })
@@ -2677,13 +2684,15 @@ function syde:Init(library)
 
 				updateSize()
 
-				Para.Content:GetPropertyChangedSignal("TextBounds"):Connect(updateSize)
+				if contentLabel then
+					contentLabel:GetPropertyChangedSignal("TextBounds"):Connect(updateSize)
+				end
 
 				local ParagraphSettings = {}
 
 				function ParagraphSettings:Set(text, title)
-					Para.Title.Text = title
-					Para.Content.Text = text
+					if titleLabel then titleLabel.Text = title end
+					if contentLabel then contentLabel.Text = text end
 				end
 
 				ParagraphSettings.Instance = Para

@@ -3584,10 +3584,11 @@ function syde:Init(library)
 
 	--[TAB INITIALIZATION]
 	function ldata:InitTab(tab)
-		local isFirstTab = not ldata.first 
+		local isFirstTab = not ldata.first
 		
 		local TabData = {
 			Title = tab.Title;
+			Icon = tab.Icon;
 			Locked = tab.Locked or false;
 			Key = tab.Key;
 		}
@@ -3599,6 +3600,57 @@ function syde:Init(library)
 		Tab.Parent = TABS
 		Tab.Title.Text = TabData.Title
 		Tab.Name = TabData.Title
+
+		--[Icon Setup]
+		if TabData.Icon then
+			-- Create icon container
+			local IconContainer = Instance.new("Frame")
+			IconContainer.Name = "IconContainer"
+			IconContainer.Size = UDim2.new(0, 20, 0, 20)
+			IconContainer.Position = UDim2.new(0, 8, 0.5, -10)
+			IconContainer.BackgroundTransparency = 1
+			IconContainer.Parent = Tab
+
+			-- Create circular background
+			local IconBackground = Instance.new("Frame")
+			IconBackground.Name = "IconBackground"
+			IconBackground.Size = UDim2.new(1, 0, 1, 0)
+			IconBackground.Position = UDim2.new(0, 0, 0, 0)
+			IconBackground.BackgroundColor3 = Color3.fromRGB(70, 70, 70) -- Grey border
+			IconBackground.BackgroundTransparency = 0
+			IconBackground.Parent = IconContainer
+
+			local IconCorner = Instance.new("UICorner")
+			IconCorner.CornerRadius = UDim.new(1, 0) -- Fully circular
+			IconCorner.Parent = IconBackground
+
+			-- Create inner circle for the icon
+			local IconInner = Instance.new("Frame")
+			IconInner.Name = "IconInner"
+			IconInner.Size = UDim2.new(1, -2, 1, -2) -- Slightly smaller
+			IconInner.Position = UDim2.new(0, 1, 0, 1)
+			IconInner.BackgroundColor3 = Color3.fromRGB(30, 30, 30) -- Dark background
+			IconInner.BackgroundTransparency = 0
+			IconInner.Parent = IconBackground
+
+			local InnerCorner = Instance.new("UICorner")
+			InnerCorner.CornerRadius = UDim.new(1, 0)
+			InnerCorner.Parent = IconInner
+
+			-- Create the icon image
+			local IconImage = Instance.new("ImageLabel")
+			IconImage.Name = "Icon"
+			IconImage.Size = UDim2.new(1, -4, 1, -4)
+			IconImage.Position = UDim2.new(0, 2, 0, 2)
+			IconImage.BackgroundTransparency = 1
+			IconImage.Image = TabData.Icon
+			IconImage.ImageColor3 = Color3.fromRGB(140, 140, 140) -- Grey icon
+			IconImage.Parent = IconInner
+
+			-- Adjust title position to make room for icon
+			Tab.Title.Position = UDim2.new(0, 36, 0, 0) -- Move title to the right
+			Tab.Title.Size = UDim2.new(1, -44, 1, 0) -- Adjust size
+		end
 
 		Tab.Title.TextTransparency = 1
 		Tab.indicator.BackgroundTransparency = 1
@@ -3673,7 +3725,8 @@ function syde:Init(library)
 
 
 		if ldata.first then
-			tweenservice:Create(Tab.Title, TweenInfo.new(2, Enum.EasingStyle.Quint), { Size = UDim2.new(1, -8, 1, 0) }):Play()
+			local titleSize = TabData.Icon and UDim2.new(1, -44, 1, 0) or UDim2.new(1, -8, 1, 0)
+			tweenservice:Create(Tab.Title, TweenInfo.new(2, Enum.EasingStyle.Quint), { Size = titleSize }):Play()
 			tweenservice:Create(Tab.Title, TweenInfo.new(2, Enum.EasingStyle.Quint), { TextColor3 = Color3.fromRGB(52, 52, 52) }):Play()
 			tweenservice:Create(Tab.indicator, TweenInfo.new(2, Enum.EasingStyle.Quint), { Size = UDim2.new(0, 2, 0, 10) }):Play()
 			tweenservice:Create(Tab.Title, TweenInfo.new(2, Enum.EasingStyle.Exponential), { TextTransparency = 0 }):Play()
@@ -3681,7 +3734,8 @@ function syde:Init(library)
 			tweenservice:Create(Tab.indicator.ImageLabel, TweenInfo.new(1, Enum.EasingStyle.Exponential), { ImageTransparency = 1 }):Play()
 		else
 			ldata.first = TabData.Title
-			tweenservice:Create(Tab.Title, TweenInfo.new(2, Enum.EasingStyle.Quint), { Size = UDim2.new(1, -10, 1, 0) }):Play()
+			local titleSize = TabData.Icon and UDim2.new(1, -46, 1, 0) or UDim2.new(1, -10, 1, 0)
+			tweenservice:Create(Tab.Title, TweenInfo.new(2, Enum.EasingStyle.Quint), { Size = titleSize }):Play()
 			tweenservice:Create(Tab.Title, TweenInfo.new(2, Enum.EasingStyle.Exponential), { TextTransparency = 0 }):Play()
 			tweenservice:Create(Tab.indicator, TweenInfo.new(2, Enum.EasingStyle.Exponential), { BackgroundColor3 = syde.theme.Accent }):Play()
 			tweenservice:Create(Tab.indicator, TweenInfo.new(2, Enum.EasingStyle.Quint), { Size = UDim2.new(0, 2, 0, 2) }):Play()
@@ -3692,6 +3746,7 @@ function syde:Init(library)
 		local colorTweenInfo = TweenInfo.new(1.5, Enum.EasingStyle.Quart)
 
 		local function ApplyTabStyle(tabButton, isSelected)
+			local hasIcon = tabButton:FindFirstChild("IconContainer") ~= nil
 			local targetSize = isSelected and UDim2.new(1, -12, 1, 0) or UDim2.new(1, -12, 1, 0)
 			local targetTextColor = isSelected and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(52, 52, 52)
 			local targetTransparency = isSelected and 0 or 1
@@ -3702,6 +3757,17 @@ function syde:Init(library)
 			tweenservice:Create(tabButton.indicator, colorTweenInfo, { BackgroundTransparency = targetTransparency, BackgroundColor3 = targetColor, Size = indicatorSize }):Play()
 			tweenservice:Create(tabButton.indicator.ImageLabel, colorTweenInfo, { ImageColor3 = targetColor }):Play()
 			tweenservice:Create(tabButton.indicator.ImageLabel, colorTweenInfo, { ImageTransparency = isSelected and 0.6 or 1 }):Play()
+
+			-- Update icon colors if icon exists
+			if hasIcon then
+				local iconBackground = tabButton.IconContainer.IconBackground
+				local iconImage = iconBackground.IconInner.Icon
+				local iconColor = isSelected and syde.theme.Accent or Color3.fromRGB(70, 70, 70)
+				local iconImageColor = isSelected and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(140, 140, 140)
+
+				tweenservice:Create(iconBackground, colorTweenInfo, { BackgroundColor3 = iconColor }):Play()
+				tweenservice:Create(iconImage, colorTweenInfo, { ImageColor3 = iconImageColor }):Play()
+			end
 		end
 
 		ApplyTabStyle(Tab, isFirstTab)

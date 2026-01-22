@@ -1229,6 +1229,10 @@ local WINDOW = UI.lib
 local TOPBAR = WINDOW.Top
 local TABS = WINDOW.Tab.ScrollingFrame
 TABS.ClipsDescendants = false
+local layout = TABS:FindFirstChild("UIListLayout")
+if layout then
+    layout.Padding = UDim.new(0, 5)
+end
 local PAGES = WINDOW.Pages
 local settingsOpen = false
 local pluginsOpen = false
@@ -3601,6 +3605,7 @@ function syde:Init(library)
 		local stroke = Instance.new("UIStroke")
 		stroke.Color = Color3.fromRGB(150, 150, 150)
 		stroke.Thickness = 0.5
+		stroke.Transparency = 0.5
 		stroke.Parent = Tab
 		local corner = Instance.new("UICorner")
 		corner.CornerRadius = UDim.new(0, 4)

@@ -3627,14 +3627,16 @@ function syde:Init(library)
 			sep.BorderSizePixel = 0
 			sep.Parent = parent
 		end
-		local stroke = Instance.new("UIStroke")
-		stroke.Color = Color3.fromRGB(150, 150, 150)
-		stroke.Thickness = 1
-		stroke.Transparency = 0
-		stroke.Parent = Tab
-		local corner = Instance.new("UICorner")
-		corner.CornerRadius = UDim.new(0, 4)
-		corner.Parent = Tab
+		if parent == TABS then
+			local stroke = Instance.new("UIStroke")
+			stroke.Color = Color3.fromRGB(150, 150, 150)
+			stroke.Thickness = 1
+			stroke.Transparency = 0
+			stroke.Parent = Tab
+			local corner = Instance.new("UICorner")
+			corner.CornerRadius = UDim.new(0, 4)
+			corner.Parent = Tab
+		end
 		Tab.Title.Text = TabData.Title
 		Tab.Name = TabData.Title
 
@@ -6683,7 +6685,8 @@ function syde:Init(library)
 
 	function ldata:InitSection(sectionConfig)
 		local SectionFrame = Instance.new("Frame")
-		SectionFrame.Size = UDim2.new(1, -20, 0, 50)
+		SectionFrame.Size = UDim2.new(1, -20, 0, 0)
+		SectionFrame.AutomaticSize = Enum.AutomaticSize.Y
 		SectionFrame.BackgroundTransparency = 1
 		SectionFrame.Parent = TABS
 		local Title = Instance.new("TextLabel")
@@ -6703,7 +6706,8 @@ function syde:Init(library)
 		Corner.CornerRadius = UDim.new(0, 4)
 		Corner.Parent = SectionFrame
 		local TabList = Instance.new("Frame")
-		TabList.Size = UDim2.new(1, 0, 1, -20)
+		TabList.Size = UDim2.new(1, 0, 0, 0)
+		TabList.AutomaticSize = Enum.AutomaticSize.Y
 		TabList.Position = UDim2.new(0, 0, 0, 20)
 		TabList.BackgroundTransparency = 1
 		TabList.Parent = SectionFrame

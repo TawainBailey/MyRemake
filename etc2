@@ -62,6 +62,106 @@ local RobloxUI = {
 	SettingsFlags = {};
 }
 
+-- Create UI structure programmatically
+function RobloxUI:CreateUI()
+	local ScreenGui = Instance.new("ScreenGui")
+	ScreenGui.Name = "RobloxUI"
+	ScreenGui.ResetOnSpawn = false
+	ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+	ScreenGui.Parent = coregui
+
+	local MainFrame = Instance.new("Frame")
+	MainFrame.Name = "Main"
+	MainFrame.Size = UDim2.new(0, 700, 0, 500)
+	MainFrame.Position = UDim2.new(0.5, -350, 0.5, -250)
+	MainFrame.BackgroundColor3 = self.theme.background
+	MainFrame.BackgroundTransparency = 0.1
+	MainFrame.Parent = ScreenGui
+
+	local MainCorner = Instance.new("UICorner")
+	MainCorner.CornerRadius = UDim.new(0, 16)
+	MainCorner.Parent = MainFrame
+
+	local TopBar = Instance.new("Frame")
+	TopBar.Name = "Top"
+	TopBar.Size = UDim2.new(1, 0, 0, 40)
+	TopBar.BackgroundTransparency = 1
+	TopBar.Parent = MainFrame
+
+	local TitleFrame = Instance.new("Frame")
+	TitleFrame.Size = UDim2.new(1, -80, 1, 0)
+	TitleFrame.Position = UDim2.new(0, 20, 0, 0)
+	TitleFrame.BackgroundTransparency = 1
+	TitleFrame.Parent = TopBar
+
+	local TitleLabel = Instance.new("TextLabel")
+	TitleLabel.Name = "Title"
+	TitleLabel.Size = UDim2.new(1, 0, 0, 20)
+	TitleLabel.Position = UDim2.new(0, 0, 0, 5)
+	TitleLabel.BackgroundTransparency = 1
+	TitleLabel.Text = "Roblox UI"
+	TitleLabel.TextColor3 = self.theme.foreground
+	TitleLabel.TextSize = 16
+	TitleLabel.Font = Enum.Font.GothamBold
+	TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+	TitleLabel.Parent = TitleFrame
+
+	local SubTitleLabel = Instance.new("TextLabel")
+	SubTitleLabel.Name = "Sub"
+	SubTitleLabel.Size = UDim2.new(1, 0, 0, 14)
+	SubTitleLabel.Position = UDim2.new(0, 0, 0, 22)
+	SubTitleLabel.BackgroundTransparency = 1
+	SubTitleLabel.Text = "Modern Dark UI"
+	SubTitleLabel.TextColor3 = self.theme.muted
+	SubTitleLabel.TextSize = 12
+	SubTitleLabel.Font = Enum.Font.Gotham
+	SubTitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+	SubTitleLabel.Parent = TitleFrame
+
+	local ResizeHandle = Instance.new("Frame")
+	ResizeHandle.Name = "resize"
+	ResizeHandle.Size = UDim2.new(0, 20, 0, 20)
+	ResizeHandle.Position = UDim2.new(1, -20, 1, -20)
+	ResizeHandle.BackgroundColor3 = self.theme.accentPanel
+	ResizeHandle.BackgroundTransparency = 0.8
+	ResizeHandle.Parent = MainFrame
+
+	local ResizeCorner = Instance.new("UICorner")
+	ResizeCorner.CornerRadius = UDim.new(0, 4)
+	ResizeCorner.Parent = ResizeHandle
+
+	local Sidebar = Instance.new("ScrollingFrame")
+	Sidebar.Name = "Sidebar"
+	Sidebar.Size = UDim2.new(0, 200, 1, -40)
+	Sidebar.Position = UDim2.new(0, 0, 0, 40)
+	Sidebar.BackgroundTransparency = 1
+	Sidebar.ScrollBarThickness = 4
+	Sidebar.ScrollBarImageColor3 = self.theme.accentBright
+	Sidebar.Parent = MainFrame
+
+	local Content = Instance.new("Frame")
+	Content.Name = "Content"
+	Content.Size = UDim2.new(1, -200, 1, -40)
+	Content.Position = UDim2.new(0, 200, 0, 40)
+	Content.BackgroundTransparency = 1
+	Content.Parent = MainFrame
+
+	local Tabs = Instance.new("Frame")
+	Tabs.Name = "Tabs"
+	Tabs.Size = UDim2.new(1, 0, 0, 40)
+	Tabs.BackgroundTransparency = 1
+	Tabs.Parent = Content
+
+	return {
+		lib = MainFrame,
+		Top = TopBar,
+		Sidebar = Sidebar,
+		Content = Content,
+		Tabs = Tabs,
+		Enabled = true
+	}
+end
+
 
 -- [ THEME MANAGEMENT ]
 function RobloxUI:UpdateTheme(Config)
@@ -385,31 +485,31 @@ end
 -- [ UI INITIALIZATION ]
 function RobloxUI:Init(config)
 	print('RobloxUI Library Loaded')
-	
+
 	config = config or {}
 	config.Title = config.Title or 'Roblox UI'
 	config.SubText = config.SubText or 'Modern Dark UI'
-	
-	-- Create main UI structure
-	local UI = Library
+
+	-- Create UI structure
+	local UI = self:CreateUI()
 	local WINDOW = UI.lib
-	local TOPBAR = WINDOW.Top
-	local SIDEBAR = WINDOW.Sidebar  -- New: Sidebar for navigation
-	local CONTENT = WINDOW.Content  -- New: Content panel
-	local TABS = CONTENT.Tabs       -- New: Tabs within content
-	
+	local TOPBAR = UI.Top
+	local SIDEBAR = UI.Sidebar
+	local CONTENT = UI.Content
+	local TABS = UI.Tabs
+
 	-- Setup theme
 	UI.Enabled = true
-	
+
 	-- Configure window
 	TOPBAR.Title.Text = config.Title
 	TOPBAR.Title.Sub.Text = config.SubText
 	TOPBAR.Title.Sub.TextColor3 = Color3.new(1,1,1)
-	
+
 	-- Setup drag and resize
 	RobloxUI:AddDrag(TOPBAR, WINDOW, true)
 	RobloxUI:MakeResizable(WINDOW.resize, WINDOW, Vector2.new(654, 428))
-	
+
 	-- Initialize sidebar navigation
 	local sections = {
 		{
@@ -443,14 +543,14 @@ function RobloxUI:Init(config)
 			},
 		},
 	}
-	
+
 	-- Build sidebar
 	RobloxUI:BuildSidebar(SIDEBAR, sections)
-	
+
 	-- Setup content area
 	CONTENT.Visible = true
 	TABS.Visible = true
-	
+
 	return {
 		Window = WINDOW,
 		Sidebar = SIDEBAR,

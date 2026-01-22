@@ -6500,7 +6500,21 @@ function syde:Init(library)
 			local ZoomFrame   = EnchancedView.ViewFrame.Zoom
 			local ClipFrame   = ZoomFrame.clipframe
 			local ScrollFrame = ClipFrame.scroll
-			local ZoomAmountLabel = ZoomFrame.Frame.ZoomAmount -- << change to your label path
+			local ZoomAmountLabel = nil
+			-- Try multiple possible paths for the zoom amount label
+			if ZoomFrame:FindFirstChild("Frame") and ZoomFrame.Frame:FindFirstChild("ZoomAmount") then
+				ZoomAmountLabel = ZoomFrame.Frame.ZoomAmount
+			elseif ZoomFrame:FindFirstChild("ZoomAmount") then
+				ZoomAmountLabel = ZoomFrame.ZoomAmount
+			else
+				-- Search recursively
+				ZoomAmountLabel = ZoomFrame:FindFirstChild("ZoomAmount", true)
+			end
+
+			-- If still not found, create a warning
+			if not ZoomAmountLabel then
+				warn("[3D View] ZoomAmount label not found in template. Zoom display will be disabled.")
+			end
 
 			-- Zoom range (studs)
 			local minZoomDistance = maxDimension * 0.5

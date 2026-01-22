@@ -1318,3 +1318,5 @@ function RobloxUI:CreateKeybind(config)
 	
 	return keybindFrame
 end
+
+return RobloxUI

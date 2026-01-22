@@ -3609,7 +3609,9 @@ function syde:Init(library)
 		Tab.Parent = TABS
 		Tab.Size = UDim2.new(1, -8, 0, 35)
 		Tab.Title.Text = TabData.Title
-		Tab.Title.Size = UDim2.new(1, -12, 1, 0)
+		-- Reserve space on the left for the icon so the title doesn't overlap
+		Tab.Title.Size = UDim2.new(1, -44, 1, 0)
+		Tab.Title.Position = UDim2.new(0, 36, 0, 0)
 		Tab.Name = TabData.Title
 
 		--[Icon Setup]
@@ -3658,9 +3660,6 @@ function syde:Init(library)
 			IconImage.ImageColor3 = Color3.fromRGB(140, 140, 140) -- Grey icon
 			IconImage.Parent = IconInner
 
-			-- Move text 5px to the right of icon (icon ends at pixel 28)
-			Tab.Title.Position = UDim2.new(0, 33, 0, 0)
-			Tab.Title.Size = UDim2.new(1, -41, 1, 0)
 		end
 
 		Tab.Title.TextTransparency = 0
@@ -3738,7 +3737,7 @@ function syde:Init(library)
 		-- Apply initial styling based on whether this is the first tab
 		if isFirstTab then
 			-- First tab (selected) styling
-			tweenservice:Create(Tab.Title, TweenInfo.new(2, Enum.EasingStyle.Quint), { Size = UDim2.new(1, -12, 1, 0) }):Play()
+			tweenservice:Create(Tab.Title, TweenInfo.new(2, Enum.EasingStyle.Quint), { Size = UDim2.new(1, -44, 1, 0) }):Play()
 			Tab.Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 			Tab.Title.TextTransparency = 0
 			tweenservice:Create(Tab.indicator, TweenInfo.new(2, Enum.EasingStyle.Quint), { Size = UDim2.new(0, 2, 0, 10) }):Play()
@@ -3749,7 +3748,7 @@ function syde:Init(library)
 			ldata.first = TabData.Title
 		else
 			-- Other tabs (unselected) styling
-			tweenservice:Create(Tab.Title, TweenInfo.new(2, Enum.EasingStyle.Quint), { Size = UDim2.new(1, -12, 1, 0) }):Play()
+			tweenservice:Create(Tab.Title, TweenInfo.new(2, Enum.EasingStyle.Quint), { Size = UDim2.new(1, -44, 1, 0) }):Play()
 			Tab.Title.TextColor3 = Color3.fromRGB(180, 180, 180)
 			Tab.Title.TextTransparency = 0
 			tweenservice:Create(Tab.indicator, TweenInfo.new(2, Enum.EasingStyle.Exponential), { BackgroundColor3 = syde.theme.Accent }):Play()
@@ -3762,7 +3761,8 @@ function syde:Init(library)
 
 		local function ApplyTabStyle(tabButton, isSelected)
 			local hasIcon = tabButton:FindFirstChild("IconContainer") ~= nil
-			local targetSize = isSelected and UDim2.new(1, -12, 1, 0) or UDim2.new(1, -12, 1, 0)
+			-- Reserve left offset to avoid overlapping the icon
+			local targetSize = isSelected and UDim2.new(1, -44, 1, 0) or UDim2.new(1, -44, 1, 0)
 			local targetTextColor = isSelected and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(52, 52, 52)
 			local targetTransparency = isSelected and 0 or 1
 			local targetColor = isSelected and syde.theme.Accent or Color3.fromRGB(29, 29, 29)

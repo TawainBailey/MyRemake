@@ -3603,11 +3603,11 @@ function syde:Init(library)
 
 		--[Icon Setup]
 		if TabData.Icon then
-			-- Create icon container
+			-- Create icon container on the right side
 			local IconContainer = Instance.new("Frame")
 			IconContainer.Name = "IconContainer"
 			IconContainer.Size = UDim2.new(0, 20, 0, 20)
-			IconContainer.Position = UDim2.new(0, 8, 0.5, -10)
+			IconContainer.Position = UDim2.new(1, -28, 0.5, -10) -- Right side with 8px padding
 			IconContainer.BackgroundTransparency = 1
 			IconContainer.Parent = Tab
 
@@ -3647,9 +3647,9 @@ function syde:Init(library)
 			IconImage.ImageColor3 = Color3.fromRGB(140, 140, 140) -- Grey icon
 			IconImage.Parent = IconInner
 
-			-- Adjust title position to make room for icon
-			Tab.Title.Position = UDim2.new(0, 30, 0, 0) -- 2px away from icon (icon ends at x=28)
-			Tab.Title.Size = UDim2.new(1, -38, 1, 0) -- Adjust size accordingly
+			-- Adjust title position to make room for icon on the right
+			Tab.Title.Position = UDim2.new(0, 8, 0, 0) -- Default left position
+			Tab.Title.Size = UDim2.new(1, -36, 1, 0) -- Leave space for icon on right
 		end
 
 		Tab.Title.TextTransparency = 1
@@ -3725,7 +3725,7 @@ function syde:Init(library)
 
 
 		if ldata.first then
-			local titleSize = TabData.Icon and UDim2.new(1, -42, 1, 0) or UDim2.new(1, -8, 1, 0)
+			local titleSize = TabData.Icon and UDim2.new(1, -36, 1, 0) or UDim2.new(1, -8, 1, 0)
 			tweenservice:Create(Tab.Title, TweenInfo.new(2, Enum.EasingStyle.Quint), { Size = titleSize }):Play()
 			tweenservice:Create(Tab.Title, TweenInfo.new(2, Enum.EasingStyle.Quint), { TextColor3 = Color3.fromRGB(52, 52, 52) }):Play()
 			tweenservice:Create(Tab.indicator, TweenInfo.new(2, Enum.EasingStyle.Quint), { Size = UDim2.new(0, 2, 0, 10) }):Play()
@@ -3734,7 +3734,7 @@ function syde:Init(library)
 			tweenservice:Create(Tab.indicator.ImageLabel, TweenInfo.new(1, Enum.EasingStyle.Exponential), { ImageTransparency = 1 }):Play()
 		else
 			ldata.first = TabData.Title
-			local titleSize = TabData.Icon and UDim2.new(1, -42, 1, 0) or UDim2.new(1, -10, 1, 0)
+			local titleSize = TabData.Icon and UDim2.new(1, -36, 1, 0) or UDim2.new(1, -10, 1, 0)
 			tweenservice:Create(Tab.Title, TweenInfo.new(2, Enum.EasingStyle.Quint), { Size = titleSize }):Play()
 			tweenservice:Create(Tab.Title, TweenInfo.new(2, Enum.EasingStyle.Exponential), { TextTransparency = 0 }):Play()
 			tweenservice:Create(Tab.indicator, TweenInfo.new(2, Enum.EasingStyle.Exponential), { BackgroundColor3 = syde.theme.Accent }):Play()

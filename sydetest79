@@ -2650,25 +2650,32 @@ function syde:Init(library)
 				local Para = Library.Settings.Paragraph:Clone()
 				Para.Visible = true
 				Para.Parent = Parent
-				Para.Title.Text = ParaData.Title
-				Para.Content.Text = ParaData.Content
-				Para.Content.TextColor3 = Color3.new(1, 1, 1)
+				
+				local titleLabel = Para:FindFirstChild("Title")
+				local contentLabel = Para:FindFirstChild("Content")
+				
+				if titleLabel then titleLabel.Text = ParaData.Title end
+				if contentLabel then contentLabel.Text = ParaData.Content end
+				if contentLabel then contentLabel.TextColor3 = Color3.new(1, 1, 1) end
 
-				Para.Content.Size = UDim2.new(1, -20, 0, Para.Content.TextBounds.Y)
-				Para.Size = UDim2.new(1, -15, 0, Para.Content.Size.Y.Offset + 45)
+				if contentLabel then
+					contentLabel.Size = UDim2.new(1, -20, 0, contentLabel.TextBounds.Y)
+					Para.Size = UDim2.new(1, -15, 0, contentLabel.Size.Y.Offset + 45)
+				end
 
 				local function updateSize()
+					if not contentLabel then return end
 					local textSize = textservice:GetTextSize(
-						Para.Content.Text,
-						Para.Content.TextSize,
-						Para.Content.Font,
-						Vector2.new(Para.Content.AbsoluteSize.X, math.huge) -- Allows vertical expansion
+						contentLabel.Text,
+						contentLabel.TextSize,
+						contentLabel.Font,
+						Vector2.new(contentLabel.AbsoluteSize.X, math.huge) -- Allows vertical expansion
 					)
 
 					local newDescSize = UDim2.new(1, -20, 0, textSize.Y)
 					local newButtonSize = UDim2.new(Para.Size.X.Scale, -40, 0, textSize.Y + 40) -- Adding extra padding
 
-					local descTween = tweenservice:Create(Para.Content, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), { Size = newDescSize })
+					local descTween = tweenservice:Create(contentLabel, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), { Size = newDescSize })
 					descTween:Play()
 
 					local buttonTween = tweenservice:Create(Para, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), { Size = newButtonSize })
@@ -2677,13 +2684,15 @@ function syde:Init(library)
 
 				updateSize()
 
-				Para.Content:GetPropertyChangedSignal("TextBounds"):Connect(updateSize)
+				if contentLabel then
+					contentLabel:GetPropertyChangedSignal("TextBounds"):Connect(updateSize)
+				end
 
 				local ParagraphSettings = {}
 
-				function ParagraphSettings:Set(text, title)
-					Para.Title.Text = title
-					Para.Content.Text = text
+				function ParagraphSettings:Set(title, content)
+					if titleLabel then titleLabel.Text = title end
+					if contentLabel then contentLabel.Text = content end
 				end
 
 				ParagraphSettings.Instance = Para
@@ -3584,10 +3593,11 @@ function syde:Init(library)
 
 	--[TAB INITIALIZATION]
 	function ldata:InitTab(tab)
-		local isFirstTab = not ldata.first 
+		local isFirstTab = not ldata.first
 		
 		local TabData = {
 			Title = tab.Title;
+			Icon = tab.Icon;
 			Locked = tab.Locked or false;
 			Key = tab.Key;
 		}
@@ -3597,10 +3607,76 @@ function syde:Init(library)
 		local Tab = TABS.Tb:Clone()
 		Tab.Visible = true
 		Tab.Parent = TABS
+		Tab.Size = UDim2.new(1, -8, 0, 35)
 		Tab.Title.Text = TabData.Title
+		-- Reserve space on the left for the icon so the title doesn't overlap
+		-- Default title layout (no icon): full width with small left padding
+		Tab.Title.Size = UDim2.new(1, -12, 1, 0)
+		Tab.Title.Position = UDim2.new(0, 6, 0, 0)
+		Tab.Title.AnchorPoint = Vector2.new(0, 0)
+		-- Ensure the text sits immediately to the right of the icon and is left-aligned
+		Tab.Title.TextXAlignment = Enum.TextXAlignment.Left
+		Tab.Title.TextYAlignment = Enum.TextYAlignment.Center
 		Tab.Name = TabData.Title
 
-		Tab.Title.TextTransparency = 1
+		--[Icon Setup]
+		if TabData.Icon then
+			-- Create icon container on the left side
+			local IconContainer = Instance.new("Frame")
+			IconContainer.Name = "IconContainer"
+			IconContainer.Size = UDim2.new(0, 20, 0, 20)
+			IconContainer.Position = UDim2.new(0, 8, 0.5, -10) -- Left side
+			IconContainer.BackgroundTransparency = 1
+			IconContainer.Parent = Tab
+
+			-- Create circular background
+			local IconBackground = Instance.new("Frame")
+			IconBackground.Name = "IconBackground"
+			IconBackground.Size = UDim2.new(1, 0, 1, 0)
+			IconBackground.Position = UDim2.new(0, 0, 0, 0)
+			IconBackground.BackgroundColor3 = Color3.fromRGB(70, 70, 70) -- Grey border
+			IconBackground.BackgroundTransparency = 0
+			IconBackground.Parent = IconContainer
+
+			local IconCorner = Instance.new("UICorner")
+			IconCorner.CornerRadius = UDim.new(1, 0) -- Fully circular
+			IconCorner.Parent = IconBackground
+
+			-- Create inner circle for the icon
+			local IconInner = Instance.new("Frame")
+			IconInner.Name = "IconInner"
+			IconInner.Size = UDim2.new(1, -2, 1, -2) -- Slightly smaller
+			IconInner.Position = UDim2.new(0, 1, 0, 1)
+			IconInner.BackgroundColor3 = Color3.fromRGB(30, 30, 30) -- Dark background
+			IconInner.BackgroundTransparency = 0
+			IconInner.Parent = IconBackground
+
+			local InnerCorner = Instance.new("UICorner")
+			InnerCorner.CornerRadius = UDim.new(1, 0)
+			InnerCorner.Parent = IconInner
+
+			-- Create the icon image
+			local IconImage = Instance.new("ImageLabel")
+			IconImage.Name = "Icon"
+			IconImage.Size = UDim2.new(1, -4, 1, -4)
+			IconImage.Position = UDim2.new(0, 2, 0, 2)
+			IconImage.BackgroundTransparency = 1
+			IconImage.Image = TabData.Icon
+			IconImage.ImageColor3 = Color3.fromRGB(140, 140, 140) -- Grey icon
+			IconImage.Parent = IconInner
+
+		end
+
+		-- If this tab has an icon, reserve extra space for it so the title sits to the right
+		if TabData.Icon then
+			Tab.Title.Size = UDim2.new(1, -44, 1, 0)
+			Tab.Title.Position = UDim2.new(0, 36, 0, 0)
+			Tab.Title.AnchorPoint = Vector2.new(0, 0)
+			Tab.Title.TextXAlignment = Enum.TextXAlignment.Left
+			Tab.Title.TextYAlignment = Enum.TextYAlignment.Center
+		end
+
+		Tab.Title.TextTransparency = 0
 		Tab.indicator.BackgroundTransparency = 1
 
 		for _, temp in ipairs(PAGES.Page:GetChildren()) do
@@ -3672,17 +3748,31 @@ function syde:Init(library)
 		end
 
 
-		if ldata.first then
-			tweenservice:Create(Tab.Title, TweenInfo.new(2, Enum.EasingStyle.Quint), { Size = UDim2.new(1, -8, 1, 0) }):Play()
-			tweenservice:Create(Tab.Title, TweenInfo.new(2, Enum.EasingStyle.Quint), { TextColor3 = Color3.fromRGB(52, 52, 52) }):Play()
+		-- Apply initial styling based on whether this is the first tab
+		if isFirstTab then
+			-- First tab (selected) styling
+			if TabData.Icon then
+				tweenservice:Create(Tab.Title, TweenInfo.new(2, Enum.EasingStyle.Quint), { Size = UDim2.new(1, -44, 1, 0) }):Play()
+			else
+				tweenservice:Create(Tab.Title, TweenInfo.new(2, Enum.EasingStyle.Quint), { Size = UDim2.new(1, -12, 1, 0) }):Play()
+			end
+			Tab.Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+			Tab.Title.TextTransparency = 0
 			tweenservice:Create(Tab.indicator, TweenInfo.new(2, Enum.EasingStyle.Quint), { Size = UDim2.new(0, 2, 0, 10) }):Play()
-			tweenservice:Create(Tab.Title, TweenInfo.new(2, Enum.EasingStyle.Exponential), { TextTransparency = 0 }):Play()
 			tweenservice:Create(Tab.indicator, TweenInfo.new(1, Enum.EasingStyle.Exponential), { BackgroundTransparency = 0.9 }):Play()
 			tweenservice:Create(Tab.indicator.ImageLabel, TweenInfo.new(1, Enum.EasingStyle.Exponential), { ImageTransparency = 1 }):Play()
-		else
+			
+			-- Set as first tab
 			ldata.first = TabData.Title
-			tweenservice:Create(Tab.Title, TweenInfo.new(2, Enum.EasingStyle.Quint), { Size = UDim2.new(1, -10, 1, 0) }):Play()
-			tweenservice:Create(Tab.Title, TweenInfo.new(2, Enum.EasingStyle.Exponential), { TextTransparency = 0 }):Play()
+		else
+			-- Other tabs (unselected) styling
+			if TabData.Icon then
+				tweenservice:Create(Tab.Title, TweenInfo.new(2, Enum.EasingStyle.Quint), { Size = UDim2.new(1, -44, 1, 0) }):Play()
+			else
+				tweenservice:Create(Tab.Title, TweenInfo.new(2, Enum.EasingStyle.Quint), { Size = UDim2.new(1, -12, 1, 0) }):Play()
+			end
+			Tab.Title.TextColor3 = Color3.fromRGB(180, 180, 180)
+			Tab.Title.TextTransparency = 0
 			tweenservice:Create(Tab.indicator, TweenInfo.new(2, Enum.EasingStyle.Exponential), { BackgroundColor3 = syde.theme.Accent }):Play()
 			tweenservice:Create(Tab.indicator, TweenInfo.new(2, Enum.EasingStyle.Quint), { Size = UDim2.new(0, 2, 0, 2) }):Play()
 			tweenservice:Create(Tab.indicator.ImageLabel, TweenInfo.new(1, Enum.EasingStyle.Exponential), { ImageTransparency = 0.6 }):Play()
@@ -3692,19 +3782,47 @@ function syde:Init(library)
 		local colorTweenInfo = TweenInfo.new(1.5, Enum.EasingStyle.Quart)
 
 		local function ApplyTabStyle(tabButton, isSelected)
-			local targetSize = isSelected and UDim2.new(1, -12, 1, 0) or UDim2.new(1, -12, 1, 0)
+			local hasIcon = tabButton:FindFirstChild("IconContainer") ~= nil
+			-- Reserve left offset to avoid overlapping the icon when present
+			local offset = hasIcon and -44 or -12
+			local targetSize = UDim2.new(1, offset, 1, 0)
 			local targetTextColor = isSelected and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(52, 52, 52)
 			local targetTransparency = isSelected and 0 or 1
 			local targetColor = isSelected and syde.theme.Accent or Color3.fromRGB(29, 29, 29)
 			local indicatorSize = isSelected and UDim2.new(0, 2, 0, 10) or UDim2.new(0, 2, 0, 5)
 
-			tweenservice:Create(tabButton.Title, positionTweenInfo, { Size = targetSize, TextColor3 = targetTextColor }):Play()
+			tweenservice:Create(tabButton.Title, positionTweenInfo, { Size = targetSize, TextColor3 = targetTextColor, TextTransparency = 0 }):Play()
 			tweenservice:Create(tabButton.indicator, colorTweenInfo, { BackgroundTransparency = targetTransparency, BackgroundColor3 = targetColor, Size = indicatorSize }):Play()
 			tweenservice:Create(tabButton.indicator.ImageLabel, colorTweenInfo, { ImageColor3 = targetColor }):Play()
 			tweenservice:Create(tabButton.indicator.ImageLabel, colorTweenInfo, { ImageTransparency = isSelected and 0.6 or 1 }):Play()
+
+			-- Update icon colors if icon exists
+			if hasIcon then
+				local iconBackground = tabButton.IconContainer.IconBackground
+				local iconImage = iconBackground.IconInner.Icon
+				local iconColor = isSelected and syde.theme.Accent or Color3.fromRGB(70, 70, 70)
+				local iconImageColor = isSelected and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(140, 140, 140)
+
+				tweenservice:Create(iconBackground, colorTweenInfo, { BackgroundColor3 = iconColor }):Play()
+				tweenservice:Create(iconImage, colorTweenInfo, { ImageColor3 = iconImageColor }):Play()
+			end
 		end
 
 		ApplyTabStyle(Tab, isFirstTab)
+
+		-- Debug prints
+		print("Tab created:", TabData.Title)
+		print("Tab.Visible:", Tab.Visible)
+		print("Tab.Title.Text:", Tab.Title.Text)
+		print("Tab.Title.TextTransparency:", Tab.Title.TextTransparency)
+		print("Tab.Title.TextColor3:", Tab.Title.TextColor3)
+		print("Tab.Title.Size:", Tab.Title.Size)
+		print("Tab.Title.Position:", Tab.Title.Position)
+		print("Tab.BackgroundColor3:", Tab.BackgroundColor3)
+		print("Tab.BackgroundTransparency:", Tab.BackgroundTransparency)
+		if TabData.Icon then
+			print("Has icon, IconContainer exists:", Tab:FindFirstChild("IconContainer") ~= nil)
+		end
 
 		local function OpenSettings()
 
@@ -4068,10 +4186,22 @@ function syde:Init(library)
 			local Section = PAGES.Page.Section:Clone()
 			Section.Visible = true
 			Section.Title.Text = SectionData.Title
-			Section.Parent = Page
+			Section.Parent = defaultParent
 			Section.Title.Position = UDim2.new(0, 0,0, 0)
 			Section.BackgroundColor3 = Color3.fromRGB(255, 255, 255) -- Reset to default
 			Section.BackgroundTransparency = 1 -- Make background transparent
+
+			if not SectionData.Collapsible then
+				Section.BackgroundColor3 = Color3.fromRGB(220, 220, 220)
+				Section.BackgroundTransparency = 0
+				local stroke = Instance.new("UIStroke")
+				stroke.Color = Color3.fromRGB(200, 200, 200)
+				stroke.Thickness = 1
+				stroke.Parent = Section
+				local corner = Instance.new("UICorner")
+				corner.CornerRadius = UDim.new(0, 8)
+				corner.Parent = Section
+			end
 
 			if SectionData.Icon then
 				Section.icon.Image = 'rbxassetid://'..SectionData.Icon
@@ -4185,7 +4315,7 @@ function syde:Init(library)
 			BorderLabel.TextColor3 = BorderData.Color or Color3.fromRGB(100, 200, 255) -- Default to bright blue
 			BorderLabel.TextXAlignment = Enum.TextXAlignment.Left
 			BorderLabel.Text = BorderData.Title
-			BorderLabel.Parent = Page
+			BorderLabel.Parent = defaultParent
 
 			-- Register border label with current section for collapsible functionality
 			if CurrentSection then
@@ -4244,7 +4374,7 @@ function syde:Init(library)
 
 			local button = PAGES.Page.Button:Clone()
 			button.Visible = true
-			button.Parent = Page
+			button.Parent = defaultParent
 			button.Title.Text = ButtonData.Title
 			button.Name = ButtonData.Title
 			button.Title.Size = UDim2.new(0, button.Title.TextBounds.X + 15,0, 35)
@@ -4431,7 +4561,7 @@ function syde:Init(library)
 
 			local toggle = PAGES.Page.Toggle:Clone()
 			toggle.Visible = true
-			toggle.Parent = Page
+			toggle.Parent = defaultParent
 			toggle.Title.Text = ToggleData.Title
 			toggle.Name = ToggleData.Title
 
@@ -4750,7 +4880,7 @@ function syde:Init(library)
 
 			local slider = PAGES.Page.Slider:Clone()
 			slider.Visible = true
-			slider.Parent = Page
+			slider.Parent = defaultParent
 			slider.Title.Text = SliderData.Title
 			slider.Name = SliderData.Title
 			slider.slideholder.slider.Visible = false
@@ -4985,7 +5115,7 @@ function syde:Init(library)
 
 			local dropdown = PAGES.Page.Dropdown:Clone()
 			dropdown.Visible = true
-			dropdown.Parent = Page
+			dropdown.Parent = defaultParent
 			dropdown.Title.Text = DropdownData.Title
 			dropdown.Name = DropdownData.Title
 			dropdown.dropHolder.drop.Container.Option.Visible = false
@@ -5291,7 +5421,7 @@ function syde:Init(library)
 
 			local textinput = PAGES.Page.Input:Clone()
 			textinput.Visible = true
-			textinput.Parent = Page
+			textinput.Parent = defaultParent
 			textinput.Name = TextInputData.Title
 			textinput.Title.Text = TextInputData.Title
 			textinput.TextFrame.TextBox.PlaceholderText = TextInputData.PlaceHolder
@@ -5423,7 +5553,7 @@ function syde:Init(library)
 
 			local colorpicker = PAGES.Page.ColorPicker:Clone()
 			colorpicker.Visible = true
-			colorpicker.Parent = Page
+			colorpicker.Parent = defaultParent
 			colorpicker.Title.Text = ColorPickerData.Title
 			colorpicker.Name = ColorPickerData.Title
 
@@ -6009,7 +6139,7 @@ function syde:Init(library)
 
 			local KeyBind = PAGES.Page.KeyBind:Clone()
 			KeyBind.Visible = true
-			KeyBind.Parent = Page
+			KeyBind.Parent = defaultParent
 			KeyBind.Title.Text = KeybindData.Title
 			KeyBind.Name = KeybindData.Title
 
@@ -6089,7 +6219,7 @@ function syde:Init(library)
 
 			local ImageBlock = PAGES.Page.img:Clone()
 			ImageBlock.Visible = true
-			ImageBlock.Parent = Page
+			ImageBlock.Parent = defaultParent
 			ImageBlock.ImageLabel.Image = 'rbxassetid://'..imgData.img
 
 		end
@@ -6098,7 +6228,7 @@ function syde:Init(library)
 
 			local Label = PAGES.Page.Label:Clone()
 			Label.Visible = true
-			Label.Parent = Page
+			Label.Parent = defaultParent
 			Label.Text.Text = Text
 
 			if Alignment == 'Center' then
@@ -6135,34 +6265,72 @@ function syde:Init(library)
 
 			local Para = PAGES.Page.Paragraph:Clone()
 			Para.Visible = true
-			Para.Parent = Page
-			Para.Title.Text = ParaData.Title
-			Para.Content.Text = ParaData.Content
-			Para.Content.TextColor3 = Color3.new(1, 1, 1)
+			Para.Parent = defaultParent
+
+			-- Ensure Title and Content exist (create if missing)
+			if not Para:FindFirstChild("Title") then
+				local TitleLabel = Instance.new("TextLabel")
+				TitleLabel.Name = "Title"
+				TitleLabel.Size = UDim2.new(1, -20, 0, 20)
+				TitleLabel.Position = UDim2.new(0, 10, 0, 5)
+				TitleLabel.BackgroundTransparency = 1
+				TitleLabel.Font = Enum.Font.GothamBold
+				TitleLabel.TextSize = 16
+				TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+				TitleLabel.TextColor3 = Color3.new(1, 1, 1)
+				TitleLabel.Parent = Para
+			end
+
+			if not Para:FindFirstChild("Content") then
+				local ContentLabel = Instance.new("TextLabel")
+				ContentLabel.Name = "Content"
+				ContentLabel.Size = UDim2.new(1, -20, 0, 40)
+				ContentLabel.Position = UDim2.new(0, 10, 0, 30)
+				ContentLabel.BackgroundTransparency = 1
+				ContentLabel.Font = Enum.Font.Gotham
+				ContentLabel.TextSize = 14
+				ContentLabel.TextXAlignment = Enum.TextXAlignment.Left
+				ContentLabel.TextYAlignment = Enum.TextYAlignment.Top
+				ContentLabel.TextColor3 = Color3.new(1, 1, 1)
+				ContentLabel.TextWrapped = true
+				ContentLabel.Parent = Para
+			end
+
+			local titleLabel = Para:FindFirstChild("Title")
+			local contentLabel = Para:FindFirstChild("Content")
+			
+			if titleLabel then titleLabel.Text = ParaData.Title end
+			if contentLabel then contentLabel.Text = ParaData.Content end
+			if contentLabel then contentLabel.TextColor3 = Color3.new(1, 1, 1) end
 
 			-- Apply gradient to title
-			Para.Title.TextTransparency = 0
-			Para.Title.TextColor3 = Color3.new(1, 1, 1) -- White text for bright gradient
-			local gradient = Instance.new("UIGradient")
-			gradient.Color = ParaData.Gradient
-			gradient.Rotation = 0
-			gradient.Parent = Para.Title
+			if titleLabel then
+				titleLabel.TextTransparency = 0
+				titleLabel.TextColor3 = Color3.new(1, 1, 1) -- White text for bright gradient
+				local gradient = Instance.new("UIGradient")
+				gradient.Color = ParaData.Gradient
+				gradient.Rotation = 0
+				gradient.Parent = titleLabel
+			end
 
-			Para.Content.Size = UDim2.new(1, -20, 0, Para.Content.TextBounds.Y)
-			Para.Size = UDim2.new(1, -15, 0, Para.Content.Size.Y.Offset + 45)
+			if contentLabel then
+				contentLabel.Size = UDim2.new(1, -20, 0, contentLabel.TextBounds.Y)
+				Para.Size = UDim2.new(1, -15, 0, contentLabel.Size.Y.Offset + 45)
+			end
 
 			local function updateSize()
+				if not contentLabel then return end
 				local textSize = textservice:GetTextSize(
-					Para.Content.Text,
-					Para.Content.TextSize,
-					Para.Content.Font,
-					Vector2.new(Para.Content.AbsoluteSize.X, math.huge) -- Allows vertical expansion
+					contentLabel.Text,
+					contentLabel.TextSize,
+					contentLabel.Font,
+					Vector2.new(contentLabel.AbsoluteSize.X, math.huge) -- Allows vertical expansion
 				)
 
 				local newDescSize = UDim2.new(1, -20, 0, textSize.Y)
 				local newButtonSize = UDim2.new(Para.Size.X.Scale, Para.Size.X.Offset, 0, textSize.Y + 40) -- Adding extra padding
 
-				local descTween = tweenservice:Create(Para.Content, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), { Size = newDescSize })
+				local descTween = tweenservice:Create(contentLabel, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), { Size = newDescSize })
 				descTween:Play()
 
 				local buttonTween = tweenservice:Create(Para, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), { Size = newButtonSize })
@@ -6171,13 +6339,15 @@ function syde:Init(library)
 
 			updateSize()
 
-			Para.Content:GetPropertyChangedSignal("TextBounds"):Connect(updateSize)
+			if contentLabel then
+				contentLabel:GetPropertyChangedSignal("TextBounds"):Connect(updateSize)
+			end
 			
 			local ParagraphSettings = {}
 
 			function ParagraphSettings:Set(title, text)
-				Para.Title.Text = title
-				Para.Content.Text = text
+				if titleLabel then titleLabel.Text = title end
+				if contentLabel then contentLabel.Text = text end
 			end
 
 			ParagraphSettings.Instance = Para
@@ -6196,7 +6366,7 @@ function syde:Init(library)
 			local row = Instance.new("Frame")
 			row.Size = UDim2.new(1, -15, 0, 50) -- Will be updated
 			row.BackgroundTransparency = 1
-			row.Parent = Page
+			row.Parent = defaultParent
 			row.Name = "Row"
 
 			local maxHeight = 0
@@ -6276,7 +6446,7 @@ function syde:Init(library)
 
 			local EnchancedView = PAGES.Page["3DView"]:Clone()
 			EnchancedView.Visible = true
-			EnchancedView.Parent = Page
+			EnchancedView.Parent = defaultParent
 			EnchancedView.Title.Text = Viewdata.Title
 
 			local Viewport = EnchancedView.ViewFrame.ViewportFrame
@@ -6559,7 +6729,7 @@ function syde:Init(library)
 
 			local RateBlock = PAGES.Page.Rate:Clone()
 			RateBlock.Visible = true
-			RateBlock.Parent = Page
+			RateBlock.Parent = defaultParent
 			RateBlock.Title.Text = RateData.Title
 
 			local starsFrame = RateBlock.stars
@@ -6608,6 +6778,233 @@ function syde:Init(library)
 				end)
 			end
 
+		end
+
+		function InitElement:TabGroup(tabGroup)
+			local TabGroupData = {
+				Tabs = tabGroup.Tabs or {};
+				Content = tabGroup.Content or {};
+			}
+
+			-- Create tab container
+			local tabContainer = Instance.new("Frame")
+			tabContainer.Name = "TabGroup"
+			tabContainer.Size = UDim2.new(1, -30, 0, 40)
+			tabContainer.BackgroundTransparency = 1
+			tabContainer.BorderSizePixel = 0
+			tabContainer.Parent = defaultParent
+
+			local tabContainerCorner = Instance.new("UICorner")
+			tabContainerCorner.CornerRadius = UDim.new(0, 8)
+			tabContainerCorner.Parent = tabContainer
+
+			-- Add thin grey border
+			local tabContainerStroke = Instance.new("UIStroke")
+			tabContainerStroke.Color = Color3.fromRGB(100, 100, 100)
+			tabContainerStroke.Thickness = 1
+			tabContainerStroke.Parent = tabContainer
+
+			local tabList = Instance.new("UIListLayout")
+			tabList.FillDirection = Enum.FillDirection.Horizontal
+			tabList.HorizontalAlignment = Enum.HorizontalAlignment.Left
+			tabList.VerticalAlignment = Enum.VerticalAlignment.Center
+			tabList.Padding = UDim.new(0, 4)
+			tabList.Parent = tabContainer
+
+			local tabPadding = Instance.new("UIPadding")
+			tabPadding.PaddingLeft = UDim.new(0, 8)
+			tabPadding.PaddingRight = UDim.new(0, 8)
+			tabPadding.PaddingTop = UDim.new(0, 6)
+			tabPadding.PaddingBottom = UDim.new(0, 6)
+			tabPadding.Parent = tabContainer
+
+			-- Create content container for tab content
+			local contentContainer = Instance.new("Frame")
+			contentContainer.Name = "TabContent"
+			contentContainer.Size = UDim2.new(1, -30, 0, 0)
+			contentContainer.AutomaticSize = Enum.AutomaticSize.Y
+			contentContainer.BackgroundTransparency = 1
+			contentContainer.Parent = defaultParent
+
+			local contentList = Instance.new("UIListLayout")
+			contentList.Padding = UDim.new(0, 8)
+			contentList.SortOrder = Enum.SortOrder.LayoutOrder
+			contentList.Parent = contentContainer
+
+			-- Tab management
+			local tabButtons = {}
+			local currentTab = TabGroupData.Tabs[1] and TabGroupData.Tabs[1].id or nil
+			local tabContents = {} -- Store content for each tab
+
+			local function clearTabContent()
+				-- Properly destroy all tab content
+				for _, child in ipairs(contentContainer:GetChildren()) do
+					if child:IsA("Frame") and child.Name ~= "UIListLayout" then
+						child:Destroy()
+					end
+				end
+				-- Clear stored content references
+				tabContents = {}
+			end
+
+			local function switchTab(tabId)
+				if currentTab == tabId then return end -- Don't switch if already on this tab
+				
+				currentTab = tabId
+
+				-- Update tab button styles
+				for _, tabBtn in ipairs(tabButtons) do
+					local isActive = (tabBtn.Name == tabId)
+					tweenservice:Create(tabBtn, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {
+						BackgroundTransparency = isActive and 0 or 1
+					}):Play()
+					tweenservice:Create(tabBtn, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {
+						TextColor3 = isActive and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(140, 140, 140)
+					}):Play()
+				end
+
+				-- Clear existing content completely
+				clearTabContent()
+
+				-- Load new content only for the active tab
+				if TabGroupData.Content[tabId] then
+					-- Create a local parent management system for this TabGroup
+					local originalDefaultParent = defaultParent
+					local function localSetParent(newParent)
+						defaultParent = newParent
+					end
+					
+					-- Temporarily set parent to this TabGroup's content container
+					localSetParent(contentContainer)
+					
+					-- Execute the content function for this tab
+					local success, errorMsg = pcall(TabGroupData.Content[tabId])
+					if not success then
+						warn("[TabGroup] Error loading content for tab '" .. tabId .. "': " .. errorMsg)
+					end
+					
+					-- Restore original parent
+					localSetParent(originalDefaultParent)
+				end
+
+				-- Update layout after content change
+				syde:updateLayout(Page, 7)
+			end
+
+			local function loadTabContent(tabId)
+				-- Load content for a tab without the same-tab check (used for initialization)
+				currentTab = tabId
+
+				-- Update tab button styles
+				for _, tabBtn in ipairs(tabButtons) do
+					local isActive = (tabBtn.Name == tabId)
+					tweenservice:Create(tabBtn, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {
+						BackgroundTransparency = isActive and 0 or 1
+					}):Play()
+					tweenservice:Create(tabBtn, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {
+						TextColor3 = isActive and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(140, 140, 140)
+					}):Play()
+				end
+
+				-- Clear existing content completely
+				clearTabContent()
+
+				-- Load new content only for the active tab
+				if TabGroupData.Content[tabId] then
+					-- Create a local parent management system for this TabGroup
+					local originalDefaultParent = defaultParent
+					local function localSetParent(newParent)
+						defaultParent = newParent
+					end
+					
+					-- Temporarily set parent to this TabGroup's content container
+					localSetParent(contentContainer)
+					
+					-- Execute the content function for this tab
+					local success, errorMsg = pcall(TabGroupData.Content[tabId])
+					if not success then
+						warn("[TabGroup] Error loading content for tab '" .. tabId .. "': " .. errorMsg)
+					end
+					
+					-- Restore original parent
+					localSetParent(originalDefaultParent)
+				end
+
+				-- Update layout after content change
+				syde:updateLayout(Page, 7)
+			end
+
+			-- Create tab buttons
+			for i, tabData in ipairs(TabGroupData.Tabs) do
+				local tabButton = Instance.new("TextButton")
+				tabButton.Name = tabData.id
+				tabButton.Size = UDim2.new(0, 80, 1, 0)
+				tabButton.BackgroundTransparency = (i == 1) and 0 or 1
+				tabButton.BackgroundColor3 = (i == 1) and syde.theme.Accent or Color3.fromRGB(35, 35, 35)
+				tabButton.BorderSizePixel = 0
+				tabButton.AutoButtonColor = false
+				tabButton.Font = Enum.Font.GothamMedium
+				tabButton.Text = tabData.label
+				tabButton.TextColor3 = (i == 1) and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(140, 140, 140)
+				tabButton.TextSize = 13
+				tabButton.LayoutOrder = i
+				tabButton.Parent = tabContainer
+
+				local tabCorner = Instance.new("UICorner")
+				tabCorner.CornerRadius = UDim.new(0, 6)
+				tabCorner.Parent = tabButton
+
+				-- Hover effects
+				tabButton.MouseEnter:Connect(function()
+					if currentTab ~= tabData.id then
+						tweenservice:Create(tabButton, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {
+							TextColor3 = Color3.fromRGB(180, 180, 180)
+						}):Play()
+					end
+				end)
+
+				tabButton.MouseLeave:Connect(function()
+					if currentTab ~= tabData.id then
+						tweenservice:Create(tabButton, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {
+							TextColor3 = Color3.fromRGB(140, 140, 140)
+						}):Play()
+					end
+				end)
+
+				-- Click handler
+				tabButton.MouseButton1Click:Connect(function()
+					if currentTab ~= tabData.id then
+						switchTab(tabData.id)
+					end
+				end)
+
+				table.insert(tabButtons, tabButton)
+			end
+
+			-- Initialize first tab
+			if currentTab then
+				loadTabContent(currentTab)
+			end
+
+			-- Register with current section
+			if CurrentSection then
+				table.insert(CurrentSection.Elements, {Instance = tabContainer})
+				table.insert(CurrentSection.Elements, {Instance = contentContainer})
+			end
+
+			-- Return tab group object for external control
+			local TabGroupObject = {
+				SwitchToTab = function(tabId)
+					if TabGroupData.Content[tabId] then
+						switchTab(tabId)
+					end
+				end,
+				GetCurrentTab = function()
+					return currentTab
+				end
+			}
+
+			return TabGroupObject
 		end
 
 		function syde:LoadSaveConfig()

@@ -6610,6 +6610,165 @@ function syde:Init(library)
 
 		end
 
+		function InitElement:TabGroup(tabGroup)
+			local TabGroupData = {
+				Tabs = tabGroup.Tabs or {};
+				Content = tabGroup.Content or {};
+			}
+
+			-- Create tab container
+			local tabContainer = Instance.new("Frame")
+			tabContainer.Name = "TabGroup"
+			tabContainer.Size = UDim2.new(1, -30, 0, 40)
+			tabContainer.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+			tabContainer.BorderSizePixel = 0
+			tabContainer.Parent = Page
+
+			local tabContainerCorner = Instance.new("UICorner")
+			tabContainerCorner.CornerRadius = UDim.new(0, 8)
+			tabContainerCorner.Parent = tabContainer
+
+			local tabList = Instance.new("UIListLayout")
+			tabList.FillDirection = Enum.FillDirection.Horizontal
+			tabList.HorizontalAlignment = Enum.HorizontalAlignment.Left
+			tabList.VerticalAlignment = Enum.VerticalAlignment.Center
+			tabList.Padding = UDim.new(0, 4)
+			tabList.Parent = tabContainer
+
+			local tabPadding = Instance.new("UIPadding")
+			tabPadding.PaddingLeft = UDim.new(0, 8)
+			tabPadding.PaddingRight = UDim.new(0, 8)
+			tabPadding.PaddingTop = UDim.new(0, 6)
+			tabPadding.PaddingBottom = UDim.new(0, 6)
+			tabPadding.Parent = tabContainer
+
+			-- Create content container for tab content
+			local contentContainer = Instance.new("Frame")
+			contentContainer.Name = "TabContent"
+			contentContainer.Size = UDim2.new(1, -30, 0, 0)
+			contentContainer.AutomaticSize = Enum.AutomaticSize.Y
+			contentContainer.BackgroundTransparency = 1
+			contentContainer.Parent = Page
+
+			local contentList = Instance.new("UIListLayout")
+			contentList.Padding = UDim.new(0, 8)
+			contentList.SortOrder = Enum.SortOrder.LayoutOrder
+			contentList.Parent = contentContainer
+
+			-- Tab management
+			local tabButtons = {}
+			local currentTab = TabGroupData.Tabs[1] and TabGroupData.Tabs[1].id or nil
+
+			local function clearTabContent()
+				for _, child in ipairs(contentContainer:GetChildren()) do
+					if child:IsA("Frame") and child.Name ~= "UIListLayout" then
+						child:Destroy()
+					end
+				end
+			end
+
+			local function switchTab(tabId)
+				currentTab = tabId
+
+				-- Update tab button styles
+				for _, tabBtn in ipairs(tabButtons) do
+					local isActive = (tabBtn.Name == tabId)
+					tweenservice:Create(tabBtn, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {
+						BackgroundColor3 = isActive and syde.theme.Accent or Color3.fromRGB(35, 35, 35),
+						BackgroundTransparency = isActive and 0 or 0.8
+					}):Play()
+					tweenservice:Create(tabBtn, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {
+						TextColor3 = isActive and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(140, 140, 140)
+					}):Play()
+				end
+
+				-- Clear and load new content
+				clearTabContent()
+				if TabGroupData.Content[tabId] then
+					-- Temporarily change defaultParent to contentContainer for tab content
+					local originalParent = defaultParent
+					setInternalParent(contentContainer)
+					TabGroupData.Content[tabId]()
+					setInternalParent(originalParent)
+				end
+
+				-- Update layout
+				syde:updateLayout(Page, 7)
+			end
+
+			-- Create tab buttons
+			for i, tabData in ipairs(TabGroupData.Tabs) do
+				local tabButton = Instance.new("TextButton")
+				tabButton.Name = tabData.id
+				tabButton.Size = UDim2.new(0, 80, 1, 0)
+				tabButton.BackgroundColor3 = (i == 1) and syde.theme.Accent or Color3.fromRGB(35, 35, 35)
+				tabButton.BackgroundTransparency = (i == 1) and 0 or 0.8
+				tabButton.BorderSizePixel = 0
+				tabButton.AutoButtonColor = false
+				tabButton.Font = Enum.Font.GothamMedium
+				tabButton.Text = tabData.label
+				tabButton.TextColor3 = (i == 1) and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(140, 140, 140)
+				tabButton.TextSize = 13
+				tabButton.LayoutOrder = i
+				tabButton.Parent = tabContainer
+
+				local tabCorner = Instance.new("UICorner")
+				tabCorner.CornerRadius = UDim.new(0, 6)
+				tabCorner.Parent = tabButton
+
+				-- Hover effects
+				tabButton.MouseEnter:Connect(function()
+					if currentTab ~= tabData.id then
+						tweenservice:Create(tabButton, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {
+							BackgroundTransparency = 0.5
+						}):Play()
+					end
+				end)
+
+				tabButton.MouseLeave:Connect(function()
+					if currentTab ~= tabData.id then
+						tweenservice:Create(tabButton, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {
+							BackgroundTransparency = 0.8
+						}):Play()
+					end
+				end)
+
+				-- Click handler
+				tabButton.MouseButton1Click:Connect(function()
+					if currentTab ~= tabData.id then
+						switchTab(tabData.id)
+					end
+				end)
+
+				table.insert(tabButtons, tabButton)
+			end
+
+			-- Initialize first tab
+			if currentTab then
+				switchTab(currentTab)
+			end
+
+			-- Register with current section
+			if CurrentSection then
+				table.insert(CurrentSection.Elements, {Instance = tabContainer})
+				table.insert(CurrentSection.Elements, {Instance = contentContainer})
+			end
+
+			-- Return tab group object for external control
+			local TabGroupObject = {
+				SwitchToTab = function(tabId)
+					if TabGroupData.Content[tabId] then
+						switchTab(tabId)
+					end
+				end,
+				GetCurrentTab = function()
+					return currentTab
+				end
+			}
+
+			return TabGroupObject
+		end
+
 		function syde:LoadSaveConfig()
 			local notified = false
 			local loaded = false

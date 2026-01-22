@@ -3609,6 +3609,7 @@ function syde:Init(library)
 		Tab.Parent = TABS
 		Tab.Size = UDim2.new(1, -8, 0, 35)
 		Tab.Title.Text = TabData.Title
+		Tab.Title.Size = UDim2.new(1, -12, 1, 0)
 		Tab.Name = TabData.Title
 
 		--[Icon Setup]
@@ -3659,7 +3660,7 @@ function syde:Init(library)
 
 			-- Adjust title position to the right of icon
 			Tab.Title.Position = UDim2.new(0, 30, 0, 0) -- 2px away from icon (icon ends at x=28)
-			Tab.Title.Size = UDim2.new(1, -38, 1, 0) -- Adjust size accordingly
+			Tab.Title.Size = UDim2.new(1, -40, 1, 0) -- Adjust size accordingly
 		end
 
 		Tab.Title.TextTransparency = 0

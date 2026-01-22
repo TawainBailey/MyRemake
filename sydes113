@@ -3617,7 +3617,7 @@ function syde:Init(library)
 				CategoryLabel.BackgroundTransparency = 1
 				CategoryLabel.TextColor3 = Color3.fromRGB(169, 169, 169) -- light gray
 				CategoryLabel.TextXAlignment = Enum.TextXAlignment.Left
-				CategoryLabel.Font = Enum.Font.SourceSansBold
+				CategoryLabel.Font = Enum.Font.SourceSans
 				CategoryLabel.TextSize = 14
 				CategoryLabel.Parent = TABS
 			end
@@ -3628,6 +3628,14 @@ function syde:Init(library)
 		local Tab = TABS.Tb:Clone()
 		Tab.Visible = true
 		Tab.Parent = TABS
+		
+		-- Add border for categorized tabs
+		if tab.Category then
+			local stroke = Instance.new("UIStroke")
+			stroke.Color = Color3.fromRGB(100, 100, 100) -- gray
+			stroke.Thickness = 1
+			stroke.Parent = Tab
+		end
 		Tab.Size = UDim2.new(1, -8, 0, 35)
 		Tab.Title.Text = TabData.Title
 		-- Reserve space on the left for the icon so the title doesn't overlap

@@ -3623,7 +3623,7 @@ function syde:Init(library)
 			local sep = Instance.new("Frame")
 			sep.Size = UDim2.new(1, 0, 0, 1)
 			sep.BackgroundColor3 = Color3.fromRGB(150, 150, 150)
-			sep.BackgroundTransparency = 0.5
+			sep.BackgroundTransparency = 0
 			sep.BorderSizePixel = 0
 			sep.Parent = parent
 		end
@@ -6697,22 +6697,22 @@ function syde:Init(library)
 		Title.BackgroundTransparency = 1
 		Title.Size = UDim2.new(1, 0, 0, 20)
 		Title.Parent = SectionFrame
-		local Border = Instance.new("UIStroke")
-		Border.Color = Color3.fromRGB(150, 150, 150)
-		Border.Thickness = 0.5
-		Border.Transparency = 0.5
-		Border.Parent = SectionFrame
-		local Corner = Instance.new("UICorner")
-		Corner.CornerRadius = UDim.new(0, 4)
-		Corner.Parent = SectionFrame
 		local TabList = Instance.new("Frame")
 		TabList.Size = UDim2.new(1, 0, 0, 0)
 		TabList.AutomaticSize = Enum.AutomaticSize.Y
 		TabList.Position = UDim2.new(0, 0, 0, 20)
 		TabList.BackgroundTransparency = 1
 		TabList.Parent = SectionFrame
+		local Border = Instance.new("UIStroke")
+		Border.Color = Color3.fromRGB(150, 150, 150)
+		Border.Thickness = 0.5
+		Border.Transparency = 0.5
+		Border.Parent = TabList
+		local Corner = Instance.new("UICorner")
+		Corner.CornerRadius = UDim.new(0, 4)
+		Corner.Parent = TabList
 		local Layout = Instance.new("UIListLayout")
-		Layout.Padding = UDim.new(0, 2)
+		Layout.Padding = UDim.new(0, 0)
 		Layout.Parent = TabList
 		return TabList
 	end

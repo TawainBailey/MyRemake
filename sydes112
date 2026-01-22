@@ -3588,7 +3588,8 @@ function syde:Init(library)
 
 	local ldata = {
 		first = false,
-		selected = false
+		selected = false,
+		categories = {}
 	}
 
 	--[TAB INITIALIZATION]
@@ -3600,9 +3601,29 @@ function syde:Init(library)
 			Icon = tab.Icon;
 			Locked = tab.Locked or false;
 			Key = tab.Key;
+			Category = tab.Category;
 		}
 		
 		local LockedFrames = {}
+		
+		--[Category Setup]
+		if tab.Category then
+			if not ldata.categories[tab.Category] then
+				ldata.categories[tab.Category] = {}
+				local CategoryLabel = Instance.new("TextLabel")
+				CategoryLabel.Name = "Category_" .. tab.Category
+				CategoryLabel.Text = tab.Category
+				CategoryLabel.Size = UDim2.new(1, -8, 0, 20)
+				CategoryLabel.BackgroundTransparency = 1
+				CategoryLabel.TextColor3 = Color3.fromRGB(169, 169, 169) -- light gray
+				CategoryLabel.TextXAlignment = Enum.TextXAlignment.Left
+				CategoryLabel.Font = Enum.Font.SourceSansBold
+				CategoryLabel.TextSize = 14
+				CategoryLabel.Parent = TABS
+			end
+			table.insert(ldata.categories[tab.Category], Tab)
+		end
+		
 		--[Tab Setup]
 		local Tab = TABS.Tb:Clone()
 		Tab.Visible = true

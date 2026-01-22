@@ -3598,9 +3598,12 @@ function syde:Init(library)
 		Tab.Visible = true
 		Tab.Parent = TABS
 		local stroke = Instance.new("UIStroke")
-		stroke.Color = Color3.fromRGB(100, 100, 100)
-		stroke.Thickness = 1
+		stroke.Color = Color3.fromRGB(150, 150, 150)
+		stroke.Thickness = 0.5
 		stroke.Parent = Tab
+		local corner = Instance.new("UICorner")
+		corner.CornerRadius = UDim.new(0, 4)
+		corner.Parent = Tab
 		Tab.Title.Text = TabData.Title
 		Tab.Name = TabData.Title
 
@@ -3696,7 +3699,7 @@ function syde:Init(library)
 		local colorTweenInfo = TweenInfo.new(1.5, Enum.EasingStyle.Quart)
 
 		local function ApplyTabStyle(tabButton, isSelected)
-			local targetSize = isSelected and UDim2.new(1, -12, 1, 0) or UDim2.new(1, -12, 1, 0)
+			local targetSize = isSelected and UDim2.new(1, -16, 1, 0) or UDim2.new(1, -16, 1, 0)
 			local targetTextColor = isSelected and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(52, 52, 52)
 			local targetTransparency = isSelected and 0 or 1
 			local targetColor = isSelected and syde.theme.Accent or Color3.fromRGB(29, 29, 29)

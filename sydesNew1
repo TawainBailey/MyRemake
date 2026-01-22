@@ -1,0 +1,400 @@
+--[[
+
+
+                        dP          
+                        88          
+.d8888b. dP    dP .d888b88 .d8888b. 
+Y8ooooo. 88    88 88'  `88 88ooood8 
+      88 88.  .88 88.  .88 88.  ... 
+`88888P' `8888P88 `88888P8 `88888P' beta.
+              .88                   
+          d8888P                    
+
+
+made with 💓 by sellessence
+]]
+
+
+
+-- Services
+local inputservice = game:GetService("InsertService")
+local tweenservice = game:GetService("TweenService")
+local https = game:GetService("HttpService")
+local runservice = game:GetService("RunService")
+local userinput = game:GetService("UserInputService")
+local players = game:GetService("Players"):GetPlayers()
+local textservice = game:GetService('TextService')
+local player = game:GetService('Players')
+local coregui = game:GetService("CoreGui")
+
+local screenSize = workspace.CurrentCamera.ViewportSize
+local isMobile = userinput.TouchEnabled or (screenSize.X < 1024 and screenSize.Y < 768)
+local dragOffset = 255
+local dragOffsetMobile = 150
+local camera = workspace.CurrentCamera
+
+local sharedModule = {}
+local resizing = false
+
+-- Load Library Assets
+local Loader = game:GetObjects("rbxassetid://110221114597158")[1]
+local Library = game:GetObjects("rbxassetid://123800669522471")[1]
+
+Library.Enabled = false
+local loaded = false
+
+-- Syde Library Table
+local syde = {
+	theme = {
+		['Accent'] = Color3.fromRGB(0, 123, 255);
+		['HitBox'] = Color3.fromRGB(0, 123, 255);
+		['DropShadow'] = Color3.fromRGB(0, 47, 95);
+	};
+	Connections = {};
+	Comms = Instance.new('BindableEvent');
+	ParentOverride = nil;
+	Build = 'SY3';
+	ConfigEnabled = false;
+	ConfigFolder = 'Syde';
+	ConfigFile = 'Config';
+	Flags = {};
+	SettingsFlags = {};
+}
+
+-- [ THEME MANAGEMENT ]
+function syde:UpdateTheme(Config)
+	if type(Config) ~= "table" then
+		warn("[UpdateTheme] Invalid configuration table")
+		return
+	end
+
+	local updatedKeys = {}
+
+	for key, value in pairs(Config) do
+		if self.theme[key] ~= nil then
+			if typeof(self.theme[key]) == typeof(value) then
+				if type(value) == "table" then
+					self:DeepMerge(self.theme[key], value)
+				else
+					self.theme[key] = value
+				end
+				table.insert(updatedKeys, key)
+			else
+				warn(("[UpdateTheme] Type mismatch for key '%s' (expected %s, got %s)"):format(
+					key, typeof(self.theme[key]), typeof(value)
+				))
+			end
+		else
+			warn("[UpdateTheme] Key '" .. key .. "' does not exist in theme")
+		end
+	end
+
+	if #updatedKeys > 0 then
+		for _, key in ipairs(updatedKeys) do
+			self.Comms:Fire(key, self.theme[key])
+		end
+	end
+end
+
+function syde:DeepMerge(target, source)
+	if type(target) ~= "table" or type(source) ~= "table" then
+		return target
+	end
+
+	for key, value in pairs(source) do
+		if type(value) == "table" and type(target[key]) == "table" then
+			self:DeepMerge(target[key], value)
+		else
+			target[key] = value
+		end
+	end
+end
+
+-- [ BACKGROUND CREATION / WINDOW INIT ]
+function syde:Init(library)
+	Library.Enabled = true
+
+	if loaded == false then
+		local UI_TAG = "sydeUILoader"
+		local MARKER_NAME = "SYDEUIDetector"
+		local INTERNAL_UUID = ("SYDE-" .. tostring(game.JobId):gsub("-", "") .. tostring(tick())):gsub("%.", "")
+		local PROTECTION_EVENT = Instance.new("BindableEvent")
+		local HttpService = game:GetService("HttpService")
+
+		-- Cleanup old UI 
+		local function deepCleanup()
+			for _, v in ipairs(coregui:GetChildren()) do
+				if v:IsA("ScreenGui") and v:FindFirstChild(MARKER_NAME) then
+					pcall(function()
+						v:Destroy()
+					end)
+				end
+			end
+		end
+		deepCleanup()
+
+		-- Load the Library
+		local successLibrary, Library = pcall(function()
+			return Library -- Replace with actual GetObjects if needed
+		end)
+
+		if not successLibrary or not Library then
+			warn("Syde 〡 Failed to load Library.")
+			return
+		end
+
+		Library.Name = UI_TAG
+		Library.ResetOnSpawn = false
+
+		local marker = Instance.new("StringValue")
+		marker.Name = MARKER_NAME
+		marker.Value = INTERNAL_UUID
+		marker.Parent = Library
+
+		pcall(function()
+			Library.Parent = coregui
+		end)
+
+		-- Ensure Library stays in CoreGui
+		task.spawn(function()
+			while Library and Library.Parent do
+				task.wait(1)
+				if Library.Parent ~= coregui then
+					warn("Syde 〡 UI moved. Restoring...")
+					pcall(function()
+						Library.Parent = coregui
+					end)
+				end
+			end
+		end)
+
+		-- Reinject if removed
+		task.spawn(function()
+			while Library and Library.Parent do
+				task.wait(2)
+			end
+
+			warn("Syde 〡 UI removed. Reinjection in progress...")
+			local success, lib = pcall(function()
+				return Library -- Replace with GetObjects if needed
+			end)
+			if success and lib then
+				lib.Name = UI_TAG
+				local m = Instance.new("StringValue")
+				m.Name = MARKER_NAME
+				m.Value = INTERNAL_UUID
+				m.Parent = lib
+				lib.ResetOnSpawn = false
+				pcall(function()
+					lib.Parent = coregui
+				end)
+			end
+		end)
+	end
+
+	tweenservice:Create(game.Workspace.Camera, TweenInfo.new(0.7, Enum.EasingStyle.Exponential), { FieldOfView = 70 }):Play()
+
+	local Data = {
+		Title = library.Title or "Syde",
+		SubText = library.SubText or "Google",
+	}
+
+	-- [Setup UI Elements]
+	local WINDOW = Library.lib
+	local TOPBAR = WINDOW.Top
+	local TABS = WINDOW.Tab.ScrollingFrame
+	local PAGES = WINDOW.Pages
+
+	TOPBAR.Title.Text = Data.Title
+	TOPBAR.Title.Sub.Text = Data.SubText
+	TOPBAR.Title.Sub.TextColor3 = Color3.new(1,1,1)
+	local subGradient = Instance.new("UIGradient")
+	subGradient.Color = ColorSequence.new{
+		ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 123, 255)),    -- blue
+		ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 255, 255)),  -- white
+		ColorSequenceKeypoint.new(1, Color3.fromRGB(25, 25, 112))       -- midnight blue
+	}
+	subGradient.Parent = TOPBAR.Title.Sub
+
+	-- [Setup Dragging & Resizing]
+	syde:AddDrag(TOPBAR, WINDOW, true)
+	syde:MakeResizable(WINDOW.resize, WINDOW, Vector2.new(654, 428))
+
+	-- [Initial Transparency Setup]
+	TOPBAR.Title.TextTransparency = 1
+	TOPBAR.Title.Sub.TextTransparency = 1
+	
+	function applyLayout(isMobile)
+		Library.lib.Size = isMobile and UDim2.new(0, 543,0, 321) or UDim2.new(0, 715, 0, 575)
+		local shadow = WINDOW:FindFirstChild("Shadow")
+		if shadow then
+			shadow.Visible = not isMobile 
+		end
+	end
+
+	local function updateLayout()
+		local screenSize = camera.ViewportSize
+		local mobile = userinput.TouchEnabled -- or (screenSize.X < 1024 and screenSize.Y < 768)
+		applyLayout(mobile)
+	end
+
+	workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(function()
+		screenSize = workspace.CurrentCamera.ViewportSize
+		isMobile = userinput.TouchEnabled  -- or (screenSize.X < 1024 and screenSize.Y < 768)
+		updateLayout()  -- Recompute layout values
+	end)
+
+	updateLayout()
+
+	-- Reapply on resize
+	camera:GetPropertyChangedSignal("ViewportSize"):Connect(updateLayout)
+	userinput:GetPropertyChangedSignal("TouchEnabled"):Connect(updateLayout)
+
+	-- Syde Connection (Coming Soon)
+	local LocalPlayer = player.LocalPlayer
+	local imageLabel = WINDOW:WaitForChild("UserInfo"):WaitForChild("ImageLabel")
+	imageLabel.Image = players:GetUserThumbnailAsync(LocalPlayer.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size420x420)
+	WINDOW.UserInfo.ImageLabel.text.Username.Text = LocalPlayer.Name
+	WINDOW.UserInfo.ImageLabel.text.Display.Text = "@"..LocalPlayer.DisplayName
+	WINDOW.UserInfo.ConnectionStatus.Status.TextLabel.Text = "Connected"
+	WINDOW.UserInfo.ConnectionStatus.Status.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+
+	-- [Fade In Animation]
+	WINDOW.Tab.Visible = false
+	tweenservice:Create(WINDOW, TweenInfo.new(0.4, Enum.EasingStyle.Exponential), {BackgroundTransparency = 0 }):Play()
+	tweenservice:Create(WINDOW.Top.div, TweenInfo.new(0.4, Enum.EasingStyle.Exponential), {BackgroundTransparency = 0 }):Play()
+	tweenservice:Create(WINDOW.Top.Title, TweenInfo.new(0.4, Enum.EasingStyle.Exponential), {TextTransparency = 0 }):Play()
+	tweenservice:Create(WINDOW.Top.Title.Sub, TweenInfo.new(0.4, Enum.EasingStyle.Exponential), {TextTransparency = 0 }):Play()
+	tweenservice:Create(WINDOW.Shadow.ImageLabel, TweenInfo.new(0.4, Enum.EasingStyle.Exponential), {ImageTransparency = 0.5 }):Play()
+	tweenservice:Create(WINDOW.resize, TweenInfo.new(0.4, Enum.EasingStyle.Exponential), {ImageTransparency = 0 }):Play()
+	tweenservice:Create(WINDOW.Top.UHolder.Util.Mini.interact, TweenInfo.new(0.4, Enum.EasingStyle.Exponential), {ImageTransparency = 0 }):Play()
+
+	loaded = true
+
+	-- Return the Window object with methods
+	local Window = {
+		-- Add methods here
+	}
+
+	return Window
+end
+
+-- [ UTILITY FUNCTIONS ]
+function syde:AddDrag(Object, Main, ConstrainToParent)
+	assert(typeof(Object) == "Instance" and Object:IsA("GuiObject"), "[AddDrag] Object must be a GuiObject")
+	assert(typeof(Main) == "Instance" and Main:IsA("GuiObject"), "[AddDrag] Main must be a GuiObject")
+
+	local userInput = game:GetService("UserInputService")
+	local tweenService = game:GetService("TweenService")
+
+	local dragging, dragInput, startMousePos, startFramePos = false, nil, nil, nil
+
+	local function getConstrainedPosition(newPos)
+		if not ConstrainToParent then
+			return newPos
+		end
+
+		local screenSize = workspace.CurrentCamera.ViewportSize
+		local frameSize = Main.AbsoluteSize
+		local framePos = Main.AbsolutePosition
+
+		newPos = Vector2.new(
+			math.clamp(newPos.X, 0, screenSize.X - frameSize.X),
+			math.clamp(newPos.Y, 0, screenSize.Y - frameSize.Y)
+		)
+
+		return newPos
+	end
+
+	local function updateInput(input)
+		local delta = input.Position - startMousePos
+		local newPos = getConstrainedPosition(startFramePos + delta)
+
+		tweenService:Create(Main, TweenInfo.new(0.1, Enum.EasingStyle.Linear), {Position = UDim2.new(0, newPos.X, 0, newPos.Y)}):Play()
+	end
+
+	Object.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+			dragging = true
+			startMousePos = input.Position
+			startFramePos = Main.AbsolutePosition
+
+			input.Changed:Connect(function()
+				if input.UserInputState == Enum.UserInputState.End then
+					dragging = false
+				end
+			end)
+		end
+	end)
+
+	Object.InputChanged:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+			dragInput = input
+		end
+	end)
+
+	userInput.InputChanged:Connect(function(input)
+		if dragging and input == dragInput then
+			updateInput(input)
+		end
+	end)
+end
+
+function syde:MakeResizable(resizeHandle, window, minSize)
+	local userInput = game:GetService("UserInputService")
+	local tweenService = game:GetService("TweenService")
+
+	local dragging = false
+	local startMousePos, startSize
+
+	resizeHandle.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 then
+			dragging = true
+			startMousePos = input.Position
+			startSize = window.AbsoluteSize
+			resizing = true
+		end
+	end)
+
+	userInput.InputEnded:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 then
+			dragging = false
+			resizing = false
+		end
+	end)
+
+	userInput.InputChanged:Connect(function(input)
+		if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+			local delta = input.Position - startMousePos
+			local newSize = startSize + Vector2.new(delta.X, delta.Y)
+			newSize = Vector2.new(math.max(newSize.X, minSize.X), math.max(newSize.Y, minSize.Y))
+			window.Size = UDim2.new(0, newSize.X, 0, newSize.Y)
+		end
+	end)
+end
+
+function syde:updateLayout(container, spacing)
+	spacing = spacing or 5
+	local yOffset = 0
+	local containerWidth = container.AbsoluteSize.X 
+
+	for _, v in ipairs(container:GetChildren()) do
+		if v:IsA('UIListLayout') then
+			v:Destroy()
+		end
+	end
+
+	if resizing == false then
+		for _, child in ipairs(container:GetChildren()) do
+			if (child:IsA("Frame") or child:IsA("ImageLabel") or child:IsA("TextLabel") or child:IsA("TextButton")) and child.Visible then
+				child.Size = UDim2.new(1, -10, 0, child.Size.Y.Offset)
+				tweenservice:Create(child, TweenInfo.new(0.45, Enum.EasingStyle.Exponential), {Position = UDim2.new(0, 0, 0, yOffset)}):Play()
+				yOffset = yOffset + child.AbsoluteSize.Y + spacing
+			end
+		end
+	end
+
+	container.CanvasSize = UDim2.new(0, 0, 0, yOffset)
+end
+
+return syde

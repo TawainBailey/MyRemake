@@ -6658,16 +6658,22 @@ function syde:Init(library)
 			-- Tab management
 			local tabButtons = {}
 			local currentTab = TabGroupData.Tabs[1] and TabGroupData.Tabs[1].id or nil
+			local tabContents = {} -- Store content for each tab
 
 			local function clearTabContent()
+				-- Properly destroy all tab content
 				for _, child in ipairs(contentContainer:GetChildren()) do
 					if child:IsA("Frame") and child.Name ~= "UIListLayout" then
 						child:Destroy()
 					end
 				end
+				-- Clear stored content references
+				tabContents = {}
 			end
 
 			local function switchTab(tabId)
+				if currentTab == tabId then return end -- Don't switch if already on this tab
+				
 				currentTab = tabId
 
 				-- Update tab button styles
@@ -6682,17 +6688,25 @@ function syde:Init(library)
 					}):Play()
 				end
 
-				-- Clear and load new content
+				-- Clear existing content completely
 				clearTabContent()
+
+				-- Load new content only for the active tab
 				if TabGroupData.Content[tabId] then
 					-- Temporarily change defaultParent to contentContainer for tab content
 					local originalParent = defaultParent
 					setInternalParent(contentContainer)
-					TabGroupData.Content[tabId]()
+					
+					-- Execute the content function for this tab
+					local success, errorMsg = pcall(TabGroupData.Content[tabId])
+					if not success then
+						warn("[TabGroup] Error loading content for tab '" .. tabId .. "': " .. errorMsg)
+					end
+					
 					setInternalParent(originalParent)
 				end
 
-				-- Update layout
+				-- Update layout after content change
 				syde:updateLayout(Page, 7)
 			end
 

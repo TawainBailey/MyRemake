@@ -3657,6 +3657,9 @@ function syde:Init(library)
 			IconImage.Image = TabData.Icon
 			IconImage.ImageColor3 = Color3.fromRGB(140, 140, 140) -- Grey icon
 			IconImage.Parent = IconInner
+
+			-- Position text 3px to the right of icon
+			Tab.Title.Position = UDim2.new(0, 23, 0, 0)
 		end
 
 		Tab.Title.TextTransparency = 0

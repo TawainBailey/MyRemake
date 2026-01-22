@@ -3610,8 +3610,9 @@ function syde:Init(library)
 		Tab.Size = UDim2.new(1, -8, 0, 35)
 		Tab.Title.Text = TabData.Title
 		-- Reserve space on the left for the icon so the title doesn't overlap
-		Tab.Title.Size = UDim2.new(1, -44, 1, 0)
-		Tab.Title.Position = UDim2.new(0, 36, 0, 0)
+		-- Default title layout (no icon): full width with small left padding
+		Tab.Title.Size = UDim2.new(1, -12, 1, 0)
+		Tab.Title.Position = UDim2.new(0, 6, 0, 0)
 		Tab.Title.AnchorPoint = Vector2.new(0, 0)
 		-- Ensure the text sits immediately to the right of the icon and is left-aligned
 		Tab.Title.TextXAlignment = Enum.TextXAlignment.Left
@@ -3664,6 +3665,15 @@ function syde:Init(library)
 			IconImage.ImageColor3 = Color3.fromRGB(140, 140, 140) -- Grey icon
 			IconImage.Parent = IconInner
 
+		end
+
+		-- If this tab has an icon, reserve extra space for it so the title sits to the right
+		if TabData.Icon then
+			Tab.Title.Size = UDim2.new(1, -44, 1, 0)
+			Tab.Title.Position = UDim2.new(0, 36, 0, 0)
+			Tab.Title.AnchorPoint = Vector2.new(0, 0)
+			Tab.Title.TextXAlignment = Enum.TextXAlignment.Left
+			Tab.Title.TextYAlignment = Enum.TextYAlignment.Center
 		end
 
 		Tab.Title.TextTransparency = 0
@@ -3741,7 +3751,11 @@ function syde:Init(library)
 		-- Apply initial styling based on whether this is the first tab
 		if isFirstTab then
 			-- First tab (selected) styling
-			tweenservice:Create(Tab.Title, TweenInfo.new(2, Enum.EasingStyle.Quint), { Size = UDim2.new(1, -44, 1, 0) }):Play()
+			if TabData.Icon then
+				tweenservice:Create(Tab.Title, TweenInfo.new(2, Enum.EasingStyle.Quint), { Size = UDim2.new(1, -44, 1, 0) }):Play()
+			else
+				tweenservice:Create(Tab.Title, TweenInfo.new(2, Enum.EasingStyle.Quint), { Size = UDim2.new(1, -12, 1, 0) }):Play()
+			end
 			Tab.Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 			Tab.Title.TextTransparency = 0
 			tweenservice:Create(Tab.indicator, TweenInfo.new(2, Enum.EasingStyle.Quint), { Size = UDim2.new(0, 2, 0, 10) }):Play()
@@ -3752,7 +3766,11 @@ function syde:Init(library)
 			ldata.first = TabData.Title
 		else
 			-- Other tabs (unselected) styling
-			tweenservice:Create(Tab.Title, TweenInfo.new(2, Enum.EasingStyle.Quint), { Size = UDim2.new(1, -44, 1, 0) }):Play()
+			if TabData.Icon then
+				tweenservice:Create(Tab.Title, TweenInfo.new(2, Enum.EasingStyle.Quint), { Size = UDim2.new(1, -44, 1, 0) }):Play()
+			else
+				tweenservice:Create(Tab.Title, TweenInfo.new(2, Enum.EasingStyle.Quint), { Size = UDim2.new(1, -12, 1, 0) }):Play()
+			end
 			Tab.Title.TextColor3 = Color3.fromRGB(180, 180, 180)
 			Tab.Title.TextTransparency = 0
 			tweenservice:Create(Tab.indicator, TweenInfo.new(2, Enum.EasingStyle.Exponential), { BackgroundColor3 = syde.theme.Accent }):Play()
@@ -3765,8 +3783,9 @@ function syde:Init(library)
 
 		local function ApplyTabStyle(tabButton, isSelected)
 			local hasIcon = tabButton:FindFirstChild("IconContainer") ~= nil
-			-- Reserve left offset to avoid overlapping the icon
-			local targetSize = isSelected and UDim2.new(1, -44, 1, 0) or UDim2.new(1, -44, 1, 0)
+			-- Reserve left offset to avoid overlapping the icon when present
+			local offset = hasIcon and -44 or -12
+			local targetSize = UDim2.new(1, offset, 1, 0)
 			local targetTextColor = isSelected and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(52, 52, 52)
 			local targetTransparency = isSelected and 0 or 1
 			local targetColor = isSelected and syde.theme.Accent or Color3.fromRGB(29, 29, 29)

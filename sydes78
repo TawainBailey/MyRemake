@@ -6202,6 +6202,36 @@ function syde:Init(library)
 			local Para = PAGES.Page.Paragraph:Clone()
 			Para.Visible = true
 			Para.Parent = defaultParent
+
+			-- Ensure Title and Content exist (create if missing)
+			if not Para:FindFirstChild("Title") then
+				local TitleLabel = Instance.new("TextLabel")
+				TitleLabel.Name = "Title"
+				TitleLabel.Size = UDim2.new(1, -20, 0, 20)
+				TitleLabel.Position = UDim2.new(0, 10, 0, 5)
+				TitleLabel.BackgroundTransparency = 1
+				TitleLabel.Font = Enum.Font.GothamBold
+				TitleLabel.TextSize = 16
+				TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+				TitleLabel.TextColor3 = Color3.new(1, 1, 1)
+				TitleLabel.Parent = Para
+			end
+
+			if not Para:FindFirstChild("Content") then
+				local ContentLabel = Instance.new("TextLabel")
+				ContentLabel.Name = "Content"
+				ContentLabel.Size = UDim2.new(1, -20, 0, 40)
+				ContentLabel.Position = UDim2.new(0, 10, 0, 30)
+				ContentLabel.BackgroundTransparency = 1
+				ContentLabel.Font = Enum.Font.Gotham
+				ContentLabel.TextSize = 14
+				ContentLabel.TextXAlignment = Enum.TextXAlignment.Left
+				ContentLabel.TextYAlignment = Enum.TextYAlignment.Top
+				ContentLabel.TextColor3 = Color3.new(1, 1, 1)
+				ContentLabel.TextWrapped = true
+				ContentLabel.Parent = Para
+			end
+
 			Para.Title.Text = ParaData.Title
 			Para.Content.Text = ParaData.Content
 			Para.Content.TextColor3 = Color3.new(1, 1, 1)

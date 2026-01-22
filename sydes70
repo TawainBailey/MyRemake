@@ -3640,20 +3640,27 @@ function syde:Init(library)
 			-- Create the icon image
 			local IconImage = Instance.new("ImageLabel")
 			IconImage.Name = "Icon"
-			IconImage.Size = UDim2.new(1, -4, 1, -4)
-			IconImage.Position = UDim2.new(0, 2, 0, 2)
+			IconImage.Size = UDim2.new(1, -6, 1, -6) -- Slightly larger
+			IconImage.Position = UDim2.new(0, 3, 0, 3) -- Center it better
 			IconImage.BackgroundTransparency = 1
 			IconImage.Image = TabData.Icon
 			IconImage.ImageColor3 = Color3.fromRGB(140, 140, 140) -- Grey icon
+			IconImage.ScaleType = Enum.ScaleType.Fit
 			IconImage.Parent = IconInner
 
 			-- Adjust title position to make room for icon
-			Tab.Title.Position = UDim2.new(0, 36, 0, 0) -- Move title to the right
-			Tab.Title.Size = UDim2.new(1, -44, 1, 0) -- Adjust size
+			Tab.Title.Position = UDim2.new(0, 32, 0.5, -8) -- Better positioning
+			Tab.Title.Size = UDim2.new(1, -40, 0, 16) -- Better size
 		end
 
 		Tab.Title.TextTransparency = 1
 		Tab.indicator.BackgroundTransparency = 1
+
+		-- Set default title position if no icon
+		if not TabData.Icon then
+			Tab.Title.Position = UDim2.new(0, 4, 0.5, -8)
+			Tab.Title.Size = UDim2.new(1, -8, 0, 16)
+		end
 
 		for _, temp in ipairs(PAGES.Page:GetChildren()) do
 			if temp:IsA("Frame") then
@@ -3725,8 +3732,9 @@ function syde:Init(library)
 
 
 		if ldata.first then
-			local titleSize = TabData.Icon and UDim2.new(1, -44, 1, 0) or UDim2.new(1, -8, 1, 0)
-			tweenservice:Create(Tab.Title, TweenInfo.new(2, Enum.EasingStyle.Quint), { Size = titleSize }):Play()
+			local titleSize = TabData.Icon and UDim2.new(1, -40, 0, 16) or UDim2.new(1, -8, 1, 0)
+			local titlePosition = TabData.Icon and UDim2.new(0, 32, 0.5, -8) or UDim2.new(0, 4, 0.5, -8)
+			tweenservice:Create(Tab.Title, TweenInfo.new(2, Enum.EasingStyle.Quint), { Size = titleSize, Position = titlePosition }):Play()
 			tweenservice:Create(Tab.Title, TweenInfo.new(2, Enum.EasingStyle.Quint), { TextColor3 = Color3.fromRGB(52, 52, 52) }):Play()
 			tweenservice:Create(Tab.indicator, TweenInfo.new(2, Enum.EasingStyle.Quint), { Size = UDim2.new(0, 2, 0, 10) }):Play()
 			tweenservice:Create(Tab.Title, TweenInfo.new(2, Enum.EasingStyle.Exponential), { TextTransparency = 0 }):Play()
@@ -3734,8 +3742,9 @@ function syde:Init(library)
 			tweenservice:Create(Tab.indicator.ImageLabel, TweenInfo.new(1, Enum.EasingStyle.Exponential), { ImageTransparency = 1 }):Play()
 		else
 			ldata.first = TabData.Title
-			local titleSize = TabData.Icon and UDim2.new(1, -46, 1, 0) or UDim2.new(1, -10, 1, 0)
-			tweenservice:Create(Tab.Title, TweenInfo.new(2, Enum.EasingStyle.Quint), { Size = titleSize }):Play()
+			local titleSize = TabData.Icon and UDim2.new(1, -40, 0, 16) or UDim2.new(1, -10, 1, 0)
+			local titlePosition = TabData.Icon and UDim2.new(0, 32, 0.5, -8) or UDim2.new(0, 4, 0.5, -8)
+			tweenservice:Create(Tab.Title, TweenInfo.new(2, Enum.EasingStyle.Quint), { Size = titleSize, Position = titlePosition }):Play()
 			tweenservice:Create(Tab.Title, TweenInfo.new(2, Enum.EasingStyle.Exponential), { TextTransparency = 0 }):Play()
 			tweenservice:Create(Tab.indicator, TweenInfo.new(2, Enum.EasingStyle.Exponential), { BackgroundColor3 = syde.theme.Accent }):Play()
 			tweenservice:Create(Tab.indicator, TweenInfo.new(2, Enum.EasingStyle.Quint), { Size = UDim2.new(0, 2, 0, 2) }):Play()
@@ -3747,13 +3756,14 @@ function syde:Init(library)
 
 		local function ApplyTabStyle(tabButton, isSelected)
 			local hasIcon = tabButton:FindFirstChild("IconContainer") ~= nil
-			local targetSize = isSelected and UDim2.new(1, -12, 1, 0) or UDim2.new(1, -12, 1, 0)
+			local targetSize = hasIcon and UDim2.new(1, -40, 0, 16) or UDim2.new(1, -12, 1, 0)
+			local targetPosition = hasIcon and UDim2.new(0, 32, 0.5, -8) or UDim2.new(0, 4, 0.5, -8)
 			local targetTextColor = isSelected and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(52, 52, 52)
 			local targetTransparency = isSelected and 0 or 1
 			local targetColor = isSelected and syde.theme.Accent or Color3.fromRGB(29, 29, 29)
 			local indicatorSize = isSelected and UDim2.new(0, 2, 0, 10) or UDim2.new(0, 2, 0, 5)
 
-			tweenservice:Create(tabButton.Title, positionTweenInfo, { Size = targetSize, TextColor3 = targetTextColor }):Play()
+			tweenservice:Create(tabButton.Title, positionTweenInfo, { Size = targetSize, Position = targetPosition, TextColor3 = targetTextColor }):Play()
 			tweenservice:Create(tabButton.indicator, colorTweenInfo, { BackgroundTransparency = targetTransparency, BackgroundColor3 = targetColor, Size = indicatorSize }):Play()
 			tweenservice:Create(tabButton.indicator.ImageLabel, colorTweenInfo, { ImageColor3 = targetColor }):Play()
 			tweenservice:Create(tabButton.indicator.ImageLabel, colorTweenInfo, { ImageTransparency = isSelected and 0.6 or 1 }):Play()

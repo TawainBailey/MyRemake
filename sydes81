@@ -3778,6 +3778,20 @@ function syde:Init(library)
 
 		ApplyTabStyle(Tab, isFirstTab)
 
+		-- Debug prints
+		print("Tab created:", TabData.Title)
+		print("Tab.Visible:", Tab.Visible)
+		print("Tab.Title.Text:", Tab.Title.Text)
+		print("Tab.Title.TextTransparency:", Tab.Title.TextTransparency)
+		print("Tab.Title.TextColor3:", Tab.Title.TextColor3)
+		print("Tab.Title.Size:", Tab.Title.Size)
+		print("Tab.Title.Position:", Tab.Title.Position)
+		print("Tab.BackgroundColor3:", Tab.BackgroundColor3)
+		print("Tab.BackgroundTransparency:", Tab.BackgroundTransparency)
+		if TabData.Icon then
+			print("Has icon, IconContainer exists:", Tab:FindFirstChild("IconContainer") ~= nil)
+		end
+
 		local function OpenSettings()
 
 			WINDOW.Settings.Visible = true

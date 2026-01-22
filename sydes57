@@ -3629,8 +3629,8 @@ function syde:Init(library)
 		end
 		local stroke = Instance.new("UIStroke")
 		stroke.Color = Color3.fromRGB(150, 150, 150)
-		stroke.Thickness = 0.5
-		stroke.Transparency = 0.5
+		stroke.Thickness = 1
+		stroke.Transparency = 0
 		stroke.Parent = Tab
 		local corner = Instance.new("UICorner")
 		corner.CornerRadius = UDim.new(0, 4)

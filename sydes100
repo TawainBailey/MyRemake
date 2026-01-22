@@ -3612,6 +3612,10 @@ function syde:Init(library)
 		-- Reserve space on the left for the icon so the title doesn't overlap
 		Tab.Title.Size = UDim2.new(1, -44, 1, 0)
 		Tab.Title.Position = UDim2.new(0, 36, 0, 0)
+		Tab.Title.AnchorPoint = Vector2.new(0, 0)
+		-- Ensure the text sits immediately to the right of the icon and is left-aligned
+		Tab.Title.TextXAlignment = Enum.TextXAlignment.Left
+		Tab.Title.TextYAlignment = Enum.TextYAlignment.Center
 		Tab.Name = TabData.Title
 
 		--[Icon Setup]

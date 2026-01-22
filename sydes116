@@ -3626,14 +3626,14 @@ function syde:Init(library)
 				-- Container for tabs with border
 				local CategoryContainer = Instance.new("Frame")
 				CategoryContainer.Name = "CategoryContainer_" .. tab.Category
-				CategoryContainer.Size = UDim2.new(1, 0, 0, 0)
+				CategoryContainer.Size = UDim2.new(1, -10, 0, 0)
 				CategoryContainer.AutomaticSize = Enum.AutomaticSize.Y
 				CategoryContainer.BackgroundTransparency = 1
 				CategoryContainer.Parent = TABS
 				
 				local stroke = Instance.new("UIStroke")
 				stroke.Color = Color3.fromRGB(100, 100, 100)
-				stroke.Thickness = 1
+				stroke.Thickness = 0.5
 				stroke.Parent = CategoryContainer
 				
 				local corner = Instance.new("UICorner")

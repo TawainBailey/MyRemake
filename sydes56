@@ -1233,6 +1233,21 @@ local layout = TABS:FindFirstChild("UIListLayout")
 if layout then
     layout.Padding = UDim.new(0, 5)
 end
+local function getAllTabs(container)
+    local tabs = {}
+    for _, child in ipairs(container:GetChildren()) do
+        if child.Name ~= "UIListLayout" and child:IsA("Frame") then
+            if child:FindFirstChild("Title") then
+                table.insert(tabs, child)
+            else
+                for _, sub in ipairs(getAllTabs(child)) do
+                    table.insert(tabs, sub)
+                end
+            end
+        end
+    end
+    return tabs
+end
 local PAGES = WINDOW.Pages
 local settingsOpen = false
 local pluginsOpen = false
@@ -3597,11 +3612,21 @@ function syde:Init(library)
 			Key = tab.Key;
 		}
 		
+		local parent = tab.Section or TABS
+		
 		local LockedFrames = {}
 		--[Tab Setup]
 		local Tab = TABS.Tb:Clone()
 		Tab.Visible = true
-		Tab.Parent = TABS
+		Tab.Parent = parent
+		if parent ~= TABS then
+			local sep = Instance.new("Frame")
+			sep.Size = UDim2.new(1, 0, 0, 1)
+			sep.BackgroundColor3 = Color3.fromRGB(150, 150, 150)
+			sep.BackgroundTransparency = 0.5
+			sep.BorderSizePixel = 0
+			sep.Parent = parent
+		end
 		local stroke = Instance.new("UIStroke")
 		stroke.Color = Color3.fromRGB(150, 150, 150)
 		stroke.Thickness = 0.5
@@ -3887,7 +3912,7 @@ function syde:Init(library)
 
 			syde:replayLoadTweens()
 
-			for _, otherTab in ipairs(TABS:GetChildren()) do
+			for _, otherTab in ipairs(getAllTabs(TABS)) do
 				if otherTab:IsA("Frame") then
 					ApplyTabStyle(otherTab, otherTab == Tab)
 				end
@@ -3974,7 +3999,7 @@ function syde:Init(library)
 			end  ]]
 
 			-- Make all tab buttons appear disabled
-			for _, otherTab in ipairs(TABS:GetChildren()) do
+			for _, otherTab in ipairs(getAllTabs(TABS)) do
 				if otherTab:IsA("Frame") then
 					ApplyTabStyle(otherTab, false) 
 					otherTab.interact.Active = false 
@@ -3996,7 +4021,7 @@ function syde:Init(library)
 				end
 			end
 
-			for _, otherTab in ipairs(TABS:GetChildren()) do
+			for _, otherTab in ipairs(getAllTabs(TABS)) do
 				if otherTab:IsA("Frame") then
 					ApplyTabStyle(otherTab, otherTab.Name == ldata.previousTab) 
 					otherTab.interact.Active = true 
@@ -4024,7 +4049,7 @@ function syde:Init(library)
 			tweenservice:Create(WINDOW.Top.UHolder.Util.Plugin.interact, TweenInfo.new(0.7, Enum.EasingStyle.Exponential), {ImageTransparency = 0}):Play()
 
 			-- Make all tab buttons appear disabled
-			for _, otherTab in ipairs(TABS:GetChildren()) do
+			for _, otherTab in ipairs(getAllTabs(TABS)) do
 				if otherTab:IsA("Frame") then
 					ApplyTabStyle(otherTab, false) 
 					otherTab.interact.Active = false 
@@ -4045,7 +4070,7 @@ function syde:Init(library)
 				end
 			end
 
-			for _, otherTab in ipairs(TABS:GetChildren()) do
+			for _, otherTab in ipairs(getAllTabs(TABS)) do
 				if otherTab:IsA("Frame") then
 					ApplyTabStyle(otherTab, otherTab.Name == ldata.previousTab) 
 					otherTab.interact.Active = true 
@@ -6654,6 +6679,38 @@ function syde:Init(library)
 
 		return InitElement
 
+	end
+
+	function ldata:InitSection(sectionConfig)
+		local SectionFrame = Instance.new("Frame")
+		SectionFrame.Size = UDim2.new(1, -20, 0, 50)
+		SectionFrame.BackgroundTransparency = 1
+		SectionFrame.Parent = TABS
+		local Title = Instance.new("TextLabel")
+		Title.Text = sectionConfig.Title
+		Title.Font = Enum.Font.SourceSans
+		Title.TextSize = 18
+		Title.TextColor3 = Color3.fromRGB(150, 150, 150)
+		Title.BackgroundTransparency = 1
+		Title.Size = UDim2.new(1, 0, 0, 20)
+		Title.Parent = SectionFrame
+		local Border = Instance.new("UIStroke")
+		Border.Color = Color3.fromRGB(150, 150, 150)
+		Border.Thickness = 0.5
+		Border.Transparency = 0.5
+		Border.Parent = SectionFrame
+		local Corner = Instance.new("UICorner")
+		Corner.CornerRadius = UDim.new(0, 4)
+		Corner.Parent = SectionFrame
+		local TabList = Instance.new("Frame")
+		TabList.Size = UDim2.new(1, 0, 1, -20)
+		TabList.Position = UDim2.new(0, 0, 0, 20)
+		TabList.BackgroundTransparency = 1
+		TabList.Parent = SectionFrame
+		local Layout = Instance.new("UIListLayout")
+		Layout.Padding = UDim.new(0, 2)
+		Layout.Parent = TabList
+		return TabList
 	end
 
 	return ldata

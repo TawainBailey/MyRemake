@@ -6778,13 +6778,19 @@ function syde:Init(library)
 			local tabContainer = Instance.new("Frame")
 			tabContainer.Name = "TabGroup"
 			tabContainer.Size = UDim2.new(1, -30, 0, 40)
-			tabContainer.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+			tabContainer.BackgroundTransparency = 1
 			tabContainer.BorderSizePixel = 0
 			tabContainer.Parent = defaultParent
 
 			local tabContainerCorner = Instance.new("UICorner")
 			tabContainerCorner.CornerRadius = UDim.new(0, 8)
 			tabContainerCorner.Parent = tabContainer
+
+			-- Add thin grey border
+			local tabContainerStroke = Instance.new("UIStroke")
+			tabContainerStroke.Color = Color3.fromRGB(100, 100, 100)
+			tabContainerStroke.Thickness = 1
+			tabContainerStroke.Parent = tabContainer
 
 			local tabList = Instance.new("UIListLayout")
 			tabList.FillDirection = Enum.FillDirection.Horizontal
@@ -6838,8 +6844,7 @@ function syde:Init(library)
 				for _, tabBtn in ipairs(tabButtons) do
 					local isActive = (tabBtn.Name == tabId)
 					tweenservice:Create(tabBtn, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {
-						BackgroundColor3 = isActive and syde.theme.Accent or Color3.fromRGB(35, 35, 35),
-						BackgroundTransparency = isActive and 0 or 0.8
+						BackgroundTransparency = isActive and 0 or 1
 					}):Play()
 					tweenservice:Create(tabBtn, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {
 						TextColor3 = isActive and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(140, 140, 140)
@@ -6882,8 +6887,7 @@ function syde:Init(library)
 				for _, tabBtn in ipairs(tabButtons) do
 					local isActive = (tabBtn.Name == tabId)
 					tweenservice:Create(tabBtn, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {
-						BackgroundColor3 = isActive and syde.theme.Accent or Color3.fromRGB(35, 35, 35),
-						BackgroundTransparency = isActive and 0 or 0.8
+						BackgroundTransparency = isActive and 0 or 1
 					}):Play()
 					tweenservice:Create(tabBtn, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {
 						TextColor3 = isActive and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(140, 140, 140)
@@ -6923,8 +6927,8 @@ function syde:Init(library)
 				local tabButton = Instance.new("TextButton")
 				tabButton.Name = tabData.id
 				tabButton.Size = UDim2.new(0, 80, 1, 0)
+				tabButton.BackgroundTransparency = (i == 1) and 0 or 1
 				tabButton.BackgroundColor3 = (i == 1) and syde.theme.Accent or Color3.fromRGB(35, 35, 35)
-				tabButton.BackgroundTransparency = (i == 1) and 0 or 0.8
 				tabButton.BorderSizePixel = 0
 				tabButton.AutoButtonColor = false
 				tabButton.Font = Enum.Font.GothamMedium
@@ -6942,7 +6946,7 @@ function syde:Init(library)
 				tabButton.MouseEnter:Connect(function()
 					if currentTab ~= tabData.id then
 						tweenservice:Create(tabButton, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {
-							BackgroundTransparency = 0.5
+							TextColor3 = Color3.fromRGB(180, 180, 180)
 						}):Play()
 					end
 				end)
@@ -6950,7 +6954,7 @@ function syde:Init(library)
 				tabButton.MouseLeave:Connect(function()
 					if currentTab ~= tabData.id then
 						tweenservice:Create(tabButton, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {
-							BackgroundTransparency = 0.8
+							TextColor3 = Color3.fromRGB(140, 140, 140)
 						}):Play()
 					end
 				end)

@@ -3607,6 +3607,7 @@ function syde:Init(library)
 		local Tab = TABS.Tb:Clone()
 		Tab.Visible = true
 		Tab.Parent = TABS
+		Tab.Size = UDim2.new(1, -8, 0, 35)
 		Tab.Title.Text = TabData.Title
 		Tab.Name = TabData.Title
 

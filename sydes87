@@ -3661,7 +3661,7 @@ function syde:Init(library)
 			Tab.Title.Size = UDim2.new(1, -38, 1, 0) -- Adjust size accordingly
 		end
 
-		Tab.Title.TextTransparency = 1
+		Tab.Title.TextTransparency = 0
 		Tab.indicator.BackgroundTransparency = 1
 
 		for _, temp in ipairs(PAGES.Page:GetChildren()) do

@@ -3618,15 +3618,17 @@ function syde:Init(library)
 		--[Tab Setup]
 		local Tab = TABS.Tb:Clone()
 		Tab.Visible = true
-		Tab.Parent = parent
 		if parent ~= TABS then
-			local sep = Instance.new("Frame")
-			sep.Size = UDim2.new(1, 0, 0, 1)
-			sep.BackgroundColor3 = Color3.fromRGB(150, 150, 150)
-			sep.BackgroundTransparency = 0
-			sep.BorderSizePixel = 0
-			sep.Parent = parent
+			if #parent:GetChildren() > 1 then
+				local sep = Instance.new("Frame")
+				sep.Size = UDim2.new(1, 0, 0, 1)
+				sep.BackgroundColor3 = Color3.fromRGB(150, 150, 150)
+				sep.BackgroundTransparency = 0
+				sep.BorderSizePixel = 0
+				sep.Parent = parent
+			end
 		end
+		Tab.Parent = parent
 		if parent == TABS then
 			local stroke = Instance.new("UIStroke")
 			stroke.Color = Color3.fromRGB(150, 150, 150)

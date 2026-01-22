@@ -3649,8 +3649,8 @@ function syde:Init(library)
 			IconImage.Parent = IconInner
 
 			-- Adjust title position to make room for icon
-			Tab.Title.Position = UDim2.new(0, 32, 0.5, -8) -- Better positioning
-			Tab.Title.Size = UDim2.new(1, -40, 0, 16) -- Better size
+			Tab.Title.Position = UDim2.new(0, 32, 0.5, -8) -- Position after icon
+			Tab.Title.Size = UDim2.new(0, 60, 0, 16) -- Fixed width for text
 		end
 
 		Tab.Title.TextTransparency = 1
@@ -3659,7 +3659,7 @@ function syde:Init(library)
 		-- Set default title position if no icon
 		if not TabData.Icon then
 			Tab.Title.Position = UDim2.new(0, 4, 0.5, -8)
-			Tab.Title.Size = UDim2.new(1, -8, 0, 16)
+			Tab.Title.Size = UDim2.new(0, 88, 0, 16) -- Fixed width for tabs without icons
 		end
 
 		for _, temp in ipairs(PAGES.Page:GetChildren()) do
@@ -3732,8 +3732,9 @@ function syde:Init(library)
 
 
 		if ldata.first then
-			local titleSize = TabData.Icon and UDim2.new(1, -40, 0, 16) or UDim2.new(1, -8, 1, 0)
-			local titlePosition = TabData.Icon and UDim2.new(0, 32, 0.5, -8) or UDim2.new(0, 4, 0.5, -8)
+			local hasIcon = Tab:FindFirstChild("IconContainer") ~= nil
+			local titleSize = hasIcon and UDim2.new(1, -40, 0, 16) or UDim2.new(1, -8, 1, 0)
+			local titlePosition = hasIcon and UDim2.new(0, 32, 0.5, -8) or UDim2.new(0, 4, 0.5, -8)
 			tweenservice:Create(Tab.Title, TweenInfo.new(2, Enum.EasingStyle.Quint), { Size = titleSize, Position = titlePosition }):Play()
 			tweenservice:Create(Tab.Title, TweenInfo.new(2, Enum.EasingStyle.Quint), { TextColor3 = Color3.fromRGB(52, 52, 52) }):Play()
 			tweenservice:Create(Tab.indicator, TweenInfo.new(2, Enum.EasingStyle.Quint), { Size = UDim2.new(0, 2, 0, 10) }):Play()
@@ -3742,8 +3743,9 @@ function syde:Init(library)
 			tweenservice:Create(Tab.indicator.ImageLabel, TweenInfo.new(1, Enum.EasingStyle.Exponential), { ImageTransparency = 1 }):Play()
 		else
 			ldata.first = TabData.Title
-			local titleSize = TabData.Icon and UDim2.new(1, -40, 0, 16) or UDim2.new(1, -10, 1, 0)
-			local titlePosition = TabData.Icon and UDim2.new(0, 32, 0.5, -8) or UDim2.new(0, 4, 0.5, -8)
+			local hasIcon = Tab:FindFirstChild("IconContainer") ~= nil
+			local titleSize = hasIcon and UDim2.new(1, -40, 0, 16) or UDim2.new(1, -10, 1, 0)
+			local titlePosition = hasIcon and UDim2.new(0, 32, 0.5, -8) or UDim2.new(0, 4, 0.5, -8)
 			tweenservice:Create(Tab.Title, TweenInfo.new(2, Enum.EasingStyle.Quint), { Size = titleSize, Position = titlePosition }):Play()
 			tweenservice:Create(Tab.Title, TweenInfo.new(2, Enum.EasingStyle.Exponential), { TextTransparency = 0 }):Play()
 			tweenservice:Create(Tab.indicator, TweenInfo.new(2, Enum.EasingStyle.Exponential), { BackgroundColor3 = syde.theme.Accent }):Play()
@@ -3756,7 +3758,7 @@ function syde:Init(library)
 
 		local function ApplyTabStyle(tabButton, isSelected)
 			local hasIcon = tabButton:FindFirstChild("IconContainer") ~= nil
-			local targetSize = hasIcon and UDim2.new(1, -40, 0, 16) or UDim2.new(1, -12, 1, 0)
+			local targetSize = hasIcon and UDim2.new(0, 60, 0, 16) or UDim2.new(0, 88, 0, 16)
 			local targetPosition = hasIcon and UDim2.new(0, 32, 0.5, -8) or UDim2.new(0, 4, 0.5, -8)
 			local targetTextColor = isSelected and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(52, 52, 52)
 			local targetTransparency = isSelected and 0 or 1
@@ -6854,7 +6856,7 @@ function syde:Init(library)
 			for i, tabData in ipairs(TabGroupData.Tabs) do
 				local tabButton = Instance.new("TextButton")
 				tabButton.Name = tabData.id
-				tabButton.Size = UDim2.new(0, 80, 1, 0)
+				tabButton.Size = UDim2.new(0, 100, 1, 0) -- Increased width for icons
 				tabButton.BackgroundColor3 = (i == 1) and syde.theme.Accent or Color3.fromRGB(35, 35, 35)
 				tabButton.BackgroundTransparency = (i == 1) and 0 or 0.8
 				tabButton.BorderSizePixel = 0

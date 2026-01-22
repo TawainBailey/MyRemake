@@ -3628,7 +3628,7 @@ function syde:Init(library)
 				CategoryContainer.Name = "CategoryContainer_" .. tab.Category
 				CategoryContainer.Size = UDim2.new(1, -10, 0, 0)
 				CategoryContainer.AutomaticSize = Enum.AutomaticSize.Y
-				CategoryContainer.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+				CategoryContainer.BackgroundColor3 = Color3.fromRGB(32, 32, 32)
 				CategoryContainer.BackgroundTransparency = 0
 				CategoryContainer.Parent = TABS
 				

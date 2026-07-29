@@ -87,10 +87,24 @@ local function ensureUIReferences()
 	end
 
 	WINDOW = root
-	TOPBAR = root:FindFirstChild("Top")
+	TOPBAR = root:FindFirstChild("Top") or root:FindFirstChild("Top", true)
+
 	local tabContainer = root:FindFirstChild("Tab")
-	TABS = tabContainer and tabContainer:FindFirstChild("ScrollingFrame") or nil
-	PAGES = root:FindFirstChild("Pages")
+		or root:FindFirstChild("Tabs")
+		or root:FindFirstChild("Tab", true)
+		or root:FindFirstChild("Tabs", true)
+
+	if tabContainer then
+		TABS = tabContainer:FindFirstChild("ScrollingFrame")
+			or tabContainer:FindFirstChildWhichIsA("ScrollingFrame")
+			or tabContainer:FindFirstChild("ScrollingFrame", true)
+	end
+
+	if not TABS then
+		TABS = root:FindFirstChild("ScrollingFrame", true)
+	end
+
+	PAGES = root:FindFirstChild("Pages") or root:FindFirstChild("Pages", true)
 
 	return WINDOW ~= nil and TOPBAR ~= nil and TABS ~= nil and PAGES ~= nil
 end
